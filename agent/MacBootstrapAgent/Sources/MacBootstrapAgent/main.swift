@@ -1992,6 +1992,26 @@ func currentDockDisplayIDFromWindowServer() -> UInt32? {
         ?? dockDisplayIDFromWindowList(.optionAll)
 }
 
+func appHasVisibleWindows(processIdentifier: pid_t) -> Bool {
+    guard let windowInfo = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] else {
+        return false
+    }
+    return windowInfo.contains { window in
+        guard (window[kCGWindowOwnerPID as String] as? pid_t) == processIdentifier else {
+            return false
+        }
+        let layer = window[kCGWindowLayer as String] as? Int ?? 0
+        guard layer == 0 else {
+            return false
+        }
+        guard let boundsDictionary = window[kCGWindowBounds as String] as? NSDictionary,
+              let bounds = CGRect(dictionaryRepresentation: boundsDictionary) else {
+            return false
+        }
+        return bounds.width > 1 && bounds.height > 1
+    }
+}
+
 private func dockDisplayIDFromWindowList(_ options: CGWindowListOption) -> UInt32? {
     guard let windowInfo = CGWindowListCopyWindowInfo(options, kCGNullWindowID) as? [[String: Any]] else {
         return nil
@@ -2249,16 +2269,36 @@ final class Agent: NSObject, NSApplicationDelegate {
     private func toggleApp(bundleID: String) {
         let running = NSRunningApplication.runningApplications(withBundleIdentifier: bundleID)
         if let app = running.first {
-            if app.isActive || !app.isHidden {
+            let hasVisibleWindows = appHasVisibleWindows(processIdentifier: app.processIdentifier)
+            if hasVisibleWindows && (app.isActive || !app.isHidden) {
                 app.hide()
             } else {
-                app.activate(options: [.activateIgnoringOtherApps])
+                reopenAndActivate(app: app, bundleID: bundleID)
             }
             return
         }
 
         if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) {
-            NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
+            let configuration = NSWorkspace.OpenConfiguration()
+            configuration.activates = true
+            NSWorkspace.shared.openApplication(at: url, configuration: configuration)
+        }
+    }
+
+    private func reopenAndActivate(app: NSRunningApplication, bundleID: String) {
+        guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) else {
+            app.unhide()
+            app.activate(options: [.activateIgnoringOtherApps])
+            return
+        }
+        let configuration = NSWorkspace.OpenConfiguration()
+        configuration.activates = true
+        NSWorkspace.shared.openApplication(at: url, configuration: configuration) { reopenedApp, _ in
+            DispatchQueue.main.async {
+                let target = reopenedApp ?? app
+                target.unhide()
+                target.activate(options: [.activateIgnoringOtherApps])
+            }
         }
     }
 
