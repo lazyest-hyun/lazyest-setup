@@ -1,0 +1,26 @@
+# macOS
+.DS_Store
+
+# SwiftPM / Xcode build output
+.build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+
+# Generated app bundles and archives
+dist/
+*.app/
+*.zip
+*.dmg
+*.pkg
+
+# Local runtime state
+*.log
+*.tmp
+*.bak
+*.backup
+
+# Local Codex/editor state
+.codex/
+.idea/
+.vscode/
