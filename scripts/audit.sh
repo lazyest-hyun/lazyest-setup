@@ -13,16 +13,6 @@ echo "  files:"
 find "$ROOT_DIR" -maxdepth 3 -type f | sed "s#^$ROOT_DIR/#    #"
 echo
 
-echo "Screenshots"
-screenshot_dir="$(effective_screenshot_dir)"
-if [ -d "$screenshot_dir" ]; then
-  echo "  folder: exists ($screenshot_dir)"
-else
-  echo "  folder: missing ($screenshot_dir)"
-fi
-echo "  location: $(read_default com.apple.screencapture location)"
-echo
-
 echo "Applications"
 for app in \
   "Google Chrome" \

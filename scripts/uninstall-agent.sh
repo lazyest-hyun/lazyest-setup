@@ -50,3 +50,5 @@ if pgrep -x MacBootstrapAgent >/dev/null 2>&1; then
 else
   echo "  process: stopped"
 fi
+echo "UNINSTALL_AGENT_OK"
+echo "  note: Agent user settings were preserved"

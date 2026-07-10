@@ -7,8 +7,8 @@ source "$SCRIPT_DIR/lib.sh"
 
 parse_common_flags "$@"
 
-pkg="$(agent_package_dir)"
-echo "BUILD_AGENT"
+pkg="$(setup_package_dir)"
+echo "BUILD_SETUP"
 echo "  dry-run: $(bool_label "$DRY_RUN")"
 echo "  package: $pkg"
 
@@ -19,7 +19,7 @@ fi
 
 echo "  swift: $(swift --version | head -1)"
 if ((DRY_RUN)); then
-  echo "[dry-run] cd $pkg && swift build -c release"
+  echo "[dry-run] swift build --package-path $pkg -c release --product MacBootstrapSetup"
 else
-  run_cmd swift build --package-path "$pkg" -c release
+  run_cmd swift build --package-path "$pkg" -c release --product MacBootstrapSetup
 fi

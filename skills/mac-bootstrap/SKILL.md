@@ -1,28 +1,26 @@
 # mac-bootstrap Skill
 
-Use this skill when helping set up or audit a macOS machine with this repository.
+Use this skill for the one-time MacBootstrapSetup project. Runtime Agent work belongs in the separate `mac-bootstrap-agent` repository.
 
 ## Principles
 
-- Prefer read-only audit before applying settings.
-- Do not install optional apps unless the user explicitly asks.
-- Do not print secrets, full environment variables, Keychain values, or tokens.
-- Treat GUI-only macOS settings as manual checks unless a stable defaults key is known.
-- Keep scripts reusable and idempotent.
+- Start with read-only state checks.
+- Do not install apps or apply macOS settings without an explicit user request.
+- Keep each setting independently applicable and reversible where possible.
+- Never print secrets, full environment variables, Keychain values, passwords, or tokens.
+- Verify the installed app and real macOS state instead of relying only on command output.
 
 ## Workflow
 
-1. Run `./bootstrap.sh audit` and summarize what is already applied.
-2. Use `./bootstrap.sh apply-minimal --dry-run` to preview native changes.
-3. Apply with `./bootstrap.sh apply-minimal` only after the user confirms.
-4. For Dock changes, run `./bootstrap.sh dock-plan` first.
-5. For Karabiner, use `./bootstrap.sh karabiner-template` and only install Karabiner if needed.
-6. Keep app installs optional; use `./bootstrap.sh downloads` for official references.
+1. Run `./bootstrap.sh audit`.
+2. Run `./bootstrap.sh plan` and `./bootstrap.sh install-plan`.
+3. Preview the requested action with its `--dry-run` option.
+4. Build Setup with `./bootstrap.sh build-setup` when source changed.
+5. Install Setup only when requested with `./bootstrap.sh install-setup`.
+6. Treat `./bootstrap.sh install-agent` as a bridge to the separate Agent repository.
 
-## Classification
+## Boundaries
 
-- Already applied: current state already matches the desired setup.
-- No-install/native path: can be handled by macOS defaults, AppleScript, Shortcuts, Automator, or a small Swift helper.
-- Install only if missing/needed: useful apps that should not be installed by default.
-- Unknown/manual check: GUI state that cannot be safely inferred from stable command-line state.
-
+- Setup owns app installation, Korean input, keyboard defaults, desktop defaults, and Dock configuration.
+- MacBootstrapAgent owns app hotkeys, screenshot clipboard copy, sleep prevention, and Dock anchoring.
+- Do not add Agent source or runtime defaults back into this repository.

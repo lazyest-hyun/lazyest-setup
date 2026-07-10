@@ -7,7 +7,7 @@ source "$SCRIPT_DIR/lib.sh"
 
 parse_common_flags "$@"
 
-setup_binary="$(agent_package_dir)/.build/release/MacBootstrapSetup"
+setup_binary="$(setup_binary_path)"
 setup_app="$(setup_app_path)"
 version="$(app_version)"
 default_codesign_identity="MacBootstrap Local Code Signing"
@@ -38,8 +38,17 @@ echo "  setup app: $setup_app"
 echo "  version: $version"
 
 if [ ! -x "$setup_binary" ]; then
-  echo "  blocked: setup binary not found; run ./bootstrap.sh build-agent first"
+  echo "  blocked: setup binary not found; run ./bootstrap.sh build-setup first"
   exit 0
+fi
+
+if pgrep -x MacBootstrapSetup >/dev/null 2>&1; then
+  if ((DRY_RUN)); then
+    echo "[dry-run] stop the existing MacBootstrapSetup process"
+  else
+    pkill -x MacBootstrapSetup || true
+    sleep 0.3
+  fi
 fi
 
 if [ -d "$setup_app" ]; then
@@ -58,8 +67,8 @@ if ((DRY_RUN)); then
 else
   cp "$setup_binary" "$setup_app/Contents/MacOS/MacBootstrapSetup"
   chmod +x "$setup_app/Contents/MacOS/MacBootstrapSetup"
-  if [ -f "$ROOT_DIR/agent/MacBootstrapAgent/Assets/AppIcon.icns" ]; then
-    cp "$ROOT_DIR/agent/MacBootstrapAgent/Assets/AppIcon.icns" "$setup_app/Contents/Resources/AppIcon.icns"
+  if [ -f "$ROOT_DIR/setup/MacBootstrapSetup/Assets/AppIcon.icns" ]; then
+    cp "$ROOT_DIR/setup/MacBootstrapSetup/Assets/AppIcon.icns" "$setup_app/Contents/Resources/AppIcon.icns"
   fi
   printf '%s\n' "$ROOT_DIR" >"$setup_app/Contents/Resources/ProjectRoot.txt"
   cat >"$setup_app/Contents/Info.plist" <<PLIST

@@ -11,7 +11,7 @@ enum SetupLanguage: String {
 func sharedLanguageConfigPath() -> URL {
     let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
         ?? URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Library/Application Support", isDirectory: true)
-    return base.appendingPathComponent("MacBootstrapAgent", isDirectory: true).appendingPathComponent("language.conf")
+    return base.appendingPathComponent("MacBootstrapSetup", isDirectory: true).appendingPathComponent("language.conf")
 }
 
 func savedLanguageCode() -> String {
@@ -46,7 +46,7 @@ func localized(_ key: String) -> String {
         "tab.text": "텍스트/키보드",
         "tab.desktop": "데스크톱",
         "tab.dock": "Dock",
-        "tab.runtime": "상시 실행",
+        "tab.runtime": "Agent",
         "language.auto": "자동",
         "language.ko": "한국어",
         "language.en": "English",
@@ -126,8 +126,8 @@ func localized(_ key: String) -> String {
         "dock.apply": "선택 적용",
         "dock.selected": "선택됨",
         "dock.current": "현재 Dock",
-        "row.agent.title": "메뉴바 Agent",
-        "row.agent.detail": "단축키, 스크린샷, 잠자기 방지.",
+        "row.agent.title": "MacBootstrapAgent",
+        "row.agent.detail": "별도 프로젝트로 설치되는 메뉴 막대 앱.",
         "button.install": "설치",
         "button.open": "열기",
         "button.done": "완료",
@@ -166,6 +166,7 @@ func localized(_ key: String) -> String {
         "status.manualCheck": "수동 확인",
         "status.agentInstalled": "Agent 설치됨",
         "status.agentFailed": "Agent 설치 실패",
+        "status.agentInstalling": "Agent 다운로드 및 설치 중",
         "status.opened": "열림",
         "status.applying": "적용 중",
         "status.failed": "실패",
@@ -188,7 +189,7 @@ func localized(_ key: String) -> String {
         "tab.text": "Text & Keyboard",
         "tab.desktop": "Desktop",
         "tab.dock": "Dock",
-        "tab.runtime": "Runtime Agent",
+        "tab.runtime": "Agent",
         "language.auto": "Auto",
         "language.ko": "한국어",
         "language.en": "English",
@@ -268,8 +269,8 @@ func localized(_ key: String) -> String {
         "dock.apply": "Apply Selection",
         "dock.selected": "selected",
         "dock.current": "in Dock",
-        "row.agent.title": "Menu bar agent",
-        "row.agent.detail": "Hotkeys, screenshots, keep-awake.",
+        "row.agent.title": "MacBootstrapAgent",
+        "row.agent.detail": "Menu bar app installed from its separate project.",
         "button.install": "Install",
         "button.open": "Open",
         "button.done": "Done",
@@ -308,6 +309,7 @@ func localized(_ key: String) -> String {
         "status.manualCheck": "Manual check",
         "status.agentInstalled": "Agent installed",
         "status.agentFailed": "Agent install failed",
+        "status.agentInstalling": "Downloading and installing Agent",
         "status.opened": "Opened",
         "status.applying": "Applying",
         "status.failed": "Failed",
@@ -1294,10 +1296,20 @@ final class SetupWindowController: NSWindowController {
     }
 
     private func installAgent() {
-        let output = runScript(["install-agent"])
-        statusLabel.stringValue = output.contains("INSTALL_AGENT") ? localized("status.agentInstalled") : localized("status.agentFailed")
-        refreshAgentState()
-        updateRowStyles()
+        statusLabel.stringValue = localized("status.agentInstalling")
+        agentPrimaryButton.isEnabled = false
+        agentRemoveButton.isEnabled = false
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self else { return }
+            let output = self.runScript(["install-agent"])
+            DispatchQueue.main.async {
+                self.statusLabel.stringValue = output.contains("INSTALL_AGENT_OK")
+                    ? localized("status.agentInstalled")
+                    : localized("status.agentFailed")
+                self.refreshAgentState()
+                self.updateRowStyles()
+            }
+        }
     }
 
     private func openAgent() {

@@ -1,10 +1,17 @@
 # Changelog
 
-This project uses the version in [`VERSION`](VERSION) for both application bundles. GitHub Releases are not required.
+This project uses the Setup app version in [`VERSION`](VERSION). GitHub Releases are not required.
 
 ## Unreleased
 
 - No pending entries.
+
+## 0.3.0 - 2026-07-10
+
+- Split the always-running MacBootstrapAgent into its own repository and Swift package.
+- Kept MacBootstrapSetup focused on one-time macOS and app setup.
+- Changed the Setup Agent row to download and install the separate Agent project directly.
+- Gave Setup its own language settings and independent build command.
 
 ## 0.2.0 - 2026-07-10
 

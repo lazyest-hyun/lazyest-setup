@@ -44,21 +44,6 @@ read_default() {
   defaults read "$domain" "$key" 2>/dev/null || printf '<unset>\n'
 }
 
-effective_screenshot_dir() {
-  local value="${1:-$SCREENSHOT_DIR}"
-  if [ "$value" = "auto" ]; then
-    local current_location
-    current_location="$(defaults read com.apple.screencapture location 2>/dev/null || true)"
-    if [ -n "$current_location" ]; then
-      printf '%s\n' "$current_location"
-    else
-      printf '%s\n' "$HOME/Desktop"
-    fi
-  else
-    printf '%s\n' "$value"
-  fi
-}
-
 bool_label() {
   if [ "${1:-}" = "1" ] || [ "${1:-}" = "true" ] || [ "${1:-}" = "True" ]; then
     echo "yes"
@@ -87,12 +72,12 @@ app_exists() {
   [ -d "/Applications/$name.app" ] || [ -d "$HOME/Applications/$name.app" ]
 }
 
-agent_package_dir() {
-  echo "$ROOT_DIR/agent/MacBootstrapAgent"
+setup_package_dir() {
+  echo "$ROOT_DIR/setup/MacBootstrapSetup"
 }
 
-agent_binary_path() {
-  echo "$(agent_package_dir)/.build/release/MacBootstrapAgent"
+setup_binary_path() {
+  echo "$(setup_package_dir)/.build/release/MacBootstrapSetup"
 }
 
 agent_app_path() {
@@ -104,20 +89,9 @@ setup_app_path() {
 }
 
 launch_agent_plist() {
-  echo "$HOME/Library/LaunchAgents/$AGENT_LABEL.plist"
+  echo "$HOME/Library/LaunchAgents/com.estaid.mac-bootstrap-agent.plist"
 }
 
-print_hotkeys_summary() {
-  local file="$ROOT_DIR/config/hotkeys.conf"
-  if [ ! -f "$file" ]; then
-    echo "  missing: $file"
-    return
-  fi
-
-  awk -F'|' '
-    /^[[:space:]]*#/ || /^[[:space:]]*$/ { next }
-    NF >= 4 && $1 == "toggle-app" {
-      printf "  app toggle: %s -> %s (%s)\n", $2, $3, $4
-    }
-  ' "$file"
+agent_archive_url() {
+  printf '%s/archive/%s.tar.gz\n' "$AGENT_REPOSITORY" "$AGENT_REF"
 }

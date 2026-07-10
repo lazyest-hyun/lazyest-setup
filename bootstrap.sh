@@ -26,8 +26,7 @@ Usage:
   ./bootstrap.sh reset-karabiner [--dry-run]
   ./bootstrap.sh dock-apply [--dry-run] [--no-restart-ui]
   ./bootstrap.sh dock-cleanup [--dry-run] [--no-restart-ui]
-  ./bootstrap.sh agent-plan
-  ./bootstrap.sh build-agent [--dry-run]
+  ./bootstrap.sh build-setup [--dry-run]
   ./bootstrap.sh install-agent [--dry-run]
   ./bootstrap.sh uninstall-agent [--dry-run]
   ./bootstrap.sh install-setup [--dry-run]
@@ -35,7 +34,7 @@ Usage:
 
 Commands:
   help              Show this help.
-  version           Print the source version used by both app bundles.
+  version           Print the MacBootstrapSetup source version.
   audit             Read-only state summary.
   plan              Read-only native defaults and Dock plan.
   install-plan      Read-only optional app install plan and official links.
@@ -54,9 +53,8 @@ Commands:
   reset-karabiner   Remove right Command to F18 Karabiner rule.
   dock-cleanup      Remove configured default Dock icons, with plist backup.
   dock-apply        Apply an explicit default-app Dock checklist, with plist backup.
-  agent-plan        Read-only MacBootstrapAgent capability and config summary.
-  build-agent       Build the Swift agent, or preview with --dry-run.
-  install-agent     Install only the always-running MacBootstrapAgent.app.
+  build-setup       Build the one-time Swift Setup app, or preview with --dry-run.
+  install-agent     Download and install the separate MacBootstrapAgent project.
   uninstall-agent   Remove only MacBootstrapAgent.app.
   install-setup     Install only the one-time MacBootstrapSetup.app.
   uninstall-setup   Remove only MacBootstrapSetup.app.
@@ -125,11 +123,8 @@ case "$cmd" in
   dock-apply)
     exec "$ROOT_DIR/scripts/dock-apply.sh" "$@"
     ;;
-  agent-plan)
-    exec "$ROOT_DIR/scripts/agent-plan.sh" "$@"
-    ;;
-  build-agent)
-    exec "$ROOT_DIR/scripts/build-agent.sh" "$@"
+  build-setup)
+    exec "$ROOT_DIR/scripts/build-setup.sh" "$@"
     ;;
   install-agent)
     exec "$ROOT_DIR/scripts/install-agent.sh" "$@"

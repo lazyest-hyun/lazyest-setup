@@ -7,115 +7,52 @@ source "$SCRIPT_DIR/lib.sh"
 
 parse_common_flags "$@"
 
-binary="$(agent_binary_path)"
-app="$(agent_app_path)"
-plist="$(launch_agent_plist)"
-version="$(app_version)"
-default_codesign_identity="MacBootstrap Local Code Signing"
-codesign_identity="${MAC_BOOTSTRAP_CODESIGN_IDENTITY:-$default_codesign_identity}"
-
-codesign_identity_available() {
-  [ -n "$codesign_identity" ] || return 1
-  security find-identity -v -p codesigning 2>/dev/null | grep -F "\"$codesign_identity\"" >/dev/null
-}
-
-sign_agent_app() {
-  if codesign_identity_available; then
-    echo "  codesign: $codesign_identity"
-    if codesign --force --deep --sign "$codesign_identity" "$app"; then
-      return
-    fi
-    echo "  warning: stable codesign failed; falling back to ad-hoc signature"
-    codesign --force --deep --sign - "$app"
-  else
-    echo "  codesign: ad-hoc (stable local identity not found; set MAC_BOOTSTRAP_CODESIGN_IDENTITY to override)"
-    codesign --force --deep --sign - "$app"
-  fi
-}
-
-echo "INSTALL_AGENT"
+echo "INSTALL_EXTERNAL_AGENT"
 echo "  dry-run: $(bool_label "$DRY_RUN")"
-echo "  binary: $binary"
-echo "  app: $app"
-echo "  version: $version"
+echo "  repository: $AGENT_REPOSITORY"
+echo "  ref: $AGENT_REF"
 
-if [ ! -x "$binary" ]; then
-  echo "  blocked: agent binary not found; run ./bootstrap.sh build-agent first"
+if [ -n "${MAC_BOOTSTRAP_AGENT_SOURCE_DIR:-}" ]; then
+  source_dir="$MAC_BOOTSTRAP_AGENT_SOURCE_DIR"
+  if [ ! -x "$source_dir/bootstrap.sh" ]; then
+    echo "  blocked: Agent bootstrap not found at $source_dir/bootstrap.sh" >&2
+    exit 1
+  fi
+  echo "  source override: $source_dir"
+  if ((DRY_RUN)); then
+    "$source_dir/bootstrap.sh" install --dry-run
+  else
+    "$source_dir/bootstrap.sh" install
+  fi
   exit 0
 fi
 
-if pgrep -x MacBootstrapAgent >/dev/null 2>&1; then
-  if ((DRY_RUN)); then
-    echo "[dry-run] stop running MacBootstrapAgent before replacing app bundle"
-  else
-    pkill -x MacBootstrapAgent || true
-    sleep 0.5
-  fi
-fi
-
-if [ -d "$app" ]; then
-  run_cmd rm -rf "$app"
-fi
-run_cmd mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources" "$AGENT_CONFIG_DIR"
+archive_url="$(agent_archive_url)"
 if ((DRY_RUN)); then
-  echo "[dry-run] copy agent binary into $app"
-  echo "[dry-run] seed config/hotkeys.conf into $AGENT_CONFIG_DIR only if missing"
-  echo "[dry-run] seed config/bootstrap.conf into $AGENT_CONFIG_DIR only if missing"
-  echo "[dry-run] copy app icon into $app"
-  echo "[dry-run] write app Info.plist"
-  if codesign_identity_available; then
-    echo "[dry-run] sign $app with $codesign_identity"
-  else
-    echo "[dry-run] ad-hoc sign $app (stable local identity not found)"
-  fi
-  if [ -f "$plist" ]; then
-    echo "[dry-run] remove legacy LaunchAgent plist at $plist"
-  fi
-else
-  cp "$binary" "$app/Contents/MacOS/MacBootstrapAgent"
-  chmod +x "$app/Contents/MacOS/MacBootstrapAgent"
-  if [ ! -f "$AGENT_CONFIG_DIR/hotkeys.conf" ]; then
-    cp "$ROOT_DIR/config/hotkeys.conf" "$AGENT_CONFIG_DIR/hotkeys.conf"
-  fi
-  if [ ! -f "$AGENT_CONFIG_DIR/bootstrap.conf" ]; then
-    cp "$ROOT_DIR/config/bootstrap.conf" "$AGENT_CONFIG_DIR/bootstrap.conf"
-  fi
-  if [ -f "$ROOT_DIR/agent/MacBootstrapAgent/Assets/AppIcon.icns" ]; then
-    cp "$ROOT_DIR/agent/MacBootstrapAgent/Assets/AppIcon.icns" "$app/Contents/Resources/AppIcon.icns"
-  fi
-  cat >"$app/Contents/Info.plist" <<PLIST
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>CFBundleExecutable</key>
-  <string>MacBootstrapAgent</string>
-  <key>CFBundleIdentifier</key>
-  <string>$AGENT_LABEL</string>
-  <key>CFBundleName</key>
-  <string>MacBootstrapAgent</string>
-  <key>CFBundleDisplayName</key>
-  <string>MacBootstrapAgent</string>
-  <key>CFBundleIconFile</key>
-  <string>AppIcon</string>
-  <key>CFBundlePackageType</key>
-  <string>APPL</string>
-  <key>CFBundleShortVersionString</key>
-  <string>$version</string>
-  <key>CFBundleVersion</key>
-  <string>$version</string>
-  <key>LSMinimumSystemVersion</key>
-  <string>13.0</string>
-  <key>LSUIElement</key>
-  <true/>
-</dict>
-</plist>
-PLIST
-  printf 'APPL????' >"$app/Contents/PkgInfo"
-  if [ -f "$plist" ]; then
-    rm "$plist"
-  fi
-  sign_agent_app
+  echo "[dry-run] download $archive_url"
+  echo "[dry-run] extract the separate mac-bootstrap-agent project"
+  echo "[dry-run] run its ./bootstrap.sh install"
+  exit 0
 fi
 
-echo "  note: installed menu bar app only; this does not launch it or enable runtime features"
+if ! command -v swift >/dev/null 2>&1; then
+  echo "  blocked: Swift toolchain not found" >&2
+  exit 1
+fi
+
+temp_dir="$(mktemp -d "${TMPDIR:-/tmp}/mac-bootstrap-agent.XXXXXX")"
+cleanup() {
+  rm -rf "$temp_dir"
+}
+trap cleanup EXIT
+
+archive="$temp_dir/agent.tar.gz"
+/usr/bin/curl --fail --location --silent --show-error --retry 2 "$archive_url" --output "$archive"
+/usr/bin/tar -xzf "$archive" -C "$temp_dir"
+source_dir="$(find "$temp_dir" -mindepth 1 -maxdepth 1 -type d -name 'mac-bootstrap-agent-*' -print -quit)"
+if [ -z "$source_dir" ] || [ ! -x "$source_dir/bootstrap.sh" ]; then
+  echo "  blocked: downloaded Agent source is invalid" >&2
+  exit 1
+fi
+
+"$source_dir/bootstrap.sh" install

@@ -74,7 +74,7 @@ for app in "${INSTALL_CANDIDATES[@]}"; do
       ;;
     Amphetamine)
       url="https://apps.apple.com/app/amphetamine/id937984704"
-      note="optional App Store alternative; MacBootstrapAgent includes basic keep-awake mode"
+      note="optional App Store alternative; the separate MacBootstrapAgent project includes basic keep-awake mode"
       status="missing"
       app_exists "$app" && status="present"
       ;;

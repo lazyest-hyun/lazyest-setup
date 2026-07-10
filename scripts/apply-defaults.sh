@@ -11,25 +11,6 @@ echo "APPLY_DEFAULTS"
 echo "  dry-run: $(bool_label "$DRY_RUN")"
 echo "  restart-ui: $(bool_label "$RESTART_UI")"
 
-effective_screenshot_dir="${MAC_BOOTSTRAP_SCREENSHOT_DIR:-$SCREENSHOT_DIR}"
-if [ "$effective_screenshot_dir" = "auto" ]; then
-  current_location="$(defaults read com.apple.screencapture location 2>/dev/null || true)"
-  if [ -n "$current_location" ]; then
-    effective_screenshot_dir="$current_location"
-  else
-    effective_screenshot_dir="$HOME/Desktop/screenshots"
-  fi
-fi
-
-if [ "$APPLY_SCREENSHOT_LOCATION" = "1" ]; then
-  run_cmd mkdir -p "$effective_screenshot_dir"
-  run_cmd defaults write com.apple.screencapture location -string "$effective_screenshot_dir"
-  run_cmd killall SystemUIServer
-  run_cmd killall screencaptureui 2>/dev/null || true
-else
-  echo "  screenshot location skipped by config"
-fi
-
 if [ "$APPLY_TEXT_AUTOMATION_DEFAULTS" = "1" ]; then
   run_cmd defaults write -g NSAutomaticSpellingCorrectionEnabled -bool false
   run_cmd defaults write -g NSAutomaticPeriodSubstitutionEnabled -bool false
@@ -68,5 +49,5 @@ fi
 if ((RESTART_UI)); then
   run_cmd killall SystemUIServer
 else
-  echo "  skipped extra UI restart; screenshot service refresh runs when screenshot location changes"
+  echo "  skipped extra UI restart"
 fi
