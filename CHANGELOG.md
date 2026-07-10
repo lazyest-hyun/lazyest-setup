@@ -4,7 +4,7 @@ This project uses the Setup app version in [`VERSION`](VERSION). GitHub Releases
 
 ## Unreleased
 
-- No pending entries.
+- Updated the pinned MacBootstrapAgent source to `0.2.1` with equal-width app hotkey rows.
 
 ## 0.3.0 - 2026-07-10
 
