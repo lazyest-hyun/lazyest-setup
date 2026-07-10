@@ -16,8 +16,9 @@ echo "  previous input source: Control-Space"
 echo "  next input source: Control-Option-Space"
 
 if ((DRY_RUN)); then
-  echo "[dry-run] set AppleSymbolicHotKeys 60 and 64 enabled with Control-Space"
-  echo "[dry-run] set AppleSymbolicHotKeys 61 and 65 enabled with Control-Option-Space"
+  echo "[dry-run] set AppleSymbolicHotKeys 60 enabled with Control-Space"
+  echo "[dry-run] set AppleSymbolicHotKeys 61 enabled with Control-Option-Space"
+  echo "[dry-run] preserve Spotlight shortcuts 64 and 65"
   exit 0
 fi
 
@@ -49,20 +50,19 @@ def defaults_export(domain):
 
 hotkeys = defaults_export("com.apple.symbolichotkeys")
 symbolic = hotkeys.setdefault("AppleSymbolicHotKeys", {})
-for key in ["60", "64"]:
-    symbolic[key] = {
-        "enabled": True,
-        "value": {"type": "standard", "parameters": [65535, 49, 1048576]},
-    }
-for key in ["61", "65"]:
-    symbolic[key] = {
-        "enabled": True,
-        "value": {"type": "standard", "parameters": [65535, 49, 1572864]},
-    }
+symbolic["60"] = {
+    "enabled": True,
+    "value": {"type": "standard", "parameters": [65535, 49, 262144]},
+}
+symbolic["61"] = {
+    "enabled": True,
+    "value": {"type": "standard", "parameters": [65535, 49, 786432]},
+}
 backup(hotkeys_plist, "com.apple.symbolichotkeys")
 raw = plistlib.dumps(hotkeys, fmt=plistlib.FMT_XML)
 subprocess.run(["defaults", "import", "com.apple.symbolichotkeys", "-"], input=raw, check=True)
 print("  result: input-source shortcuts reset")
+print("  preserved: Spotlight shortcuts 64 and 65")
 PY
 
 if [ -x /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings ]; then

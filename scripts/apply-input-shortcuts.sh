@@ -16,8 +16,9 @@ echo "  previous input source: disabled"
 echo "  next input source: F18"
 
 if ((DRY_RUN)); then
-  echo "[dry-run] set AppleSymbolicHotKeys 60, 64 and 65 disabled"
+  echo "[dry-run] set AppleSymbolicHotKeys 60 disabled"
   echo "[dry-run] set AppleSymbolicHotKeys 61 enabled with F18"
+  echo "[dry-run] preserve Spotlight shortcuts 64 and 65"
   exit 0
 fi
 
@@ -49,11 +50,10 @@ def defaults_export(domain):
 
 hotkeys = defaults_export("com.apple.symbolichotkeys")
 symbolic = hotkeys.setdefault("AppleSymbolicHotKeys", {})
-for key in ["60", "64", "65"]:
-    symbolic[key] = {
-        "enabled": False,
-        "value": {"type": "standard", "parameters": [32, 49, 262144]},
-    }
+symbolic["60"] = {
+    "enabled": False,
+    "value": {"type": "standard", "parameters": [32, 49, 262144]},
+}
 symbolic["61"] = {
     "enabled": True,
     "value": {"type": "standard", "parameters": [65535, 79, 8388608]},
@@ -62,6 +62,7 @@ backup(hotkeys_plist, "com.apple.symbolichotkeys")
 raw = plistlib.dumps(hotkeys, fmt=plistlib.FMT_XML)
 subprocess.run(["defaults", "import", "com.apple.symbolichotkeys", "-"], input=raw, check=True)
 print("  result: input-source shortcuts applied")
+print("  preserved: Spotlight shortcuts 64 and 65")
 PY
 
 if [ -x /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings ]; then

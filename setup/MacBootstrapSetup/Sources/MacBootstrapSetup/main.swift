@@ -1979,8 +1979,6 @@ final class SetupWindowController: NSWindowController {
         }
         return symbolicHotKeyEnabled(symbolic, "60") == false &&
             symbolicHotKeyEnabled(symbolic, "61") == true &&
-            symbolicHotKeyEnabled(symbolic, "64") == false &&
-            symbolicHotKeyEnabled(symbolic, "65") == false &&
             symbolicHotKeyIsF18(symbolic, "61")
     }
 
@@ -1993,9 +1991,7 @@ final class SetupWindowController: NSWindowController {
             return false
         }
         return symbolicHotKeyEnabled(symbolic, "60") == false ||
-            symbolicHotKeyEnabled(symbolic, "64") == false ||
-            symbolicHotKeyIsF18(symbolic, "61") ||
-            symbolicHotKeyIsF18(symbolic, "65")
+            symbolicHotKeyIsF18(symbolic, "61")
     }
 
     private func symbolicHotKeyIsF18(_ symbolic: [String: Any], _ key: String) -> Bool {

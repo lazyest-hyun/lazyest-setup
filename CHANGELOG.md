@@ -6,6 +6,11 @@ This project uses the Setup app version in [`VERSION`](VERSION). GitHub Releases
 
 - Updated the pinned MacBootstrapAgent source to `0.2.2` with one immediate screenshot-copy control.
 
+## 0.3.1 - 2026-07-10
+
+- Fixed the input-source shortcut action so it changes only input-source shortcuts and preserves Spotlight shortcuts.
+- Corrected Setup state detection so Spotlight preferences do not affect the input-source status.
+
 ## 0.3.0 - 2026-07-10
 
 - Split the always-running MacBootstrapAgent into its own repository and Swift package.
