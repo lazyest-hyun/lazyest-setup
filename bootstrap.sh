@@ -7,6 +7,7 @@ usage() {
   cat <<'EOF'
 Usage:
   ./bootstrap.sh help
+  ./bootstrap.sh version
   ./bootstrap.sh audit
   ./bootstrap.sh plan
   ./bootstrap.sh install-plan
@@ -34,6 +35,7 @@ Usage:
 
 Commands:
   help              Show this help.
+  version           Print the source version used by both app bundles.
   audit             Read-only state summary.
   plan              Read-only native defaults and Dock plan.
   install-plan      Read-only optional app install plan and official links.
@@ -65,6 +67,10 @@ cmd="${1:-}"
 shift || true
 
 case "$cmd" in
+  version)
+    tr -d '[:space:]' <"$ROOT_DIR/VERSION"
+    printf '\n'
+    ;;
   audit)
     exec "$ROOT_DIR/scripts/audit.sh" "$@"
     ;;

@@ -67,6 +67,21 @@ bool_label() {
   fi
 }
 
+app_version() {
+  local version_file="$ROOT_DIR/VERSION"
+  local version
+  if [ ! -f "$version_file" ]; then
+    echo "Missing version file: $version_file" >&2
+    return 1
+  fi
+  version="$(tr -d '[:space:]' <"$version_file")"
+  if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "Invalid semantic version in $version_file: $version" >&2
+    return 1
+  fi
+  printf '%s\n' "$version"
+}
+
 app_exists() {
   local name="$1"
   [ -d "/Applications/$name.app" ] || [ -d "$HOME/Applications/$name.app" ]

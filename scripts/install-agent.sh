@@ -10,7 +10,9 @@ parse_common_flags "$@"
 binary="$(agent_binary_path)"
 app="$(agent_app_path)"
 plist="$(launch_agent_plist)"
-codesign_identity="${MAC_BOOTSTRAP_CODESIGN_IDENTITY:-}"
+version="$(app_version)"
+default_codesign_identity="MacBootstrap Local Code Signing"
+codesign_identity="${MAC_BOOTSTRAP_CODESIGN_IDENTITY:-$default_codesign_identity}"
 
 codesign_identity_available() {
   [ -n "$codesign_identity" ] || return 1
@@ -26,7 +28,7 @@ sign_agent_app() {
     echo "  warning: stable codesign failed; falling back to ad-hoc signature"
     codesign --force --deep --sign - "$app"
   else
-    echo "  codesign: ad-hoc (set MAC_BOOTSTRAP_CODESIGN_IDENTITY for a stable local signing identity)"
+    echo "  codesign: ad-hoc (stable local identity not found; set MAC_BOOTSTRAP_CODESIGN_IDENTITY to override)"
     codesign --force --deep --sign - "$app"
   fi
 }
@@ -35,6 +37,7 @@ echo "INSTALL_AGENT"
 echo "  dry-run: $(bool_label "$DRY_RUN")"
 echo "  binary: $binary"
 echo "  app: $app"
+echo "  version: $version"
 
 if [ ! -x "$binary" ]; then
   echo "  blocked: agent binary not found; run ./bootstrap.sh build-agent first"
@@ -98,9 +101,9 @@ else
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>
-  <string>0.1.0</string>
+  <string>$version</string>
   <key>CFBundleVersion</key>
-  <string>1</string>
+  <string>$version</string>
   <key>LSMinimumSystemVersion</key>
   <string>13.0</string>
   <key>LSUIElement</key>
@@ -115,4 +118,4 @@ PLIST
   sign_agent_app
 fi
 
-echo "  note: installed always-running menu bar app only; this script does not launch it"
+echo "  note: installed menu bar app only; this does not launch it or enable runtime features"

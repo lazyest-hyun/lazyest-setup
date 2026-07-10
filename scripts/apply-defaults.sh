@@ -44,6 +44,17 @@ else
   echo "  click-desktop default skipped by config"
 fi
 
+if [ "${APPLY_DOCK_AUTOHIDE:-0}" = "1" ]; then
+  if [ "${DOCK_AUTOHIDE:-1}" = "1" ]; then
+    run_cmd defaults write com.apple.dock autohide -bool true
+  else
+    run_cmd defaults write com.apple.dock autohide -bool false
+  fi
+  run_cmd killall Dock
+else
+  echo "  Dock auto-hide skipped by config"
+fi
+
 if [ "$APPLY_BLACK_WALLPAPER" = "1" ]; then
   if [ -f "$BLACK_WALLPAPER" ]; then
     run_cmd osascript -e "tell application \"System Events\" to tell every desktop to set picture to POSIX file \"$BLACK_WALLPAPER\""

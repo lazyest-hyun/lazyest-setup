@@ -134,6 +134,7 @@ echo
 
 echo "WindowManager and wallpaper"
 echo "  EnableStandardClickToShowDesktop: $(read_default com.apple.WindowManager EnableStandardClickToShowDesktop)"
+echo "  Dock autohide: $(read_default com.apple.dock autohide)"
 echo "  Stage Manager GloballyEnabled: $(read_default com.apple.WindowManager GloballyEnabled)"
 db="$HOME/Library/Application Support/Dock/desktoppicture.db"
 if [ -f "$db" ]; then

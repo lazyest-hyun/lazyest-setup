@@ -1,7 +1,9 @@
 import AppKit
 import ApplicationServices
 import Carbon
+import Darwin
 import Foundation
+import ImageIO
 import IOKit.pwr_mgt
 
 let dockAnchorStatusNotification = Notification.Name("MacBootstrapDockAnchorStatusChanged")
@@ -27,6 +29,14 @@ func agentSavedLanguageCode() -> String {
     return UserDefaults.standard.string(forKey: "MacBootstrapLanguage") ?? AgentLanguage.automatic.rawValue
 }
 
+func saveAgentLanguageCode(_ code: String) throws {
+    guard AgentLanguage(rawValue: code) != nil else { return }
+    let path = agentSharedLanguageConfigPath()
+    try FileManager.default.createDirectory(at: path.deletingLastPathComponent(), withIntermediateDirectories: true)
+    try code.write(to: path, atomically: true, encoding: .utf8)
+    UserDefaults.standard.set(code, forKey: "MacBootstrapLanguage")
+}
+
 func agentLanguage() -> AgentLanguage {
     let selected = AgentLanguage(rawValue: agentSavedLanguageCode()) ?? .automatic
     if selected != .automatic {
@@ -39,17 +49,18 @@ func agentLanguage() -> AgentLanguage {
 func agentText(_ key: String) -> String {
     let ko: [String: String] = [
         "title": "MacBootstrapAgent",
-        "tab.apps": "앱",
+        "tab.apps": "앱 단축키",
         "tab.screenshots": "스크린샷",
         "tab.keepAwake": "슬립모드 방지",
         "tab.dockAnchor": "Dock 고정",
-        "apps.hint": "추가한 앱만 단축키로 토글합니다.",
+        "apps.hint": "단축키로 앱을 숨기거나 다시 표시합니다. 실행 중이 아니면 앱을 엽니다.",
+        "apps.enabled": "앱 단축키 사용",
+        "apps.countSuffix": "개 앱",
         "apps.name": "이름",
         "apps.bundle": "번들 ID",
         "apps.shortcut": "단축키",
         "apps.add": "앱 추가",
         "apps.addRunning": "앱 추가",
-        "apps.config": "설정 파일 열기",
         "apps.editTitle": "앱 단축키 추가",
         "apps.editRow": "변경",
         "apps.applyRow": "적용",
@@ -61,22 +72,26 @@ func agentText(_ key: String) -> String {
         "apps.captured": "캡처됨",
         "apps.cancel": "취소",
         "apps.remove": "삭제",
-        "screenshots.title": "macOS 기본 스크린샷 단축키를 그대로 사용합니다.",
-        "screenshots.detail": "이 폴더에 새 스크린샷 이미지가 저장되면 Agent가 클립보드에도 복사합니다.",
-        "screenshots.folder": "스크린샷 폴더",
-        "screenshots.choose": "선택...",
-        "screenshots.copy": "저장된 스크린샷을 클립보드에도 복사",
+        "screenshots.title": "스크린샷",
+        "screenshots.detail": "기본 스크린샷 단축키는 그대로 사용합니다. 파일은 현재 macOS 저장 위치에 남고 같은 이미지가 클립보드에도 복사됩니다.",
+        "screenshots.folder": "저장 폴더",
+        "screenshots.choose": "변경",
+        "screenshots.open": "폴더 열기",
+        "screenshots.copy": "파일 저장 + 클립보드 복사",
+        "screenshots.immediate": "캡처 직후 바로 복사",
+        "screenshots.immediateDetail": "떠 있는 썸네일을 끄고 캡처 파일을 즉시 저장합니다.",
         "state.on": "켜짐",
         "state.off": "꺼짐",
         "keep.title": "슬립모드 방지",
-        "keep.detail": "잠금화면이나 디스플레이 꺼짐 상태에서도 시스템 슬립을 막습니다. 화면은 계속 켜두지 않습니다.",
-        "keep.prevent": "슬립모드 방지",
+        "keep.detail": "잠금 화면이나 디스플레이가 꺼져도 Mac은 깨어 있어 원격 작업을 계속합니다.",
+        "keep.prevent": "슬립모드 방지 사용",
+        "keep.policy": "화면 잠금과 디스플레이 꺼짐은 그대로 허용하고 시스템 잠자기만 막습니다. MacBook 덮개를 닫으면 전원 및 외부 디스플레이 상태에 따라 macOS가 잠들 수 있습니다.",
         "keep.display": "디스플레이 계속 켜두기",
         "dock.title": "Dock 고정",
-        "dock.detail": "선택한 모니터의 Dock은 그대로 쓰고, 다른 모니터의 Dock trigger edge만 막습니다. System Settings에 켜져 있어도 Agent 내부 검증이 통과해야 실행됩니다.",
-        "dock.checkbox": "Dock 고정",
+        "dock.detail": "Dock을 선택한 모니터로 옮기고 다른 모니터로 이동하지 않게 유지합니다.",
+        "dock.checkbox": "Dock 고정 사용",
         "dock.display": "고정할 모니터",
-        "dock.permission": "권한 재등록",
+        "dock.permission": "권한 설정",
         "dock.status.off": "꺼짐",
         "dock.status.active": "실행 중",
         "dock.status.needsPermission": "Accessibility 권한 미적용",
@@ -88,10 +103,14 @@ func agentText(_ key: String) -> String {
         "dock.status.layoutLimited": "디스플레이 하단 높이가 달라 macOS 기본 Dock이 가장 아래 모니터에 머물 수 있음",
         "dock.status.targetLimited": "선택 모니터 하단이 전체 데스크톱 하단이 아니라 macOS 기본 Dock 이동이 제한될 수 있음",
         "dock.status.targetReady": "선택 모니터 하단에서 Dock 사용 가능",
-        "footer.reload": "다시 불러오기",
+        "footer.reload": "설정 다시 불러오기",
+        "language.label": "언어",
+        "language.auto": "자동",
+        "language.korean": "한국어",
+        "language.english": "English",
         "footer.save": "저장",
-        "status.saved": "저장됨. 단축키와 스크린샷 감시를 다시 불러왔습니다.",
-        "status.loaded": "앱 바인딩 로드됨",
+        "status.saved": "자동 저장됨",
+        "status.loaded": "설정 불러옴",
         "status.failed": "저장 실패",
         "menu.settings": "설정 열기",
         "menu.keepAwake": "슬립모드 방지",
@@ -103,17 +122,18 @@ func agentText(_ key: String) -> String {
     }
     let en: [String: String] = [
         "title": "MacBootstrapAgent",
-        "tab.apps": "Apps",
+        "tab.apps": "App Hotkeys",
         "tab.screenshots": "Screenshots",
         "tab.keepAwake": "Prevent Sleep",
         "tab.dockAnchor": "Dock Anchor",
-        "apps.hint": "Only added apps are toggled by hotkey.",
+        "apps.hint": "Use a hotkey to hide or restore an app. The app opens when it is not running.",
+        "apps.enabled": "Enable app hotkeys",
+        "apps.countSuffix": " apps",
         "apps.name": "Name",
         "apps.bundle": "Bundle ID",
         "apps.shortcut": "Shortcut",
         "apps.add": "Add App",
         "apps.addRunning": "Add App",
-        "apps.config": "Open Config File",
         "apps.editTitle": "Add App Hotkey",
         "apps.editRow": "Change",
         "apps.applyRow": "Apply",
@@ -125,22 +145,26 @@ func agentText(_ key: String) -> String {
         "apps.captured": "Captured",
         "apps.cancel": "Cancel",
         "apps.remove": "Remove",
-        "screenshots.title": "Use the normal macOS screenshot shortcuts.",
-        "screenshots.detail": "When macOS saves a new screenshot image in this folder, the agent copies that image to the clipboard.",
-        "screenshots.folder": "Screenshot folder",
-        "screenshots.choose": "Choose...",
-        "screenshots.copy": "Copy saved screenshots to clipboard",
+        "screenshots.title": "Screenshots",
+        "screenshots.detail": "Keep using the standard screenshot shortcuts. The file stays in the current macOS save location and the same image is copied to the clipboard.",
+        "screenshots.folder": "Save folder",
+        "screenshots.choose": "Change",
+        "screenshots.open": "Open folder",
+        "screenshots.copy": "Save file + copy to clipboard",
+        "screenshots.immediate": "Copy immediately after capture",
+        "screenshots.immediateDetail": "Disables the floating thumbnail so the capture file is saved immediately.",
         "state.on": "On",
         "state.off": "Off",
         "keep.title": "Prevent Sleep",
-        "keep.detail": "Keeps the Mac awake on the lock screen or while the display is off. It does not force the display to stay on.",
+        "keep.detail": "Keeps the Mac awake for remote work while the screen is locked or the display is off.",
         "keep.prevent": "Prevent Sleep",
+        "keep.policy": "Screen locking and display sleep remain available; only system sleep is prevented. Closing a MacBook may still sleep it depending on power and external display state.",
         "keep.display": "Keep display awake",
         "dock.title": "Dock Anchor",
-        "dock.detail": "Keeps the Dock usable on the selected display and blocks only the Dock trigger edge on other displays. The agent must pass its own Accessibility check even when System Settings appears enabled.",
-        "dock.checkbox": "Dock Anchor",
+        "dock.detail": "Moves the Dock to the selected display and keeps it from moving to another display.",
+        "dock.checkbox": "Keep Dock on display",
         "dock.display": "Pinned display",
-        "dock.permission": "Re-register Permission",
+        "dock.permission": "Permission Settings",
         "dock.status.off": "Off",
         "dock.status.active": "Active",
         "dock.status.needsPermission": "Accessibility permission not applied",
@@ -152,10 +176,14 @@ func agentText(_ key: String) -> String {
         "dock.status.layoutLimited": "Display bottom edges are not aligned, so native macOS Dock can stay on the lowest display",
         "dock.status.targetLimited": "The selected display is not on the bottom edge of the full desktop, so native Dock movement can be limited",
         "dock.status.targetReady": "Dock can be used on the selected display edge",
-        "footer.reload": "Reload",
+        "footer.reload": "Reload Settings",
+        "language.label": "Language",
+        "language.auto": "Automatic",
+        "language.korean": "한국어",
+        "language.english": "English",
         "footer.save": "Save",
-        "status.saved": "Saved. Hotkeys and screenshot watcher reloaded.",
-        "status.loaded": "app binding(s) loaded",
+        "status.saved": "Saved automatically",
+        "status.loaded": "Settings loaded",
         "status.failed": "Save failed",
         "menu.settings": "Open Settings",
         "menu.keepAwake": "Prevent Sleep",
@@ -169,6 +197,7 @@ struct AppBinding {
     var shortcut: String
     var bundleID: String
     var label: String
+    var isEnabled: Bool
 }
 
 struct TextBinding {
@@ -190,6 +219,7 @@ struct ParsedShortcut {
 final class Config {
     let hotkeyPath: String
     let bootstrapPath: String
+    private(set) var appHotkeysEnabled: Bool
     private(set) var screenshotDir: String
     private(set) var screenshotClipboardWatch: Bool
     private(set) var keepAwakeEnabled: Bool
@@ -200,14 +230,16 @@ final class Config {
     init(hotkeyPath: String, bootstrapPath: String) {
         self.hotkeyPath = hotkeyPath
         self.bootstrapPath = bootstrapPath
+        self.appHotkeysEnabled = false
         self.screenshotDir = currentMacOSScreenshotDir()
-        self.screenshotClipboardWatch = true
+        self.screenshotClipboardWatch = false
         self.keepAwakeEnabled = false
         self.keepDisplayAwake = false
         self.dockAnchorEnabled = false
         self.dockAnchorDisplayID = currentDisplayID()
         ensureConfigFiles()
         loadBootstrap()
+        syncScreenshotDirFromSystem()
     }
 
     func loadBindings() throws -> [AppBinding] {
@@ -220,7 +252,8 @@ final class Config {
             return AppBinding(
                 shortcut: parts[1].trimmingCharacters(in: .whitespaces),
                 bundleID: parts[2].trimmingCharacters(in: .whitespaces),
-                label: parts[3].trimmingCharacters(in: .whitespaces)
+                label: parts[3].trimmingCharacters(in: .whitespaces),
+                isEnabled: parts.count < 5 || parts[4] == "1" || parts[4].lowercased() == "true"
             )
         }
     }
@@ -252,16 +285,17 @@ final class Config {
     func saveHotkeys(appBindings: [AppBinding]) throws {
         let header = """
         # MacBootstrapAgent app hotkeys.
-        # Format: toggle-app|shortcut|bundle-id|label
+        # Format: toggle-app|shortcut|bundle-id|label|enabled
         # Add, remove, or edit rows from the Agent UI.
 
         """
-        let appBody = appBindings.map { "toggle-app|\($0.shortcut)|\($0.bundleID)|\($0.label)" }
+        let appBody = appBindings.map { "toggle-app|\($0.shortcut)|\($0.bundleID)|\($0.label)|\($0.isEnabled ? "1" : "0")" }
         let body = appBody.joined(separator: "\n")
         try (header + body + (body.isEmpty ? "" : "\n")).write(toFile: hotkeyPath, atomically: true, encoding: .utf8)
     }
 
     func saveBootstrap(
+        appHotkeysEnabled: Bool,
         screenshotDir: String,
         screenshotClipboardWatch: Bool,
         keepAwakeEnabled: Bool,
@@ -269,6 +303,7 @@ final class Config {
         dockAnchorEnabled: Bool,
         dockAnchorDisplayID: UInt32?
     ) throws {
+        self.appHotkeysEnabled = appHotkeysEnabled
         self.screenshotDir = resolveScreenshotDir(screenshotDir)
         self.screenshotClipboardWatch = screenshotClipboardWatch
         self.keepAwakeEnabled = keepAwakeEnabled
@@ -276,6 +311,7 @@ final class Config {
         self.dockAnchorEnabled = dockAnchorEnabled
         self.dockAnchorDisplayID = dockAnchorDisplayID
         let content = """
+        APP_HOTKEYS_ENABLED=\(appHotkeysEnabled ? "1" : "0")
         SCREENSHOT_DIR="\(screenshotDir)"
         SCREENSHOT_CLIPBOARD_WATCH=\(screenshotClipboardWatch ? "1" : "0")
         KEEP_AWAKE_ENABLED=\(keepAwakeEnabled ? "1" : "0")
@@ -289,6 +325,7 @@ final class Config {
 
     func setKeepAwakeEnabled(_ enabled: Bool) throws {
         try saveBootstrap(
+            appHotkeysEnabled: appHotkeysEnabled,
             screenshotDir: screenshotDir,
             screenshotClipboardWatch: screenshotClipboardWatch,
             keepAwakeEnabled: enabled,
@@ -299,13 +336,19 @@ final class Config {
     }
 
     func reloadBootstrap() {
+        appHotkeysEnabled = false
         screenshotDir = currentMacOSScreenshotDir()
-        screenshotClipboardWatch = true
+        screenshotClipboardWatch = false
         keepAwakeEnabled = false
         keepDisplayAwake = false
         dockAnchorEnabled = false
         dockAnchorDisplayID = currentDisplayID()
         loadBootstrap()
+        syncScreenshotDirFromSystem()
+    }
+
+    func syncScreenshotDirFromSystem() {
+        screenshotDir = currentMacOSScreenshotDir()
     }
 
     private func ensureConfigFiles() {
@@ -323,7 +366,9 @@ final class Config {
         guard let content = try? String(contentsOfFile: bootstrapPath, encoding: .utf8) else { return }
         for rawLine in content.split(separator: "\n") {
             let line = rawLine.trimmingCharacters(in: .whitespaces)
-            if line.hasPrefix("SCREENSHOT_DIR="), let value = shellValue(line) {
+            if line.hasPrefix("APP_HOTKEYS_ENABLED="), let value = shellValue(line) {
+                appHotkeysEnabled = value == "1" || value.lowercased() == "true"
+            } else if line.hasPrefix("SCREENSHOT_DIR="), let value = shellValue(line) {
                 screenshotDir = resolveScreenshotDir(value)
             } else if line.hasPrefix("SCREENSHOT_CLIPBOARD_WATCH="), let value = shellValue(line) {
                 screenshotClipboardWatch = value == "1" || value.lowercased() == "true"
@@ -364,9 +409,11 @@ final class Config {
 final class BindingRow {
     var binding: AppBinding
     var draftShortcut = ""
+    let iconView: NSImageView
     let label: NSTextField
     let bundleID: NSTextField
     let shortcutField: ShortcutCaptureField
+    let enabledSwitch: NSSwitch
     let editButton: NSButton
     let removeButton: NSButton
     var isEditing = false
@@ -374,12 +421,29 @@ final class BindingRow {
     init(binding: AppBinding) {
         self.binding = binding
         self.draftShortcut = binding.shortcut
+        self.iconView = NSImageView()
         self.label = NSTextField(labelWithString: binding.label)
         self.bundleID = NSTextField(labelWithString: binding.bundleID)
         self.shortcutField = ShortcutCaptureField(string: binding.shortcut)
         self.shortcutField.lastCompleteShortcut = binding.shortcut
+        self.enabledSwitch = NSSwitch(frame: .zero)
         self.editButton = NSButton(title: agentText("apps.editRow"), target: nil, action: nil)
         self.removeButton = NSButton(title: "", target: nil, action: nil)
+        if let appURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: binding.bundleID) {
+            self.iconView.image = NSWorkspace.shared.icon(forFile: appURL.path)
+        } else {
+            self.iconView.image = NSImage(systemSymbolName: "app", accessibilityDescription: binding.label)
+        }
+        self.iconView.imageScaling = .scaleProportionallyUpOrDown
+        self.iconView.setContentHuggingPriority(.required, for: .horizontal)
+        self.label.font = NSFont.systemFont(ofSize: 13, weight: .medium)
+        self.label.lineBreakMode = .byTruncatingTail
+        self.bundleID.font = NSFont.systemFont(ofSize: 11)
+        self.bundleID.textColor = .secondaryLabelColor
+        self.bundleID.lineBreakMode = .byTruncatingMiddle
+        self.enabledSwitch.state = binding.isEnabled ? .on : .off
+        self.enabledSwitch.toolTip = agentText("apps.enabled")
+        self.enabledSwitch.setAccessibilityLabel("\(binding.label) \(agentText("apps.enabled"))")
         setEditing(false)
     }
 
@@ -390,6 +454,8 @@ final class BindingRow {
         bundleID.stringValue = binding.bundleID
         shortcutField.stringValue = binding.shortcut
         shortcutField.lastCompleteShortcut = binding.shortcut
+        enabledSwitch.state = binding.isEnabled ? .on : .off
+        refreshEnabledAppearance()
     }
 
     func setEditing(_ editing: Bool) {
@@ -411,12 +477,21 @@ final class BindingRow {
             removeButton.contentTintColor = .systemRed
             removeButton.toolTip = agentText("apps.remove")
         }
+        refreshEnabledAppearance()
     }
 
     func cancelEditing() {
         shortcutField.stringValue = binding.shortcut
         shortcutField.lastCompleteShortcut = binding.shortcut
         setEditing(false)
+    }
+
+    func refreshEnabledAppearance() {
+        let enabled = enabledSwitch.state == .on
+        iconView.alphaValue = enabled ? 1 : 0.5
+        label.textColor = enabled ? .labelColor : .secondaryLabelColor
+        bundleID.textColor = enabled ? .secondaryLabelColor : .tertiaryLabelColor
+        shortcutField.textColor = enabled ? .labelColor : .tertiaryLabelColor
     }
 }
 
@@ -527,6 +602,71 @@ final class ShortcutCaptureField: NSTextField {
     }
 }
 
+final class SettingsTabButton: NSButton {
+    private let tabLabel: NSTextField
+    private let tabIcon: NSImageView
+
+    var isSelectedTab = false {
+        didSet { updateAppearance() }
+    }
+
+    init(title: String, symbolName: String) {
+        tabLabel = NSTextField(labelWithString: title)
+        tabIcon = NSImageView(image: NSImage(systemSymbolName: symbolName, accessibilityDescription: title) ?? NSImage())
+        super.init(frame: .zero)
+
+        self.title = ""
+        isBordered = false
+        setButtonType(.momentaryPushIn)
+        wantsLayer = true
+        layer?.cornerRadius = 6
+        setAccessibilityLabel(title)
+
+        tabLabel.font = NSFont.systemFont(ofSize: 12, weight: .medium)
+        tabLabel.alignment = .center
+        tabLabel.lineBreakMode = .byTruncatingTail
+        tabIcon.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 12, weight: .medium)
+        tabIcon.setContentHuggingPriority(.required, for: .horizontal)
+
+        let content = NSStackView(views: [tabIcon, tabLabel])
+        content.orientation = .horizontal
+        content.alignment = .centerY
+        content.spacing = 7
+        content.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(content)
+        NSLayoutConstraint.activate([
+            content.centerXAnchor.constraint(equalTo: centerXAnchor),
+            content.centerYAnchor.constraint(equalTo: centerYAnchor),
+            content.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 8),
+            content.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -8),
+            heightAnchor.constraint(equalToConstant: 32)
+        ])
+        updateAppearance()
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func updateLayer() {
+        super.updateLayer()
+        updateAppearance()
+    }
+
+    private func updateAppearance() {
+        guard let layer else { return }
+        layer.backgroundColor = (isSelectedTab
+            ? NSColor.controlAccentColor.withAlphaComponent(0.2)
+            : NSColor.controlBackgroundColor.withAlphaComponent(0.55)).cgColor
+        layer.borderWidth = 1
+        layer.borderColor = (isSelectedTab
+            ? NSColor.controlAccentColor.withAlphaComponent(0.45)
+            : NSColor.separatorColor.withAlphaComponent(0.4)).cgColor
+        tabLabel.textColor = isSelectedTab ? .labelColor : .secondaryLabelColor
+        tabIcon.contentTintColor = isSelectedTab ? .controlAccentColor : .secondaryLabelColor
+    }
+}
+
 final class SettingsWindowController: NSWindowController {
     private let config: Config
     private var rows: [BindingRow] = []
@@ -535,36 +675,42 @@ final class SettingsWindowController: NSWindowController {
     private let textBindingsStack = NSStackView()
     private let appsHintLabel = NSTextField(labelWithString: agentText("apps.hint"))
     private let textHintLabel = NSTextField(labelWithString: agentText("text.hint"))
-    private let screenshotDirField = NSTextField()
+    private var screenshotDirectoryPath = ""
     private var shortcutCaptureMonitor: Any?
     private weak var activeShortcutField: ShortcutCaptureField?
     private var activeShortcutLabel = ""
     private weak var activeEditingRow: BindingRow?
-    private lazy var screenshotWatchButton = toggleButton(title: agentText("screenshots.copy"), action: #selector(toggleScreenshotWatch))
-    private lazy var keepAwakeButton = toggleButton(title: agentText("keep.prevent"), action: #selector(toggleKeepAwake))
-    private lazy var dockAnchorButton = toggleButton(title: agentText("dock.checkbox"), action: #selector(toggleDockAnchor))
+    private lazy var appHotkeysSwitch = settingSwitch(action: #selector(toggleAppHotkeys))
+    private lazy var screenshotFolderButton = pathButton(action: #selector(openScreenshotDirectory))
+    private lazy var screenshotWatchSwitch = settingSwitch(action: #selector(toggleScreenshotWatch))
+    private lazy var screenshotImmediateSwitch = settingSwitch(action: #selector(toggleScreenshotImmediateCopy))
+    private lazy var keepAwakeSwitch = settingSwitch(action: #selector(toggleKeepAwake))
+    private lazy var dockAnchorSwitch = settingSwitch(action: #selector(toggleDockAnchor))
     private lazy var dockPermissionButton = actionButton(title: agentText("dock.permission"), action: #selector(openAccessibilitySettings))
     private lazy var appAddButton = actionButton(title: agentText("apps.addRunning"), action: #selector(addRunningApp))
-    private lazy var appConfigButton = actionButton(title: agentText("apps.config"), action: #selector(openHotkeyConfig))
-    private lazy var footerReloadButton = NSButton(title: agentText("footer.reload"), target: self, action: #selector(reloadPressed))
-    private lazy var footerSaveButton = NSButton(title: agentText("footer.save"), target: self, action: #selector(savePressed))
+    private lazy var footerReloadButton = iconButton(symbolName: "arrow.clockwise", tooltip: agentText("footer.reload"), action: #selector(reloadPressed))
+    private let languagePopup = NSPopUpButton()
+    private let settingsTabs = NSTabView()
+    private var tabButtons: [SettingsTabButton] = []
     private let dockDisplayPopup = NSPopUpButton()
     private let dockAnchorStatusLabel = NSTextField(labelWithString: "")
     private let statusLabel = NSTextField(labelWithString: "")
     var onSave: (() -> Void)?
     var onShortcutCaptureStart: (() -> Void)?
     var onShortcutCaptureEnd: (() -> Void)?
+    var onLanguageChange: (() -> Void)?
 
     init(config: Config) {
         self.config = config
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 880, height: 560),
+            contentRect: NSRect(x: 0, y: 0, width: 820, height: 540),
             styleMask: [.titled, .closable, .miniaturizable, .resizable],
             backing: .buffered,
             defer: false
         )
         window.title = agentText("title")
         window.isReleasedWhenClosed = false
+        window.minSize = NSSize(width: 760, height: 500)
         super.init(window: window)
         buildUI()
         NotificationCenter.default.addObserver(forName: dockAnchorStatusNotification, object: nil, queue: .main) { [weak self] note in
@@ -584,8 +730,9 @@ final class SettingsWindowController: NSWindowController {
         guard let contentView = window?.contentView else { return }
         let root = NSStackView()
         root.orientation = .vertical
-        root.spacing = 12
-        root.edgeInsets = NSEdgeInsets(top: 18, left: 18, bottom: 18, right: 18)
+        root.alignment = .width
+        root.spacing = 10
+        root.edgeInsets = NSEdgeInsets(top: 14, left: 14, bottom: 12, right: 14)
         root.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(root)
         NSLayoutConstraint.activate([
@@ -595,41 +742,106 @@ final class SettingsWindowController: NSWindowController {
             root.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
         ])
 
-        let title = NSTextField(labelWithString: agentText("title"))
-        title.font = NSFont.boldSystemFont(ofSize: 22)
-        root.addArrangedSubview(title)
+        let tabBarRow = NSStackView()
+        tabBarRow.orientation = .horizontal
+        let tabBar = NSStackView()
+        tabBar.orientation = .horizontal
+        tabBar.distribution = .fillEqually
+        tabBar.spacing = 4
+        let tabDefinitions = [
+            (agentText("tab.apps"), "keyboard"),
+            (agentText("tab.screenshots"), "camera.viewfinder"),
+            (agentText("tab.keepAwake"), "moon.zzz"),
+            (agentText("tab.dockAnchor"), "dock.rectangle")
+        ]
+        for (index, definition) in tabDefinitions.enumerated() {
+            let button = SettingsTabButton(title: definition.0, symbolName: definition.1)
+            button.target = self
+            button.action = #selector(selectSettingsTab(_:))
+            button.tag = index
+            button.isSelectedTab = index == 0
+            tabButtons.append(button)
+            tabBar.addArrangedSubview(button)
+        }
+        tabBar.widthAnchor.constraint(equalToConstant: 560).isActive = true
+        tabBarRow.addArrangedSubview(NSView())
+        tabBarRow.addArrangedSubview(tabBar)
+        tabBarRow.addArrangedSubview(NSView())
+        root.addArrangedSubview(tabBarRow)
 
-        let tabs = NSTabView()
-        tabs.translatesAutoresizingMaskIntoConstraints = false
-        tabs.addTabViewItem(appBindingsTab())
-        tabs.addTabViewItem(screenshotsTab())
-        tabs.addTabViewItem(keepAwakeTab())
-        tabs.addTabViewItem(dockAnchorTab())
-        root.addArrangedSubview(tabs)
-        tabs.heightAnchor.constraint(greaterThanOrEqualToConstant: 410).isActive = true
+        settingsTabs.tabViewType = .noTabsNoBorder
+        settingsTabs.frame = NSRect(x: 0, y: 0, width: 792, height: 400)
+        settingsTabs.translatesAutoresizingMaskIntoConstraints = false
+        settingsTabs.addTabViewItem(appBindingsTab())
+        settingsTabs.addTabViewItem(screenshotsTab())
+        settingsTabs.addTabViewItem(keepAwakeTab())
+        settingsTabs.addTabViewItem(dockAnchorTab())
+        root.addArrangedSubview(settingsTabs)
+        settingsTabs.widthAnchor.constraint(equalTo: contentView.widthAnchor, constant: -28).isActive = true
+        settingsTabs.heightAnchor.constraint(greaterThanOrEqualToConstant: 400).isActive = true
 
         let footer = NSStackView()
         footer.orientation = .horizontal
-        footer.spacing = 10
+        footer.spacing = 8
         statusLabel.textColor = .secondaryLabelColor
+        statusLabel.font = NSFont.systemFont(ofSize: 11)
         footer.addArrangedSubview(statusLabel)
         footer.addArrangedSubview(NSView())
+        let languageLabel = NSTextField(labelWithString: agentText("language.label"))
+        languageLabel.textColor = .secondaryLabelColor
+        languageLabel.font = NSFont.systemFont(ofSize: 11)
+        footer.addArrangedSubview(languageLabel)
+        configureLanguagePopup()
+        languagePopup.target = self
+        languagePopup.action = #selector(changeLanguage)
+        languagePopup.widthAnchor.constraint(equalToConstant: 118).isActive = true
+        footer.addArrangedSubview(languagePopup)
         footer.addArrangedSubview(footerReloadButton)
-        footer.addArrangedSubview(footerSaveButton)
         root.addArrangedSubview(footer)
     }
 
-    private func toggleButton(title: String, action: Selector) -> NSButton {
-        let button = NSButton(title: title, target: self, action: action)
-        button.setButtonType(.toggle)
-        button.bezelStyle = .rounded
-        button.alignment = .left
-        button.wantsLayer = true
-        button.layer?.cornerRadius = 7
-        button.layer?.borderWidth = 1
-        button.heightAnchor.constraint(equalToConstant: 34).isActive = true
-        button.widthAnchor.constraint(greaterThanOrEqualToConstant: 360).isActive = true
-        return button
+    private func configureLanguagePopup() {
+        languagePopup.removeAllItems()
+        let options: [(String, String)] = [
+            (agentText("language.auto"), AgentLanguage.automatic.rawValue),
+            (agentText("language.korean"), AgentLanguage.korean.rawValue),
+            (agentText("language.english"), AgentLanguage.english.rawValue)
+        ]
+        for option in options {
+            languagePopup.addItem(withTitle: option.0)
+            languagePopup.lastItem?.representedObject = option.1
+        }
+        let savedCode = agentSavedLanguageCode()
+        if let index = languagePopup.itemArray.firstIndex(where: { ($0.representedObject as? String) == savedCode }) {
+            languagePopup.selectItem(at: index)
+        } else {
+            languagePopup.selectItem(at: 0)
+        }
+    }
+
+    @objc private func changeLanguage() {
+        guard let code = languagePopup.selectedItem?.representedObject as? String else { return }
+        do {
+            try saveAgentLanguageCode(code)
+            onLanguageChange?()
+        } catch {
+            statusLabel.stringValue = "\(agentText("status.failed")): \(error.localizedDescription)"
+        }
+    }
+
+    @objc private func selectSettingsTab(_ sender: SettingsTabButton) {
+        for button in tabButtons {
+            button.isSelectedTab = button === sender
+        }
+        settingsTabs.selectTabViewItem(at: sender.tag)
+    }
+
+    private func settingSwitch(action: Selector) -> NSSwitch {
+        let toggle = NSSwitch(frame: .zero)
+        toggle.target = self
+        toggle.action = action
+        toggle.setContentHuggingPriority(.required, for: .horizontal)
+        return toggle
     }
 
     private func actionButton(title: String, action: Selector) -> NSButton {
@@ -652,60 +864,118 @@ final class SettingsWindowController: NSWindowController {
         return button
     }
 
-    private func rowContainer() -> NSStackView {
+    private func pathButton(action: Selector) -> NSButton {
+        let button = NSButton(title: "", target: self, action: action)
+        button.isBordered = false
+        button.alignment = .right
+        button.contentTintColor = .linkColor
+        button.font = NSFont.systemFont(ofSize: 12)
+        button.lineBreakMode = .byTruncatingMiddle
+        button.toolTip = agentText("screenshots.open")
+        return button
+    }
+
+    private func pageHeader(title: String, detail: String) -> NSStackView {
+        let stack = NSStackView()
+        stack.orientation = .vertical
+        stack.alignment = .leading
+        stack.spacing = 4
+        let titleLabel = NSTextField(labelWithString: title)
+        titleLabel.font = NSFont.systemFont(ofSize: 17, weight: .semibold)
+        stack.addArrangedSubview(titleLabel)
+        if !detail.isEmpty {
+            let detailLabel = NSTextField(wrappingLabelWithString: detail)
+            detailLabel.textColor = .secondaryLabelColor
+            detailLabel.font = NSFont.systemFont(ofSize: 12)
+            stack.addArrangedSubview(detailLabel)
+        }
+        return stack
+    }
+
+    private func settingRow(title: String, detail: String = "", control: NSView) -> NSStackView {
+        let row = NSStackView()
+        row.orientation = .horizontal
+        row.alignment = .centerY
+        row.spacing = 12
+        row.edgeInsets = NSEdgeInsets(top: 10, left: 2, bottom: 10, right: 2)
+
+        let labels = NSStackView()
+        labels.orientation = .vertical
+        labels.alignment = .leading
+        labels.spacing = 2
+        let titleLabel = NSTextField(labelWithString: title)
+        titleLabel.font = NSFont.systemFont(ofSize: 13, weight: .medium)
+        labels.addArrangedSubview(titleLabel)
+        if !detail.isEmpty {
+            let detailLabel = NSTextField(wrappingLabelWithString: detail)
+            detailLabel.textColor = .secondaryLabelColor
+            detailLabel.font = NSFont.systemFont(ofSize: 11)
+            labels.addArrangedSubview(detailLabel)
+        }
+        labels.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        row.addArrangedSubview(labels)
+        row.addArrangedSubview(NSView())
+        control.setContentHuggingPriority(.required, for: .horizontal)
+        row.addArrangedSubview(control)
+        row.heightAnchor.constraint(greaterThanOrEqualToConstant: 58).isActive = true
+        return row
+    }
+
+    private func compactSettingRow(title: String, control: NSView) -> NSStackView {
+        let row = NSStackView()
+        row.orientation = .horizontal
+        row.alignment = .centerY
+        row.spacing = 10
+        row.edgeInsets = NSEdgeInsets(top: 2, left: 2, bottom: 2, right: 2)
+        let titleLabel = NSTextField(labelWithString: title)
+        titleLabel.font = NSFont.systemFont(ofSize: 12, weight: .medium)
+        row.addArrangedSubview(titleLabel)
+        row.addArrangedSubview(NSView())
+        control.setContentHuggingPriority(.required, for: .horizontal)
+        row.addArrangedSubview(control)
+        return row
+    }
+
+    private func separator() -> NSBox {
+        let box = NSBox()
+        box.boxType = .separator
+        return box
+    }
+
+    private func rowContainer(compact: Bool = false) -> NSStackView {
         let view = NSStackView()
         view.orientation = .horizontal
         view.spacing = 8
-        view.edgeInsets = NSEdgeInsets(top: 7, left: 10, bottom: 7, right: 10)
+        let verticalInset: CGFloat = compact ? 5 : 7
+        view.edgeInsets = NSEdgeInsets(top: verticalInset, left: 10, bottom: verticalInset, right: 10)
         view.wantsLayer = true
         view.layer?.cornerRadius = 8
-        view.layer?.backgroundColor = NSColor.controlBackgroundColor.withAlphaComponent(0.55).cgColor
+        view.layer?.backgroundColor = NSColor.controlBackgroundColor.withAlphaComponent(0.35).cgColor
         view.layer?.borderWidth = 1
-        view.layer?.borderColor = NSColor.separatorColor.withAlphaComponent(0.55).cgColor
+        view.layer?.borderColor = NSColor.separatorColor.withAlphaComponent(0.28).cgColor
         return view
     }
 
-    private func updateToggleButton(_ button: NSButton, baseTitle: String, isOn: Bool) {
-        button.state = isOn ? .on : .off
-        button.title = "\(baseTitle) · \(agentText(isOn ? "state.on" : "state.off"))"
-        button.contentTintColor = isOn ? .controlAccentColor : .secondaryLabelColor
-        button.layer?.borderColor = (isOn ? NSColor.controlAccentColor : NSColor.separatorColor).cgColor
-        button.layer?.backgroundColor = (isOn ? NSColor.controlAccentColor.withAlphaComponent(0.10) : NSColor.clear).cgColor
-    }
-
-    private func updateDockAnchorButton(isEnabled: Bool, status: String? = nil) {
+    private func updateDockAnchorControls(isEnabled: Bool, status: String? = nil) {
         let currentStatus = status ?? dockAnchorStatusLabel.stringValue
-        dockAnchorButton.state = isEnabled ? .on : .off
-        let suffix: String
-        if !isEnabled {
-            suffix = agentText("state.off")
-        } else if currentStatus.contains(agentText("dock.status.needsPermission")) {
-            suffix = agentText("dock.status.needsPermission")
-        } else if currentStatus.contains(agentText("dock.status.failed")) {
-            suffix = agentText("dock.status.failed")
-        } else {
-            suffix = agentText("dock.status.active")
-        }
-        dockAnchorButton.title = "\(agentText("dock.checkbox")) · \(suffix)"
+        dockAnchorSwitch.state = isEnabled ? .on : .off
         let warning = currentStatus.contains(agentText("dock.status.needsPermission"))
             || currentStatus.contains(agentText("dock.status.failed"))
             || currentStatus.contains(agentText("dock.status.targetLimited"))
-        let tint: NSColor = !isEnabled ? .secondaryLabelColor : (warning ? .systemOrange : .controlAccentColor)
-        dockAnchorButton.contentTintColor = tint
-        dockAnchorButton.layer?.borderColor = (isEnabled ? tint : NSColor.separatorColor).cgColor
-        dockAnchorButton.layer?.backgroundColor = (isEnabled ? tint.withAlphaComponent(0.10) : NSColor.clear).cgColor
         dockPermissionButton.isHidden = !isEnabled || !warning
+        dockDisplayPopup.isEnabled = !isEnabled
     }
 
     private func refreshDockAnchorUI(status: String? = nil) {
-        let enabled = dockAnchorButton.state == .on
+        let enabled = dockAnchorSwitch.state == .on
         let resolvedStatus = dockAnchorResolvedStatus(isEnabled: enabled, baseStatus: status)
         dockAnchorStatusLabel.stringValue = resolvedStatus
-        dockAnchorStatusLabel.textColor = resolvedStatus.contains(agentText("dock.status.active"))
-            ? .systemGreen
-            : (resolvedStatus.contains(agentText("dock.status.off")) ? .secondaryLabelColor : .systemOrange)
-        dockDisplayPopup.isEnabled = !enabled
-        updateDockAnchorButton(isEnabled: enabled, status: resolvedStatus)
+        let isActive = resolvedStatus.contains(agentText("dock.status.active"))
+        let isOff = resolvedStatus == agentText("dock.status.off")
+        let tint: NSColor = isActive ? .systemGreen : (isOff ? .secondaryLabelColor : .systemOrange)
+        dockAnchorStatusLabel.textColor = tint
+        dockAnchorStatusLabel.layer?.backgroundColor = tint.withAlphaComponent(isOff ? 0.08 : 0.13).cgColor
+        updateDockAnchorControls(isEnabled: enabled, status: resolvedStatus)
     }
 
     private func dockAnchorResolvedStatus(isEnabled: Bool, baseStatus override: String? = nil) -> String {
@@ -713,36 +983,53 @@ final class SettingsWindowController: NSWindowController {
         if isEnabled {
             baseStatus = override ?? (AXIsProcessTrusted() ? agentText("dock.status.active") : agentText("dock.status.needsPermission"))
         } else {
-            baseStatus = "\(override ?? agentText("dock.status.off")) · \(agentText("dock.status.agentOff")) · \(agentText("dock.status.nativeOnly"))"
+            baseStatus = override ?? agentText("dock.status.off")
         }
-
-        var parts = [baseStatus]
-        if let dockID = currentDockDisplayIDFromWindowServer(),
-           let displayName = displayTitle(for: dockID) {
-            parts.append("\(agentText("dock.status.onDisplay")): \(displayName)")
-        }
-        if !isEnabled, dockBottomEdgesAreMisaligned() {
-            parts.append(agentText("dock.status.layoutLimited"))
-        }
-        return parts.joined(separator: " · ")
+        return baseStatus
     }
 
     private func appBindingsTab() -> NSTabViewItem {
         let item = NSTabViewItem(identifier: "apps")
         item.label = agentText("tab.apps")
         let root = NSStackView()
+        root.frame = NSRect(x: 0, y: 0, width: 760, height: 400)
         root.orientation = .vertical
-        root.spacing = 12
-        root.edgeInsets = NSEdgeInsets(top: 14, left: 14, bottom: 14, right: 14)
+        root.alignment = .width
+        root.spacing = 8
+        root.edgeInsets = NSEdgeInsets(top: 14, left: 18, bottom: 12, right: 18)
 
+        let header = NSStackView()
+        header.orientation = .horizontal
+        header.alignment = .centerY
+        header.spacing = 8
         appsHintLabel.textColor = .secondaryLabelColor
-        root.addArrangedSubview(appsHintLabel)
-        root.addArrangedSubview(headerRow())
+        appsHintLabel.font = NSFont.systemFont(ofSize: 12)
+        let heading = NSStackView()
+        heading.orientation = .vertical
+        heading.alignment = .leading
+        heading.spacing = 4
+        let headingTitle = NSTextField(labelWithString: agentText("tab.apps"))
+        headingTitle.font = NSFont.systemFont(ofSize: 17, weight: .semibold)
+        heading.addArrangedSubview(headingTitle)
+        heading.addArrangedSubview(appsHintLabel)
+        header.addArrangedSubview(heading)
+        header.addArrangedSubview(NSView())
+        appAddButton.image = NSImage(systemSymbolName: "plus", accessibilityDescription: agentText("apps.addRunning"))
+        appAddButton.imagePosition = .imageLeading
+        header.addArrangedSubview(appAddButton)
+        root.addArrangedSubview(header)
+        header.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
+        root.addArrangedSubview(separator())
+        root.addArrangedSubview(compactSettingRow(title: agentText("apps.enabled"), control: appHotkeysSwitch))
+        let listSeparator = separator()
+        root.addArrangedSubview(listSeparator)
 
         bindingsStack.orientation = .vertical
-        bindingsStack.spacing = 8
+        bindingsStack.alignment = .width
+        bindingsStack.spacing = 6
         let scrollView = NSScrollView()
         scrollView.hasVerticalScroller = true
+        scrollView.drawsBackground = false
         let documentView = FlippedDocumentView()
         documentView.translatesAutoresizingMaskIntoConstraints = false
         bindingsStack.translatesAutoresizingMaskIntoConstraints = false
@@ -755,15 +1042,25 @@ final class SettingsWindowController: NSWindowController {
             bindingsStack.widthAnchor.constraint(equalTo: documentView.widthAnchor)
         ])
         scrollView.documentView = documentView
-        root.addArrangedSubview(scrollView)
-
-        let controls = NSStackView()
-        controls.orientation = .horizontal
-        controls.spacing = 10
-        controls.addArrangedSubview(NSView())
-        controls.addArrangedSubview(appAddButton)
-        controls.addArrangedSubview(appConfigButton)
-        root.addArrangedSubview(controls)
+        NSLayoutConstraint.activate([
+            documentView.leadingAnchor.constraint(equalTo: scrollView.contentView.leadingAnchor),
+            documentView.topAnchor.constraint(equalTo: scrollView.contentView.topAnchor),
+            documentView.widthAnchor.constraint(equalTo: scrollView.contentView.widthAnchor)
+        ])
+        let scrollContainer = NSView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollContainer.addSubview(scrollView)
+        root.addArrangedSubview(scrollContainer)
+        NSLayoutConstraint.activate([
+            listSeparator.leadingAnchor.constraint(equalTo: root.leadingAnchor, constant: 18),
+            listSeparator.trailingAnchor.constraint(equalTo: root.trailingAnchor, constant: -18),
+            scrollContainer.leadingAnchor.constraint(equalTo: root.leadingAnchor, constant: 18),
+            scrollContainer.trailingAnchor.constraint(equalTo: root.trailingAnchor, constant: -18),
+            scrollView.leadingAnchor.constraint(equalTo: scrollContainer.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: scrollContainer.trailingAnchor),
+            scrollView.topAnchor.constraint(equalTo: scrollContainer.topAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: scrollContainer.bottomAnchor)
+        ])
         item.view = root
         return item
     }
@@ -773,19 +1070,21 @@ final class SettingsWindowController: NSWindowController {
         item.label = agentText("tab.keepAwake")
         let root = NSStackView()
         root.orientation = .vertical
+        root.alignment = .width
         root.spacing = 14
         root.edgeInsets = NSEdgeInsets(top: 18, left: 18, bottom: 18, right: 18)
 
-        let title = NSTextField(labelWithString: agentText("keep.title"))
-        title.font = NSFont.boldSystemFont(ofSize: 14)
-        root.addArrangedSubview(title)
-
-        let detail = NSTextField(labelWithString: agentText("keep.detail"))
-        detail.textColor = .secondaryLabelColor
-        detail.lineBreakMode = .byWordWrapping
-        root.addArrangedSubview(detail)
-
-        root.addArrangedSubview(keepAwakeButton)
+        let header = pageHeader(title: agentText("keep.title"), detail: agentText("keep.detail"))
+        root.addArrangedSubview(header)
+        header.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
+        root.addArrangedSubview(separator())
+        root.addArrangedSubview(settingRow(title: agentText("keep.prevent"), control: keepAwakeSwitch))
+        root.addArrangedSubview(separator())
+        let policy = NSTextField(wrappingLabelWithString: agentText("keep.policy"))
+        policy.font = NSFont.systemFont(ofSize: 12)
+        policy.textColor = .secondaryLabelColor
+        policy.maximumNumberOfLines = 3
+        root.addArrangedSubview(policy)
         root.addArrangedSubview(NSView())
         item.view = root
         return item
@@ -796,32 +1095,34 @@ final class SettingsWindowController: NSWindowController {
         item.label = agentText("tab.dockAnchor")
         let root = NSStackView()
         root.orientation = .vertical
+        root.alignment = .width
         root.spacing = 14
         root.edgeInsets = NSEdgeInsets(top: 18, left: 18, bottom: 18, right: 18)
 
-        let title = NSTextField(labelWithString: agentText("dock.title"))
-        title.font = NSFont.boldSystemFont(ofSize: 14)
-        root.addArrangedSubview(title)
+        let header = pageHeader(title: agentText("dock.title"), detail: agentText("dock.detail"))
+        root.addArrangedSubview(header)
+        header.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
+        root.addArrangedSubview(separator())
 
-        let detail = NSTextField(labelWithString: agentText("dock.detail"))
-        detail.textColor = .secondaryLabelColor
-        detail.lineBreakMode = .byWordWrapping
-        root.addArrangedSubview(detail)
+        dockAnchorStatusLabel.alignment = .center
+        dockAnchorStatusLabel.font = NSFont.systemFont(ofSize: 11, weight: .medium)
+        dockAnchorStatusLabel.wantsLayer = true
+        dockAnchorStatusLabel.layer?.cornerRadius = 7
+        dockAnchorStatusLabel.layer?.masksToBounds = true
+        dockAnchorStatusLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 76).isActive = true
+        let anchorControls = NSStackView()
+        anchorControls.orientation = .horizontal
+        anchorControls.spacing = 8
+        anchorControls.addArrangedSubview(dockAnchorStatusLabel)
+        anchorControls.addArrangedSubview(dockPermissionButton)
+        anchorControls.addArrangedSubview(dockAnchorSwitch)
+        root.addArrangedSubview(settingRow(title: agentText("dock.checkbox"), control: anchorControls))
+        root.addArrangedSubview(separator())
 
-        root.addArrangedSubview(dockAnchorButton)
-        dockAnchorStatusLabel.textColor = .secondaryLabelColor
-        root.addArrangedSubview(dockAnchorStatusLabel)
-        let displayRow = NSStackView()
-        displayRow.orientation = .horizontal
-        displayRow.spacing = 10
-        displayRow.addArrangedSubview(NSTextField(labelWithString: agentText("dock.display")))
         dockDisplayPopup.target = self
         dockDisplayPopup.action = #selector(saveRuntimeSettings)
-        dockDisplayPopup.widthAnchor.constraint(equalToConstant: 420).isActive = true
-        displayRow.addArrangedSubview(dockDisplayPopup)
-        displayRow.addArrangedSubview(dockPermissionButton)
-        displayRow.addArrangedSubview(NSView())
-        root.addArrangedSubview(displayRow)
+        dockDisplayPopup.widthAnchor.constraint(equalToConstant: 440).isActive = true
+        root.addArrangedSubview(settingRow(title: agentText("dock.display"), control: dockDisplayPopup))
         root.addArrangedSubview(NSView())
         item.view = root
         return item
@@ -832,6 +1133,7 @@ final class SettingsWindowController: NSWindowController {
         item.label = agentText("tab.text")
         let root = NSStackView()
         root.orientation = .vertical
+        root.alignment = .width
         root.spacing = 12
         root.edgeInsets = NSEdgeInsets(top: 14, left: 14, bottom: 14, right: 14)
 
@@ -872,44 +1174,33 @@ final class SettingsWindowController: NSWindowController {
         item.label = agentText("tab.screenshots")
         let root = NSStackView()
         root.orientation = .vertical
+        root.alignment = .width
         root.spacing = 14
         root.edgeInsets = NSEdgeInsets(top: 18, left: 18, bottom: 18, right: 18)
 
-        let title = NSTextField(labelWithString: agentText("screenshots.title"))
-        title.font = NSFont.boldSystemFont(ofSize: 14)
-        root.addArrangedSubview(title)
+        let header = pageHeader(title: agentText("screenshots.title"), detail: agentText("screenshots.detail"))
+        root.addArrangedSubview(header)
+        header.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
+        root.addArrangedSubview(separator())
 
-        let detail = NSTextField(labelWithString: agentText("screenshots.detail"))
-        detail.textColor = .secondaryLabelColor
-        detail.lineBreakMode = .byWordWrapping
-        root.addArrangedSubview(detail)
-
-        let pathRow = NSStackView()
-        pathRow.orientation = .horizontal
-        pathRow.spacing = 10
-        pathRow.addArrangedSubview(NSTextField(labelWithString: agentText("screenshots.folder")))
-        screenshotDirField.widthAnchor.constraint(equalToConstant: 520).isActive = true
-        pathRow.addArrangedSubview(screenshotDirField)
-        pathRow.addArrangedSubview(NSButton(title: agentText("screenshots.choose"), target: self, action: #selector(chooseScreenshotDir)))
-        root.addArrangedSubview(pathRow)
-
-        root.addArrangedSubview(screenshotWatchButton)
+        let pathControls = NSStackView()
+        pathControls.orientation = .horizontal
+        pathControls.spacing = 8
+        screenshotFolderButton.widthAnchor.constraint(equalToConstant: 390).isActive = true
+        pathControls.addArrangedSubview(screenshotFolderButton)
+        pathControls.addArrangedSubview(actionButton(title: agentText("screenshots.choose"), action: #selector(chooseScreenshotDirectory)))
+        root.addArrangedSubview(settingRow(title: agentText("screenshots.folder"), control: pathControls))
+        root.addArrangedSubview(separator())
+        root.addArrangedSubview(settingRow(title: agentText("screenshots.copy"), control: screenshotWatchSwitch))
+        root.addArrangedSubview(separator())
+        root.addArrangedSubview(settingRow(
+            title: agentText("screenshots.immediate"),
+            detail: agentText("screenshots.immediateDetail"),
+            control: screenshotImmediateSwitch
+        ))
         root.addArrangedSubview(NSView())
         item.view = root
         return item
-    }
-
-    private func headerRow() -> NSView {
-        let row = NSStackView()
-        row.orientation = .horizontal
-        row.spacing = 8
-        for (title, width) in [(agentText("apps.name"), 180), (agentText("apps.bundle"), 320), (agentText("apps.shortcut"), 120), ("", 168)] {
-            let label = NSTextField(labelWithString: title)
-            label.font = NSFont.boldSystemFont(ofSize: 12)
-            label.widthAnchor.constraint(equalToConstant: CGFloat(width)).isActive = true
-            row.addArrangedSubview(label)
-        }
-        return row
     }
 
     private func textHeaderRow() -> NSView {
@@ -927,10 +1218,13 @@ final class SettingsWindowController: NSWindowController {
 
     private func loadFromDisk() {
         config.reloadBootstrap()
-        screenshotDirField.stringValue = config.screenshotDir
-        updateToggleButton(screenshotWatchButton, baseTitle: agentText("screenshots.copy"), isOn: config.screenshotClipboardWatch)
-        updateToggleButton(keepAwakeButton, baseTitle: agentText("keep.prevent"), isOn: config.keepAwakeEnabled)
-        dockAnchorButton.state = config.dockAnchorEnabled ? .on : .off
+        screenshotDirectoryPath = config.screenshotDir
+        updateScreenshotFolderButton()
+        appHotkeysSwitch.state = config.appHotkeysEnabled ? .on : .off
+        screenshotWatchSwitch.state = config.screenshotClipboardWatch ? .on : .off
+        screenshotImmediateSwitch.state = macOSScreenshotFloatingThumbnailEnabled() ? .off : .on
+        keepAwakeSwitch.state = config.keepAwakeEnabled ? .on : .off
+        dockAnchorSwitch.state = config.dockAnchorEnabled ? .on : .off
         populateDockDisplayPopup(selectedID: config.dockAnchorDisplayID)
         refreshDockAnchorUI()
         clearRows()
@@ -939,8 +1233,9 @@ final class SettingsWindowController: NSWindowController {
             appendRow(binding)
         }
         setAppShortcutEditingMode(activeRow: nil)
+        updateAppHotkeyControls()
         updateAppsHint(count: bindings.count)
-        statusLabel.stringValue = "\(bindings.count) \(agentText("status.loaded"))"
+        statusLabel.stringValue = ""
     }
 
     private func clearRows() {
@@ -962,19 +1257,41 @@ final class SettingsWindowController: NSWindowController {
     private func appendRow(_ binding: AppBinding) {
         let row = BindingRow(binding: binding)
 
-        let view = rowContainer()
-        row.label.widthAnchor.constraint(equalToConstant: 180).isActive = true
-        row.bundleID.widthAnchor.constraint(equalToConstant: 320).isActive = true
-        row.shortcutField.widthAnchor.constraint(equalToConstant: 120).isActive = true
+        let view = rowContainer(compact: true)
+        view.heightAnchor.constraint(greaterThanOrEqualToConstant: 48).isActive = true
+        row.iconView.widthAnchor.constraint(equalToConstant: 30).isActive = true
+        row.iconView.heightAnchor.constraint(equalToConstant: 30).isActive = true
+
+        let identity = NSStackView()
+        identity.orientation = .vertical
+        identity.alignment = .leading
+        identity.spacing = 2
+        identity.addArrangedSubview(row.label)
+        identity.addArrangedSubview(row.bundleID)
+        identity.widthAnchor.constraint(greaterThanOrEqualToConstant: 330).isActive = true
+        identity.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+
+        let appInfo = NSStackView()
+        appInfo.orientation = .horizontal
+        appInfo.alignment = .centerY
+        appInfo.spacing = 9
+        appInfo.addArrangedSubview(row.iconView)
+        appInfo.addArrangedSubview(identity)
+        appInfo.setContentHuggingPriority(.defaultLow, for: .horizontal)
+
+        row.shortcutField.widthAnchor.constraint(equalToConstant: 110).isActive = true
         row.shortcutField.alignment = .center
         row.shortcutField.placeholderString = agentText("apps.editShortcutHint")
         row.shortcutField.lineBreakMode = .byTruncatingMiddle
+        row.enabledSwitch.target = self
+        row.enabledSwitch.action = #selector(toggleRowEnabled(_:))
+        row.enabledSwitch.setContentHuggingPriority(.required, for: .horizontal)
         row.editButton.target = self
         row.editButton.action = #selector(editRow(_:))
         row.editButton.bezelStyle = .rounded
         row.editButton.controlSize = .regular
         row.editButton.heightAnchor.constraint(equalToConstant: 32).isActive = true
-        row.editButton.widthAnchor.constraint(equalToConstant: 80).isActive = true
+        row.editButton.widthAnchor.constraint(equalToConstant: 72).isActive = true
         row.removeButton.target = self
         row.removeButton.action = #selector(removeRow(_:))
         row.removeButton.bezelStyle = .rounded
@@ -984,12 +1301,13 @@ final class SettingsWindowController: NSWindowController {
         row.removeButton.imagePosition = .imageOnly
         row.removeButton.contentTintColor = .systemRed
         row.removeButton.heightAnchor.constraint(equalToConstant: 32).isActive = true
-        row.removeButton.widthAnchor.constraint(equalToConstant: 72).isActive = true
-        for control in [row.label, row.bundleID, row.shortcutField, row.editButton, row.removeButton] as [NSView] {
+        row.removeButton.widthAnchor.constraint(equalToConstant: 40).isActive = true
+        for control in [appInfo, row.shortcutField, row.editButton, row.removeButton, row.enabledSwitch] as [NSView] {
             view.addArrangedSubview(control)
         }
         rows.append(row)
         bindingsStack.addArrangedSubview(view)
+        row.enabledSwitch.isEnabled = appHotkeysSwitch.state == .on && activeEditingRow == nil
         updateAppsHint(count: rows.count)
     }
 
@@ -1042,7 +1360,7 @@ final class SettingsWindowController: NSWindowController {
               popup.indexOfSelectedItem >= 0,
               apps.indices.contains(popup.indexOfSelectedItem) else { return }
         let app = apps[popup.indexOfSelectedItem]
-        appendRow(AppBinding(shortcut: "", bundleID: app.bundleIdentifier ?? "", label: app.localizedName ?? "App"))
+        appendRow(AppBinding(shortcut: "", bundleID: app.bundleIdentifier ?? "", label: app.localizedName ?? "App", isEnabled: true))
         if let row = rows.last, let rowView = bindingsStack.arrangedSubviews.last {
             row.setEditing(true)
             beginShortcutCapture(for: row.shortcutField, label: row.binding.label)
@@ -1124,7 +1442,7 @@ final class SettingsWindowController: NSWindowController {
         let bundleID = bundleField.stringValue.trimmingCharacters(in: .whitespaces)
         let shortcut = shortcutField.stringValue.trimmingCharacters(in: .whitespaces)
         guard !label.isEmpty, !bundleID.isEmpty, !shortcut.isEmpty else { return nil }
-        return AppBinding(shortcut: shortcut, bundleID: bundleID, label: label)
+        return AppBinding(shortcut: shortcut, bundleID: bundleID, label: label, isEnabled: initial.isEnabled)
     }
 
     private func populateDockDisplayPopup(selectedID: UInt32?) {
@@ -1155,7 +1473,7 @@ final class SettingsWindowController: NSWindowController {
             endShortcutCapture()
             setAppShortcutEditingMode(activeRow: nil)
             updateAppsHint(count: rows.count)
-            statusLabel.stringValue = "\(rows.count) \(agentText("status.loaded"))"
+            statusLabel.stringValue = ""
             return
         }
         guard let index = rows.firstIndex(where: { $0.removeButton === sender }),
@@ -1169,6 +1487,13 @@ final class SettingsWindowController: NSWindowController {
         bindingsStack.removeArrangedSubview(rowView)
         rowView.removeFromSuperview()
         updateAppsHint(count: rows.count)
+        savePressed()
+    }
+
+    @objc private func toggleRowEnabled(_ sender: NSSwitch) {
+        guard let row = rows.first(where: { $0.enabledSwitch === sender }) else { return }
+        row.binding.isEnabled = sender.state == .on
+        row.refreshEnabledAppearance()
         savePressed()
     }
 
@@ -1189,7 +1514,7 @@ final class SettingsWindowController: NSWindowController {
         if row.isEditing {
             let shortcut = row.shortcutField.lastCompleteShortcut.trimmingCharacters(in: .whitespaces)
             guard parseShortcut(shortcut) != nil else { return }
-            row.update(AppBinding(shortcut: shortcut, bundleID: row.binding.bundleID, label: row.binding.label))
+            row.update(AppBinding(shortcut: shortcut, bundleID: row.binding.bundleID, label: row.binding.label, isEnabled: row.binding.isEnabled))
             row.setEditing(false)
             endShortcutCapture()
             setAppShortcutEditingMode(activeRow: nil)
@@ -1275,6 +1600,7 @@ final class SettingsWindowController: NSWindowController {
         activeEditingRow = activeRow
         let editing = activeRow != nil
         for row in rows {
+            row.enabledSwitch.isEnabled = appHotkeysSwitch.state == .on && !editing
             if row === activeRow {
                 row.shortcutField.isCapturingShortcut = true
                 row.editButton.isEnabled = true
@@ -1303,9 +1629,9 @@ final class SettingsWindowController: NSWindowController {
             }
         }
         appAddButton.isEnabled = !editing
-        appConfigButton.isEnabled = !editing
+        appHotkeysSwitch.isEnabled = !editing
+        languagePopup.isEnabled = !editing
         footerReloadButton.isEnabled = !editing
-        footerSaveButton.isEnabled = !editing
     }
 
     private func endShortcutCapture() {
@@ -1330,27 +1656,75 @@ final class SettingsWindowController: NSWindowController {
     private func updateAppsHint(count: Int) {
         appsHintLabel.stringValue = count == 0
             ? agentText("apps.hint")
-            : "\(count) \(agentText("status.loaded"))"
+            : "\(count)\(agentText("apps.countSuffix")) · \(agentText("apps.hint"))"
     }
 
-    @objc private func chooseScreenshotDir() {
+    @objc private func chooseScreenshotDirectory() {
         let panel = NSOpenPanel()
         panel.canChooseFiles = false
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = false
-        if panel.runModal() == .OK, let url = panel.url {
-            screenshotDirField.stringValue = url.path
-            saveRuntimeSettings()
+        panel.directoryURL = URL(fileURLWithPath: screenshotDirectoryPath, isDirectory: true)
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        guard setMacOSScreenshotLocation(url.path) else {
+            statusLabel.stringValue = agentText("status.failed")
+            return
         }
-    }
-
-    @objc private func toggleScreenshotWatch() {
-        updateToggleButton(screenshotWatchButton, baseTitle: agentText("screenshots.copy"), isOn: screenshotWatchButton.state == .on)
+        screenshotDirectoryPath = url.path
+        updateScreenshotFolderButton()
         saveRuntimeSettings()
     }
 
+    @objc private func openScreenshotDirectory() {
+        guard !screenshotDirectoryPath.isEmpty else { return }
+        NSWorkspace.shared.open(URL(fileURLWithPath: screenshotDirectoryPath, isDirectory: true))
+    }
+
+    private func updateScreenshotFolderButton() {
+        screenshotFolderButton.title = screenshotDirectoryPath
+        screenshotFolderButton.toolTip = screenshotDirectoryPath
+    }
+
+    @objc private func toggleScreenshotWatch() {
+        saveRuntimeSettings()
+    }
+
+    @objc private func toggleScreenshotImmediateCopy() {
+        let immediateCopyEnabled = screenshotImmediateSwitch.state == .on
+        guard setMacOSScreenshotFloatingThumbnailEnabled(!immediateCopyEnabled) else {
+            screenshotImmediateSwitch.state = macOSScreenshotFloatingThumbnailEnabled() ? .off : .on
+            statusLabel.stringValue = agentText("status.failed")
+            return
+        }
+        screenshotImmediateSwitch.state = macOSScreenshotFloatingThumbnailEnabled() ? .off : .on
+        statusLabel.stringValue = agentText("status.saved")
+    }
+
+    @objc private func toggleAppHotkeys() {
+        let enabled = appHotkeysSwitch.state == .on
+        for row in rows {
+            row.enabledSwitch.state = enabled ? .on : .off
+            row.binding.isEnabled = enabled
+            row.refreshEnabledAppearance()
+        }
+        updateAppHotkeyControls()
+        savePressed()
+    }
+
+    private func updateAppHotkeyControls() {
+        let masterEnabled = appHotkeysSwitch.state == .on
+        let individuallyEditable = masterEnabled && activeEditingRow == nil
+        for row in rows {
+            if !masterEnabled {
+                row.enabledSwitch.state = .off
+                row.binding.isEnabled = false
+                row.refreshEnabledAppearance()
+            }
+            row.enabledSwitch.isEnabled = individuallyEditable
+        }
+    }
+
     @objc private func toggleKeepAwake() {
-        updateToggleButton(keepAwakeButton, baseTitle: agentText("keep.prevent"), isOn: keepAwakeButton.state == .on)
         saveRuntimeSettings()
     }
 
@@ -1368,10 +1742,6 @@ final class SettingsWindowController: NSWindowController {
         refreshDockAnchorUI(status: AXIsProcessTrusted() ? nil : agentText("dock.status.needsPermission"))
     }
 
-    @objc private func openHotkeyConfig() {
-        NSWorkspace.shared.open(URL(fileURLWithPath: config.hotkeyPath))
-    }
-
     @objc func reloadPressed() {
         loadFromDisk()
     }
@@ -1383,20 +1753,21 @@ final class SettingsWindowController: NSWindowController {
             return AppBinding(
                 shortcut: shortcut,
                 bundleID: row.binding.bundleID,
-                label: row.binding.label
+                label: row.binding.label,
+                isEnabled: row.enabledSwitch.state == .on
             )
         }
         do {
             try config.saveBindings(bindings)
             try config.saveBootstrap(
-                screenshotDir: screenshotDirField.stringValue.trimmingCharacters(in: .whitespaces),
-                screenshotClipboardWatch: screenshotWatchButton.state == .on,
-                keepAwakeEnabled: keepAwakeButton.state == .on,
+                appHotkeysEnabled: appHotkeysSwitch.state == .on,
+                screenshotDir: screenshotDirectoryPath,
+                screenshotClipboardWatch: screenshotWatchSwitch.state == .on,
+                keepAwakeEnabled: keepAwakeSwitch.state == .on,
                 keepDisplayAwake: false,
-                dockAnchorEnabled: dockAnchorButton.state == .on,
+                dockAnchorEnabled: dockAnchorSwitch.state == .on,
                 dockAnchorDisplayID: selectedDockDisplayID()
             )
-            applyMacOSScreenshotLocation(config.screenshotDir)
             statusLabel.stringValue = agentText("status.saved")
             onSave?()
         } catch {
@@ -1407,14 +1778,14 @@ final class SettingsWindowController: NSWindowController {
     @objc private func saveRuntimeSettings() {
         do {
             try config.saveBootstrap(
-                screenshotDir: screenshotDirField.stringValue.trimmingCharacters(in: .whitespaces),
-                screenshotClipboardWatch: screenshotWatchButton.state == .on,
-                keepAwakeEnabled: keepAwakeButton.state == .on,
+                appHotkeysEnabled: appHotkeysSwitch.state == .on,
+                screenshotDir: screenshotDirectoryPath,
+                screenshotClipboardWatch: screenshotWatchSwitch.state == .on,
+                keepAwakeEnabled: keepAwakeSwitch.state == .on,
                 keepDisplayAwake: false,
-                dockAnchorEnabled: dockAnchorButton.state == .on,
+                dockAnchorEnabled: dockAnchorSwitch.state == .on,
                 dockAnchorDisplayID: selectedDockDisplayID()
             )
-            applyMacOSScreenshotLocation(config.screenshotDir)
             statusLabel.stringValue = agentText("status.saved")
             onSave?()
         } catch {
@@ -1500,7 +1871,7 @@ final class DockAnchorController {
         }
     }
 
-    func stop() {
+    func stop(keepPermissionMonitoring: Bool = false) {
         isRelocating = false
         currentlyInCorner = false
         NSCursor.unhide()
@@ -1518,8 +1889,10 @@ final class DockAnchorController {
             DistributedNotificationCenter.default().removeObserver(observer)
         }
         observers.removeAll()
-        permissionTimer?.invalidate()
-        permissionTimer = nil
+        if !keepPermissionMonitoring {
+            permissionTimer?.invalidate()
+            permissionTimer = nil
+        }
         pendingRelocationWork?.cancel()
         pendingRelocationWork = nil
     }
@@ -1531,6 +1904,7 @@ final class DockAnchorController {
             AXIsProcessTrustedWithOptions(options)
             NSLog("Dock anchor needs Accessibility permission")
             postStatus(agentText("dock.status.needsPermission"))
+            startPermissionMonitoring()
             return
         }
         guard targetDisplayID() != nil else {
@@ -1593,12 +1967,16 @@ final class DockAnchorController {
     private func verifyPermissionsAndTapValidity() {
         guard config.dockAnchorEnabled else { return }
         guard AXIsProcessTrusted() else {
-            stop()
+            stop(keepPermissionMonitoring: true)
             postStatus(agentText("dock.status.needsPermission"))
             return
         }
+        if eventTap == nil {
+            start()
+            return
+        }
         if let eventTap, !CFMachPortIsValid(eventTap) {
-            stop()
+            stop(keepPermissionMonitoring: true)
             postStatus(agentText("dock.status.failed"))
         }
     }
@@ -1882,10 +2260,19 @@ final class DockAnchorController {
 }
 
 final class ScreenshotWatcher {
+    private struct ImageFile {
+        let path: String
+        let modificationDate: Date
+    }
+
     private let config: Config
     private var timer: Timer?
+    private var directorySource: DispatchSourceFileSystemObject?
+    private var scheduledScan: DispatchWorkItem?
     private var seenPaths: Set<String> = []
+    private var pendingPaths: [String: Date] = [:]
     private var isScanning = false
+    private var isRunning = false
     private let imageExtensions = Set(["png", "jpg", "jpeg", "tif", "tiff", "heic"])
 
     init(config: Config) {
@@ -1894,20 +2281,33 @@ final class ScreenshotWatcher {
 
     func start() {
         stop()
+        isRunning = true
         DispatchQueue.global(qos: .utility).async { [weak self] in
             let files = self?.currentImageFiles() ?? []
             DispatchQueue.main.async {
-                self?.seenPaths = Set(files)
-                self?.timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+                guard let self, self.isRunning else { return }
+                self.seenPaths = Set(files.map(\.path))
+                self.startDirectoryMonitor()
+                self.scan()
+
+                let timer = Timer(timeInterval: 2.0, repeats: true) { [weak self] _ in
                     self?.scan()
                 }
+                self.timer = timer
+                RunLoop.main.add(timer, forMode: .common)
             }
         }
     }
 
     func stop() {
+        isRunning = false
         timer?.invalidate()
         timer = nil
+        scheduledScan?.cancel()
+        scheduledScan = nil
+        directorySource?.cancel()
+        directorySource = nil
+        pendingPaths.removeAll()
     }
 
     func reload() {
@@ -1920,39 +2320,155 @@ final class ScreenshotWatcher {
     }
 
     private func scan() {
-        guard config.screenshotClipboardWatch else { return }
+        guard isRunning, config.screenshotClipboardWatch else { return }
         guard !isScanning else { return }
         isScanning = true
         DispatchQueue.global(qos: .utility).async { [weak self] in
             guard let self else { return }
             let files = self.currentImageFiles()
             DispatchQueue.main.async {
-                for path in files where !self.seenPaths.contains(path) {
-                    self.seenPaths.insert(path)
-                    self.copyImageToClipboard(path: path)
+                guard self.isRunning else {
+                    self.isScanning = false
+                    return
+                }
+                let currentPaths = Set(files.map(\.path))
+                self.seenPaths.formIntersection(currentPaths)
+                self.pendingPaths = self.pendingPaths.filter { currentPaths.contains($0.key) }
+
+                let unseenFiles = files.filter { !self.seenPaths.contains($0.path) }
+                guard let newestFile = unseenFiles.last else {
+                    self.isScanning = false
+                    return
+                }
+
+                for olderFile in unseenFiles.dropLast() {
+                    self.seenPaths.insert(olderFile.path)
+                    self.pendingPaths.removeValue(forKey: olderFile.path)
+                }
+
+                let now = Date()
+                if let retryAt = self.pendingPaths[newestFile.path], retryAt > now {
+                    self.isScanning = false
+                    self.scheduleScan(after: retryAt.timeIntervalSince(now))
+                    return
+                }
+
+                if self.copyImageToClipboard(path: newestFile.path) {
+                    self.seenPaths.insert(newestFile.path)
+                    self.pendingPaths.removeValue(forKey: newestFile.path)
+                } else {
+                    self.pendingPaths = [newestFile.path: now.addingTimeInterval(0.02)]
+                    self.scheduleScan(after: 0.02)
                 }
                 self.isScanning = false
             }
         }
     }
 
-    private func currentImageFiles() -> [String] {
+    private func startDirectoryMonitor() {
+        let descriptor = Darwin.open(config.screenshotDir, O_EVTONLY)
+        guard descriptor >= 0 else { return }
+        let source = DispatchSource.makeFileSystemObjectSource(
+            fileDescriptor: descriptor,
+            eventMask: [.write, .extend, .rename, .delete],
+            queue: DispatchQueue.global(qos: .utility)
+        )
+        source.setEventHandler { [weak self] in
+            DispatchQueue.main.async {
+                self?.scheduleScan(after: 0.01)
+            }
+        }
+        source.setCancelHandler {
+            Darwin.close(descriptor)
+        }
+        directorySource = source
+        source.resume()
+    }
+
+    private func scheduleScan(after delay: TimeInterval) {
+        guard isRunning else { return }
+        scheduledScan?.cancel()
+        let workItem = DispatchWorkItem { [weak self] in
+            self?.scheduledScan = nil
+            self?.scan()
+        }
+        scheduledScan = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + max(0.01, delay), execute: workItem)
+    }
+
+    private func currentImageFiles() -> [ImageFile] {
         let dir = config.screenshotDir
         guard let urls = try? FileManager.default.contentsOfDirectory(
             at: URL(fileURLWithPath: dir),
-            includingPropertiesForKeys: [.isRegularFileKey],
+            includingPropertiesForKeys: [.isRegularFileKey, .contentModificationDateKey],
             options: [.skipsHiddenFiles]
         ) else { return [] }
         return urls
-            .filter { imageExtensions.contains($0.pathExtension.lowercased()) }
-            .map(\.path)
+            .compactMap { url -> ImageFile? in
+                guard imageExtensions.contains(url.pathExtension.lowercased()),
+                      let values = try? url.resourceValues(forKeys: [.isRegularFileKey, .contentModificationDateKey]),
+                      values.isRegularFile == true else { return nil }
+                return ImageFile(path: url.path, modificationDate: values.contentModificationDate ?? .distantPast)
+            }
+            .sorted {
+                if $0.modificationDate == $1.modificationDate {
+                    return $0.path < $1.path
+                }
+                return $0.modificationDate < $1.modificationDate
+            }
     }
 
-    private func copyImageToClipboard(path: String) {
-        guard let image = NSImage(contentsOfFile: path) else { return }
+    @discardableResult
+    private func copyImageToClipboard(path: String) -> Bool {
+        let url = URL(fileURLWithPath: path)
+        let fileExtension = url.pathExtension.lowercased()
+        guard let data = try? Data(contentsOf: url),
+              hasCompleteFileTrailer(data, fileExtension: fileExtension),
+              let source = CGImageSourceCreateWithData(data as CFData, nil),
+              CGImageSourceGetStatus(source) == .statusComplete,
+              CGImageSourceGetCount(source) > 0,
+              let cgImage = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
+            return false
+        }
+
+        let item = NSPasteboardItem()
+        let sourceType: NSPasteboard.PasteboardType
+        switch fileExtension {
+        case "png":
+            sourceType = .png
+        case "jpg", "jpeg":
+            sourceType = NSPasteboard.PasteboardType("public.jpeg")
+        case "tif", "tiff":
+            sourceType = .tiff
+        case "heic":
+            sourceType = NSPasteboard.PasteboardType("public.heic")
+        default:
+            return false
+        }
+        item.setData(data, forType: sourceType)
+
+        if sourceType != .png {
+            let representation = NSBitmapImageRep(cgImage: cgImage)
+            if let pngData = representation.representation(using: .png, properties: [:]) {
+                item.setData(pngData, forType: .png)
+            }
+        }
+
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
-        pasteboard.writeObjects([image])
+        return pasteboard.writeObjects([item])
+    }
+
+    private func hasCompleteFileTrailer(_ data: Data, fileExtension: String) -> Bool {
+        switch fileExtension {
+        case "png":
+            let iend = Data([0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82])
+            return data.count >= iend.count && data.suffix(iend.count).elementsEqual(iend)
+        case "jpg", "jpeg":
+            return data.count >= 2 && data.suffix(2).elementsEqual([0xff, 0xd9])
+        default:
+            return true
+        }
     }
 }
 
@@ -2192,6 +2708,11 @@ final class Agent: NSObject, NSApplicationDelegate {
             controller.onSave = { [weak self] in self?.reloadAll() }
             controller.onShortcutCaptureStart = { [weak self] in self?.pauseHotkeysForCapture() }
             controller.onShortcutCaptureEnd = { [weak self] in self?.reloadHotkeys() }
+            controller.onLanguageChange = { [weak self] in
+                DispatchQueue.main.async {
+                    self?.rebuildLocalizedUI()
+                }
+            }
             settingsWindowController = controller
         }
         settingsWindowController?.showWindow(nil)
@@ -2199,6 +2720,18 @@ final class Agent: NSObject, NSApplicationDelegate {
         settingsWindowController?.window?.makeKeyAndOrderFront(nil)
         settingsWindowController?.window?.orderFrontRegardless()
         NSApplication.shared.activate(ignoringOtherApps: true)
+    }
+
+    private func rebuildLocalizedUI() {
+        settingsWindowController?.close()
+        settingsWindowController = nil
+        if let statusItem {
+            NSStatusBar.system.removeStatusItem(statusItem)
+            self.statusItem = nil
+        }
+        setupStatusItem()
+        updateMenuState()
+        openSettings()
     }
 
     private func reloadAll() {
@@ -2216,9 +2749,10 @@ final class Agent: NSObject, NSApplicationDelegate {
     private func reloadHotkeys() {
         unregisterHotkeys()
         nextID = 1
+        guard config.appHotkeysEnabled else { return }
 
         do {
-            for binding in try config.loadBindings() {
+            for binding in try config.loadBindings() where binding.isEnabled {
                 register(shortcutText: binding.shortcut, label: binding.label, action: .toggleApp(binding))
             }
         } catch {
@@ -2402,15 +2936,16 @@ func applicationSupportPath(_ fileName: String) -> String {
 func defaultHotkeys() -> String {
     """
     # MacBootstrapAgent app hotkeys.
-    # Format: toggle-app|shortcut|bundle-id|label
+    # Format: toggle-app|shortcut|bundle-id|label|enabled
     # Add, remove, or edit rows from the Agent UI.
     """
 }
 
 func defaultBootstrap() -> String {
     """
+    APP_HOTKEYS_ENABLED=0
     SCREENSHOT_DIR="auto"
-    SCREENSHOT_CLIPBOARD_WATCH=1
+    SCREENSHOT_CLIPBOARD_WATCH=0
     KEEP_AWAKE_ENABLED=0
     KEEP_DISPLAY_AWAKE=0
     DOCK_ANCHOR_ENABLED=0
@@ -2440,21 +2975,83 @@ func currentMacOSScreenshotDir() -> String {
     return NSHomeDirectory() + "/Desktop"
 }
 
-func applyMacOSScreenshotLocation(_ path: String) {
-    try? FileManager.default.createDirectory(atPath: path, withIntermediateDirectories: true)
-    runProcess("/usr/bin/defaults", ["write", "com.apple.screencapture", "location", "-string", path])
-    runProcess("/usr/bin/killall", ["SystemUIServer"])
-    runProcess("/usr/bin/killall", ["screencaptureui"])
+func macOSScreenshotFloatingThumbnailEnabled() -> Bool {
+    let process = Process()
+    let pipe = Pipe()
+    process.executableURL = URL(fileURLWithPath: "/usr/bin/defaults")
+    process.arguments = ["read", "com.apple.screencapture", "show-thumbnail"]
+    process.standardOutput = pipe
+    process.standardError = Pipe()
+    do {
+        try process.run()
+        process.waitUntilExit()
+        guard process.terminationStatus == 0 else { return true }
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        let value = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() ?? ""
+        return !["0", "false", "no"].contains(value)
+    } catch {
+        return true
+    }
 }
 
-func runProcess(_ executable: String, _ arguments: [String]) {
-    let process = Process()
-    process.executableURL = URL(fileURLWithPath: executable)
-    process.arguments = arguments
-    process.standardOutput = Pipe()
-    process.standardError = Pipe()
-    try? process.run()
-    process.waitUntilExit()
+func setMacOSScreenshotFloatingThumbnailEnabled(_ enabled: Bool) -> Bool {
+    let defaults = Process()
+    defaults.executableURL = URL(fileURLWithPath: "/usr/bin/defaults")
+    defaults.arguments = ["write", "com.apple.screencapture", "show-thumbnail", "-bool", enabled ? "true" : "false"]
+    defaults.standardOutput = Pipe()
+    defaults.standardError = Pipe()
+    do {
+        try defaults.run()
+        defaults.waitUntilExit()
+    } catch {
+        return false
+    }
+    guard defaults.terminationStatus == 0 else { return false }
+
+    let refresh = Process()
+    refresh.executableURL = URL(fileURLWithPath: "/usr/bin/killall")
+    refresh.arguments = ["screencaptureui"]
+    refresh.standardOutput = Pipe()
+    refresh.standardError = Pipe()
+    do {
+        try refresh.run()
+        refresh.waitUntilExit()
+    } catch {
+        // The preference is already written; no active UI process is also a valid state.
+    }
+    return true
+}
+
+func setMacOSScreenshotLocation(_ path: String) -> Bool {
+    do {
+        try FileManager.default.createDirectory(atPath: path, withIntermediateDirectories: true)
+    } catch {
+        return false
+    }
+
+    let defaults = Process()
+    defaults.executableURL = URL(fileURLWithPath: "/usr/bin/defaults")
+    defaults.arguments = ["write", "com.apple.screencapture", "location", "-string", path]
+    defaults.standardOutput = Pipe()
+    defaults.standardError = Pipe()
+    do {
+        try defaults.run()
+        defaults.waitUntilExit()
+    } catch {
+        return false
+    }
+    guard defaults.terminationStatus == 0 else { return false }
+
+    for processName in ["SystemUIServer", "screencaptureui"] {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/killall")
+        process.arguments = [processName]
+        process.standardOutput = Pipe()
+        process.standardError = Pipe()
+        try? process.run()
+        process.waitUntilExit()
+    }
+    return true
 }
 
 let hotkeyPath = argument("--config") ?? applicationSupportPath("hotkeys.conf")

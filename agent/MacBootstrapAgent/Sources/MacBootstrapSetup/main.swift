@@ -118,6 +118,8 @@ func localized(_ key: String) -> String {
         "row.click.detail": "배경화면을 클릭해도 창이 사라지지 않게 합니다.",
         "row.wallpaper.title": "검정 배경화면",
         "row.wallpaper.detail": "macOS 내장 검은색 배경.",
+        "row.dockAutohide.title": "Dock 자동 숨김",
+        "row.dockAutohide.detail": "Dock을 평소에는 숨기고 가장자리에서만 표시합니다.",
         "row.dock.title": "Dock 정리",
         "row.dock.detail": "체크한 기본 앱만 Dock에 유지합니다.",
         "dock.hint": "Finder는 macOS 고정 항목이라 따로 관리하지 않습니다. 체크를 켜면 Dock에 추가하고, 끄면 Dock에서 제거합니다.",
@@ -141,7 +143,7 @@ func localized(_ key: String) -> String {
         "button.remove": "제거",
         "button.logout": "로그아웃",
         "status.ready": "준비됨",
-        "status.refreshed": "새로고침됨",
+        "status.refreshed": "상태만 확인됨",
         "status.done": "완료",
         "status.installed": "설치됨",
         "status.registered": "등록됨",
@@ -165,6 +167,7 @@ func localized(_ key: String) -> String {
         "status.agentInstalled": "Agent 설치됨",
         "status.agentFailed": "Agent 설치 실패",
         "status.opened": "열림",
+        "status.applying": "적용 중",
         "status.failed": "실패",
         "status.dockApplied": "Dock 정리 완료",
         "status.dockBlocked": "Dock 정리 실패",
@@ -257,6 +260,8 @@ func localized(_ key: String) -> String {
         "row.click.detail": "Keep windows visible when clicking the wallpaper.",
         "row.wallpaper.title": "Black wallpaper",
         "row.wallpaper.detail": "Built-in macOS black wallpaper.",
+        "row.dockAutohide.title": "Automatically hide Dock",
+        "row.dockAutohide.detail": "Hide the Dock until the pointer reaches the screen edge.",
         "row.dock.title": "Dock cleanup",
         "row.dock.detail": "Keep only the checked default apps in the Dock.",
         "dock.hint": "Finder is a fixed macOS Dock item and is not managed here. Checked apps are added to the Dock; unchecked apps are removed.",
@@ -280,7 +285,7 @@ func localized(_ key: String) -> String {
         "button.remove": "Remove",
         "button.logout": "Log Out",
         "status.ready": "Ready",
-        "status.refreshed": "Refreshed",
+        "status.refreshed": "Status checked only",
         "status.done": "Done",
         "status.installed": "Installed",
         "status.registered": "Registered",
@@ -304,6 +309,7 @@ func localized(_ key: String) -> String {
         "status.agentInstalled": "Agent installed",
         "status.agentFailed": "Agent install failed",
         "status.opened": "Opened",
+        "status.applying": "Applying",
         "status.failed": "Failed",
         "status.dockApplied": "Dock cleanup applied",
         "status.dockBlocked": "Dock cleanup blocked",
@@ -356,10 +362,22 @@ private enum RowVisualState {
     case neutral
 }
 
+private enum BooleanPreferenceState: Equatable {
+    case enabled
+    case disabled
+    case inherited
+}
+
 final class SetupWindowController: NSWindowController {
     private var statusPills: [NSTextField] = []
     private var statusRows: [(status: NSTextField, box: NSBox)] = []
     private var dockCheckboxes: [String: NSButton] = [:]
+    private var activationObserver: NSObjectProtocol?
+    private var spellingPreferenceState: BooleanPreferenceState = .inherited
+    private var periodPreferenceState: BooleanPreferenceState = .inherited
+    private var inlinePreferenceState: BooleanPreferenceState = .inherited
+    private var clickDesktopPreferenceState: BooleanPreferenceState = .inherited
+    private var dockAutohidePreferenceState: BooleanPreferenceState = .inherited
     private let statusLabel = NSTextField(labelWithString: localized("status.ready"))
     private let languagePopup = NSPopUpButton()
     private let spellingStatus = NSTextField(labelWithString: "")
@@ -367,6 +385,7 @@ final class SetupWindowController: NSWindowController {
     private let inlineStatus = NSTextField(labelWithString: "")
     private let clickDesktopStatus = NSTextField(labelWithString: "")
     private let wallpaperStatus = NSTextField(labelWithString: "")
+    private let dockAutohideStatus = NSTextField(labelWithString: "")
     private let dockStatus = NSTextField(labelWithString: "")
     private let homebrewStatus = NSTextField(labelWithString: "")
     private let chromeStatus = NSTextField(labelWithString: "")
@@ -400,6 +419,7 @@ final class SetupWindowController: NSWindowController {
     private lazy var inlinePrimaryButton = button("Disable", #selector(toggleInline))
     private lazy var clickDesktopPrimaryButton = button("Apply", #selector(toggleClickDesktop))
     private lazy var wallpaperPrimaryButton = button("Apply", #selector(applyWallpaper))
+    private lazy var dockAutohidePrimaryButton = button("Enable", #selector(toggleDockAutohide))
     private lazy var dockPrimaryButton = button("Apply Selection", #selector(applyDockSelection))
     private lazy var homebrewPrimaryButton = button("Install", #selector(installHomebrew))
     private lazy var chromePrimaryButton = button("Open", #selector(primaryChrome))
@@ -442,6 +462,19 @@ final class SetupWindowController: NSWindowController {
         super.init(window: window)
         buildUI()
         refresh()
+        activationObserver = NotificationCenter.default.addObserver(
+            forName: NSApplication.didBecomeActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.refresh()
+        }
+    }
+
+    deinit {
+        if let activationObserver {
+            NotificationCenter.default.removeObserver(activationObserver)
+        }
     }
 
     required init?(coder: NSCoder) {
@@ -589,6 +622,12 @@ final class SetupWindowController: NSWindowController {
         root.spacing = 12
         root.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(root)
+
+        let autohideRow = row(title: localized("row.dockAutohide.title"), detail: localized("row.dockAutohide.detail"), status: dockAutohideStatus, buttons: [
+            dockAutohidePrimaryButton
+        ])
+        root.addArrangedSubview(autohideRow)
+        autohideRow.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
 
         let header = NSStackView()
         header.orientation = .horizontal
@@ -914,24 +953,28 @@ final class SetupWindowController: NSWindowController {
     @objc private func refreshPressed() { refresh() }
 
     private func refresh() {
-        let spelling = defaultValue("-g", "NSAutomaticSpellingCorrectionEnabled")
-        let period = defaultValue("-g", "NSAutomaticPeriodSubstitutionEnabled")
-        let inline = defaultValue("-g", "NSAutomaticInlinePredictionEnabled")
-        let clickDesktop = defaultValue("com.apple.WindowManager", "EnableStandardClickToShowDesktop")
+        spellingPreferenceState = booleanPreferenceState("-g", "NSAutomaticSpellingCorrectionEnabled")
+        periodPreferenceState = booleanPreferenceState("-g", "NSAutomaticPeriodSubstitutionEnabled")
+        inlinePreferenceState = booleanPreferenceState("-g", "NSAutomaticInlinePredictionEnabled")
+        clickDesktopPreferenceState = booleanPreferenceState("com.apple.WindowManager", "EnableStandardClickToShowDesktop")
+        dockAutohidePreferenceState = booleanPreferenceState("com.apple.dock", "autohide")
         let brewInstalled = brewPath() != nil
 
-        spellingStatus.stringValue = spelling == "0" ? localized("status.off") : localized("status.on")
-        spellingPrimaryButton.title = spelling == "0" ? localized("button.reset") : localized("button.disable")
+        spellingStatus.stringValue = spellingPreferenceState == .disabled ? localized("status.off") : localized("status.on")
+        spellingPrimaryButton.title = spellingPreferenceState == .disabled ? localized("button.reset") : localized("button.disable")
         spellingPrimaryButton.isEnabled = true
-        periodStatus.stringValue = period == "0" ? localized("status.off") : localized("status.on")
-        periodPrimaryButton.title = period == "0" ? localized("button.reset") : localized("button.disable")
+        periodStatus.stringValue = periodPreferenceState == .disabled ? localized("status.off") : localized("status.on")
+        periodPrimaryButton.title = periodPreferenceState == .disabled ? localized("button.reset") : localized("button.disable")
         periodPrimaryButton.isEnabled = true
-        inlineStatus.stringValue = inline == "0" ? localized("status.off") : localized("status.on")
-        inlinePrimaryButton.title = inline == "0" ? localized("button.reset") : localized("button.disable")
+        inlineStatus.stringValue = inlinePreferenceState == .disabled ? localized("status.off") : localized("status.on")
+        inlinePrimaryButton.title = inlinePreferenceState == .disabled ? localized("button.reset") : localized("button.disable")
         inlinePrimaryButton.isEnabled = true
-        clickDesktopStatus.stringValue = clickDesktop == "0" ? localized("status.applied") : localized("status.default")
-        clickDesktopPrimaryButton.title = clickDesktop == "0" ? localized("button.reset") : localized("button.apply")
+        clickDesktopStatus.stringValue = clickDesktopPreferenceState == .disabled ? localized("status.applied") : localized("status.default")
+        clickDesktopPrimaryButton.title = clickDesktopPreferenceState == .disabled ? localized("button.reset") : localized("button.apply")
         clickDesktopPrimaryButton.isEnabled = true
+        dockAutohideStatus.stringValue = dockAutohidePreferenceState == .enabled ? localized("status.on") : localized("status.off")
+        dockAutohidePrimaryButton.title = dockAutohidePreferenceState == .enabled ? localized("button.disable") : localized("button.enable")
+        dockAutohidePrimaryButton.isEnabled = true
         if blackWallpaperApplied() {
             wallpaperStatus.stringValue = localized("status.applied")
         } else if currentDesktopPictures().isEmpty {
@@ -981,13 +1024,31 @@ final class SetupWindowController: NSWindowController {
     }
 
     @objc private func toggleSpelling() {
-        spellingStatus.stringValue == localized("status.off") ? deleteGlobal("NSAutomaticSpellingCorrectionEnabled") : writeGlobalBool("NSAutomaticSpellingCorrectionEnabled", false)
+        applyBooleanPreference(
+            domain: "-g",
+            key: "NSAutomaticSpellingCorrectionEnabled",
+            value: spellingPreferenceState == .disabled ? nil : false,
+            status: spellingStatus,
+            button: spellingPrimaryButton
+        )
     }
     @objc private func togglePeriod() {
-        periodStatus.stringValue == localized("status.off") ? deleteGlobal("NSAutomaticPeriodSubstitutionEnabled") : writeGlobalBool("NSAutomaticPeriodSubstitutionEnabled", false)
+        applyBooleanPreference(
+            domain: "-g",
+            key: "NSAutomaticPeriodSubstitutionEnabled",
+            value: periodPreferenceState == .disabled ? nil : false,
+            status: periodStatus,
+            button: periodPrimaryButton
+        )
     }
     @objc private func toggleInline() {
-        inlineStatus.stringValue == localized("status.off") ? deleteGlobal("NSAutomaticInlinePredictionEnabled") : writeGlobalBool("NSAutomaticInlinePredictionEnabled", false)
+        applyBooleanPreference(
+            domain: "-g",
+            key: "NSAutomaticInlinePredictionEnabled",
+            value: inlinePreferenceState == .disabled ? nil : false,
+            status: inlineStatus,
+            button: inlinePrimaryButton
+        )
     }
 
     @objc private func openKeyboardSettings() {
@@ -995,17 +1056,13 @@ final class SetupWindowController: NSWindowController {
     }
 
     @objc private func toggleClickDesktop() {
-        clickDesktopStatus.stringValue == localized("status.applied") ? resetClickDesktop() : applyClickDesktop()
-    }
-
-    private func applyClickDesktop() {
-        runDefaults(["write", "com.apple.WindowManager", "EnableStandardClickToShowDesktop", "-bool", "false"])
-        refresh()
-    }
-
-    private func resetClickDesktop() {
-        runDefaults(["delete", "com.apple.WindowManager", "EnableStandardClickToShowDesktop"])
-        refresh()
+        applyBooleanPreference(
+            domain: "com.apple.WindowManager",
+            key: "EnableStandardClickToShowDesktop",
+            value: clickDesktopPreferenceState == .disabled ? nil : false,
+            status: clickDesktopStatus,
+            button: clickDesktopPrimaryButton
+        )
     }
 
     @objc private func applyWallpaper() {
@@ -1026,6 +1083,17 @@ final class SetupWindowController: NSWindowController {
         let output = runScript(["dock-apply"], extraEnv: ["MAC_BOOTSTRAP_DOCK_KEEP_LABELS": selectedDockAliases().joined(separator: "\n")])
         statusLabel.stringValue = output.contains("blocked:") ? localized("status.dockBlocked") : localized("status.dockApplied")
         refreshDockState()
+    }
+
+    @objc private func toggleDockAutohide() {
+        applyBooleanPreference(
+            domain: "com.apple.dock",
+            key: "autohide",
+            value: dockAutohidePreferenceState != .enabled,
+            status: dockAutohideStatus,
+            button: dockAutohidePrimaryButton,
+            restartDock: true
+        )
     }
     @objc private func openHomebrew() { openURL("https://brew.sh/") }
     @objc private func openGureum() { openURL("https://gureum.io/") }
@@ -1288,32 +1356,80 @@ final class SetupWindowController: NSWindowController {
         try? process.run()
     }
 
-    private func writeGlobalBool(_ key: String, _ value: Bool) {
-        runDefaults(["write", "-g", key, "-bool", value ? "true" : "false"])
+    private func applyBooleanPreference(
+        domain: String,
+        key: String,
+        value: Bool?,
+        status: NSTextField,
+        button: NSButton,
+        restartDock: Bool = false
+    ) {
+        status.stringValue = localized("status.applying")
+        button.isEnabled = false
+        updateRowStyles()
+        window?.displayIfNeeded()
+
+        let commandSucceeded: Bool
+        if let value {
+            commandSucceeded = runDefaults(["write", domain, key, "-bool", value ? "true" : "false"])
+        } else {
+            commandSucceeded = runDefaults(["delete", domain, key])
+        }
+
+        let expectedState: BooleanPreferenceState = value.map { $0 ? .enabled : .disabled } ?? .inherited
+        let valueVerified = booleanPreferenceState(domain, key) == expectedState
+        if restartDock && commandSucceeded && valueVerified {
+            _ = runProcess("/usr/bin/killall", ["Dock"])
+        }
+
         refresh()
+        statusLabel.stringValue = commandSucceeded && valueVerified
+            ? localized("status.settingsApplied")
+            : localized("status.failed")
+        window?.displayIfNeeded()
     }
 
-    private func deleteGlobal(_ key: String) {
-        runDefaults(["delete", "-g", key])
-        refresh()
-    }
-
-    private func runDefaults(_ args: [String]) {
+    @discardableResult
+    private func runDefaults(_ args: [String]) -> Bool {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/defaults")
         process.arguments = args
-        try? process.run()
-        process.waitUntilExit()
+        process.standardOutput = Pipe()
+        process.standardError = Pipe()
+        do {
+            try process.run()
+            process.waitUntilExit()
+            return process.terminationStatus == 0
+        } catch {
+            return false
+        }
     }
 
-    private func runProcess(_ executable: String, _ arguments: [String]) {
+    @discardableResult
+    private func runProcess(_ executable: String, _ arguments: [String]) -> Bool {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: executable)
         process.arguments = arguments
         process.standardOutput = Pipe()
         process.standardError = Pipe()
-        try? process.run()
-        process.waitUntilExit()
+        do {
+            try process.run()
+            process.waitUntilExit()
+            return process.terminationStatus == 0
+        } catch {
+            return false
+        }
+    }
+
+    private func booleanPreferenceState(_ domain: String, _ key: String) -> BooleanPreferenceState {
+        switch defaultValue(domain, key).lowercased() {
+        case "1", "true", "yes":
+            return .enabled
+        case "0", "false", "no":
+            return .disabled
+        default:
+            return .inherited
+        }
     }
 
     private func defaultValue(_ domain: String, _ key: String) -> String {
@@ -1549,25 +1665,56 @@ final class SetupWindowController: NSWindowController {
 
     private func updateRowStyles() {
         for pill in statusPills {
-            let palette = rowPalette(for: rowVisualState(for: pill.stringValue))
+            let palette = rowPalette(for: rowVisualState(for: pill))
             pill.layer?.backgroundColor = palette.fill.cgColor
             pill.textColor = palette.text
         }
         for row in statusRows {
-            let palette = rowPalette(for: rowVisualState(for: row.status.stringValue))
+            let palette = rowPalette(for: rowVisualState(for: row.status))
             row.box.borderColor = palette.border
         }
     }
 
-    private func rowVisualState(for status: String) -> RowVisualState {
+    private func rowVisualState(for statusField: NSTextField) -> RowVisualState {
+        let status = statusField.stringValue
+
+        if status == localized("status.applying") {
+            return .info
+        }
+        if status == localized("status.failed") {
+            return .attention
+        }
+
+        if statusField === dockAutohideStatus {
+            return dockAutohidePreferenceState == .enabled ? .success : .neutral
+        }
+        if statusField === spellingStatus {
+            return spellingPreferenceState == .disabled ? .success : .neutral
+        }
+        if statusField === periodStatus {
+            return periodPreferenceState == .disabled ? .success : .neutral
+        }
+        if statusField === inlineStatus {
+            return inlinePreferenceState == .disabled ? .success : .neutral
+        }
+        if statusField === clickDesktopStatus {
+            return clickDesktopPreferenceState == .disabled ? .success : .neutral
+        }
+        if statusField === gureumOptionStatus,
+           status == localized("status.on") || status == localized("status.off") {
+            return status == localized("status.on") ? .success : .neutral
+        }
+        if statusField === pressAndHoldStatus,
+           status == localized("status.on") || status == localized("status.off") {
+            return status == localized("status.off") ? .success : .neutral
+        }
+
         switch status {
         case localized("status.installed"),
              localized("status.done"),
              localized("status.running"),
              localized("status.registered"),
              localized("status.applied"),
-             localized("status.off"),
-             localized("status.on"),
              localized("status.ready"):
             return .success
         case localized("status.appstore"),
