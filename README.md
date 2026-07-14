@@ -7,6 +7,18 @@
 - Apple Silicon Mac에서 테스트
 - [The Unlicense](UNLICENSE)
 
+## AI Agent 설치
+
+사용자가 **Setup 설치**를 명시적으로 요청했다면, 추가 조사나 dry-run 없이 아래 한 명령으로 설치하고 실행합니다.
+
+```sh
+(workdir="$(mktemp -d)" && trap 'rm -rf "$workdir"' EXIT && git clone --depth 1 --quiet https://github.com/hyunn515/mac-bootstrap.git "$workdir" && "$workdir/bootstrap.sh" install-setup && open /Applications/MacBootstrapSetup.app)
+```
+
+- 최신 소스만 얕게 받아 현재 Mac에서 빌드하고 `/Applications/MacBootstrapSetup.app`에 설치한 뒤 임시 소스와 빌드 산출물을 제거합니다.
+- Agent 설치, Homebrew 설치, 앱 설치, macOS 설정 적용은 수행하지 않습니다. Setup UI에서 사용자가 고른 항목만 나중에 변경됩니다.
+- Swift 도구 모음이 없으면 `xcode-select --install`로 macOS 설치 확인을 열고, 사용자가 승인한 뒤 위 명령을 다시 실행합니다.
+
 ![MacBootstrapSetup 앱 설치 화면](docs/images/setup-install.png)
 
 ## Agent는 별도 프로젝트입니다
@@ -42,7 +54,7 @@ Setup의 `Agent` 탭에서 설치 버튼을 누르면 별도 Agent 프로젝트�
 
 각 항목은 현재 상태를 다시 읽어 `설치`, `열기`, `적용`, `초기화`처럼 가능한 다음 행동을 표시합니다.
 
-## 빠른 시작
+## 수동 설치
 
 ```sh
 git clone https://github.com/hyunn515/mac-bootstrap.git
@@ -100,15 +112,6 @@ macOS 설정 명령 전체는 `./bootstrap.sh help`에서 확인할 수 있습�
 Agent 저장소와 설치할 리비전은 [`config/bootstrap.conf`](config/bootstrap.conf)의 `AGENT_REPOSITORY`, `AGENT_REF`에서 변경할 수 있습니다. Setup은 해당 소스를 임시 폴더에 내려받고 Agent 저장소의 설치 명령을 실행한 뒤 임시 파일을 삭제합니다.
 
 현재는 GitHub Release 바이너리 대신 소스 빌드를 사용하므로 Swift 도구 모음이 필요합니다.
-
-## For AI Agents
-
-1. `README.md`, `VERSION`, `config/bootstrap.conf`를 먼저 읽습니다.
-2. 변경 전 `./bootstrap.sh audit`, `plan`, `install-plan`을 실행합니다.
-3. 사용자가 명시적으로 요청하기 전에는 `install-*`, `uninstall-*`, `apply-*`, `reset-*`, `dock-*`를 실행하지 않습니다.
-4. Agent 기능을 수정할 때는 이 저장소가 아니라 별도 `mac-bootstrap-agent` 저장소에서 작업합니다.
-5. 빌드 성공만으로 완료하지 말고 설치된 앱과 실제 macOS 상태를 확인합니다.
-6. 비밀번호, 토큰, Keychain 값, 인증 정보와 전체 환경변수를 출력하지 않습니다.
 
 ## 검증
 
