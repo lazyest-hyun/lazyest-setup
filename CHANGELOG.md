@@ -6,6 +6,12 @@ This project uses the Setup app version in [`VERSION`](VERSION). GitHub Releases
 
 - Updated the pinned MacBootstrapAgent source to `0.2.2` with one immediate screenshot-copy control.
 
+## 0.3.2 - 2026-07-13
+
+- Moved the right Command to F18 setup fully to a named Karabiner Complex Modification.
+- Made Setup and audit verify the selected profile's exact Complex rule instead of matching unrelated text.
+- Limited reset cleanup to the MacBootstrap-owned Complex rule and the legacy right Command to F18 Simple mapping.
+
 ## 0.3.1 - 2026-07-10
 
 - Fixed the input-source shortcut action so it changes only input-source shortcuts and preserves Spotlight shortcuts.

@@ -47,14 +47,58 @@ karabiner_config="$HOME/.config/karabiner/karabiner.json"
 if [ -f "$karabiner_config" ]; then
   echo "  config: present"
   /usr/bin/python3 - "$karabiner_config" <<'PY'
-import json, sys
+import json
+import sys
+
 path = sys.argv[1]
+
+def is_right_command_to_f18(candidate):
+    if not isinstance(candidate, dict):
+        return False
+    source = candidate.get("from")
+    targets = candidate.get("to")
+    return (
+        isinstance(source, dict)
+        and source.get("key_code") == "right_command"
+        and isinstance(targets, list)
+        and any(isinstance(target, dict) and target.get("key_code") == "f18" for target in targets)
+    )
+
+def has_legacy_simple_mapping(profile):
+    containers = [profile]
+    containers.extend(item for item in profile.get("devices", []) if isinstance(item, dict))
+    for container in containers:
+        mappings = container.get("simple_modifications")
+        if isinstance(mappings, list) and any(is_right_command_to_f18(item) for item in mappings):
+            return True
+    return False
+
 try:
-    data = json.load(open(path))
-    text = json.dumps(data).lower()
-    print(f"  right_command_mentions: {text.count('right_command')}")
-    print(f"  f18_mentions: {text.count('f18')}")
-    print(f"  right_command_to_f18_likely: {'yes' if 'right_command' in text and 'f18' in text else 'no'}")
+    with open(path, "r", encoding="utf-8") as handle:
+        data = json.load(handle)
+    profiles = data.get("profiles", [])
+    selected = next((item for item in profiles if isinstance(item, dict) and item.get("selected")), None)
+    if selected is None:
+        selected = next((item for item in profiles if isinstance(item, dict)), None)
+    if selected is None:
+        raise ValueError("no Karabiner profile")
+
+    rules = selected.get("complex_modifications", {}).get("rules", [])
+    complex_applied = any(
+        isinstance(rule, dict)
+        and rule.get("description") == "MacBootstrap: right_command to F18"
+        and any(
+            isinstance(manipulator, dict)
+            and manipulator.get("type") == "basic"
+            and is_right_command_to_f18(manipulator)
+            for manipulator in rule.get("manipulators", [])
+        )
+        for rule in rules
+    )
+    legacy_simple = has_legacy_simple_mapping(selected)
+    print(f"  right_command_to_f18_complex: {'yes' if complex_applied else 'no'}")
+    print(f"  legacy_simple_mapping_present: {'yes' if legacy_simple else 'no'}")
+    print(f"  right_command_to_f18_applied: {'yes' if complex_applied and not legacy_simple else 'no'}")
 except Exception:
     print("  summary: unreadable")
 PY

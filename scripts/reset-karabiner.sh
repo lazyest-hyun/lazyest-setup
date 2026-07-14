@@ -43,20 +43,38 @@ print(f"  backup: {backup_path}")
 with open(config_path, "r", encoding="utf-8") as handle:
     config = json.load(handle)
 
-def is_same_rule(candidate):
-    text = json.dumps(candidate, sort_keys=True).lower()
-    return "right_command" in text and "f18" in text
+owned_rule_description = "MacBootstrap: right_command to F18"
+
+def is_right_command_to_f18(candidate):
+    if not isinstance(candidate, dict):
+        return False
+    source = candidate.get("from")
+    targets = candidate.get("to")
+    return (
+        isinstance(source, dict)
+        and source.get("key_code") == "right_command"
+        and isinstance(targets, list)
+        and any(isinstance(target, dict) and target.get("key_code") == "f18" for target in targets)
+    )
+
+def remove_legacy_simple_mappings(container):
+    mappings = container.get("simple_modifications")
+    if isinstance(mappings, list):
+        mappings[:] = [item for item in mappings if not is_right_command_to_f18(item)]
 
 for profile in config.get("profiles", []):
-    simple_modifications = profile.get("simple_modifications")
-    if isinstance(simple_modifications, list):
-        simple_modifications[:] = [
-            item for item in simple_modifications
-            if item.get("from", {}).get("key_code") != "right_command"
-        ]
+    if not isinstance(profile, dict):
+        continue
+    remove_legacy_simple_mappings(profile)
+    for device in profile.get("devices", []):
+        if isinstance(device, dict):
+            remove_legacy_simple_mappings(device)
     rules = profile.get("complex_modifications", {}).get("rules")
     if isinstance(rules, list):
-        rules[:] = [item for item in rules if not is_same_rule(item)]
+        rules[:] = [
+            item for item in rules
+            if not isinstance(item, dict) or item.get("description") != owned_rule_description
+        ]
 
 with open(config_path, "w", encoding="utf-8") as handle:
     json.dump(config, handle, ensure_ascii=False, indent=2)

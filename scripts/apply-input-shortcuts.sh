@@ -56,7 +56,7 @@ symbolic["60"] = {
 }
 symbolic["61"] = {
     "enabled": True,
-    "value": {"type": "standard", "parameters": [65535, 79, 8388608]},
+    "value": {"type": "standard", "parameters": [65535, 79, 0]},
 }
 backup(hotkeys_plist, "com.apple.symbolichotkeys")
 raw = plistlib.dumps(hotkeys, fmt=plistlib.FMT_XML)

@@ -18,7 +18,7 @@ echo "  config: $config_path"
 echo "  asset: $asset_path"
 
 if ((DRY_RUN)); then
-  echo "[dry-run] create/update right Command -> F18 simple modification"
+  echo "[dry-run] create/update right Command -> F18 complex modification"
   exit 0
 fi
 
@@ -40,7 +40,7 @@ asset_path = os.path.expanduser("~/.config/karabiner/assets/complex_modification
 backup_dir = os.path.expanduser("~/.local/share/mac-bootstrap/backups")
 
 rule = {
-    "description": "Right Command to F18",
+    "description": "MacBootstrap: right_command to F18",
     "manipulators": [
         {
             "type": "basic",
@@ -87,24 +87,49 @@ if not profiles:
     profiles.append({"name": "Default profile", "selected": True, "complex_modifications": {"rules": []}})
 
 profile = next((item for item in profiles if item.get("selected")), profiles[0])
-simple_modifications = profile.setdefault("simple_modifications", [])
-complex_modifications = profile.setdefault("complex_modifications", {})
-rules = complex_modifications.setdefault("rules", [])
+simple_modifications = profile.get("simple_modifications")
+if not isinstance(simple_modifications, list):
+    simple_modifications = []
+    profile["simple_modifications"] = simple_modifications
 
-def is_same_rule(candidate):
-    text = json.dumps(candidate, sort_keys=True).lower()
-    return "right_command" in text and "f18" in text
+complex_modifications = profile.get("complex_modifications")
+if not isinstance(complex_modifications, dict):
+    complex_modifications = {}
+    profile["complex_modifications"] = complex_modifications
 
-rules[:] = [item for item in rules if not is_same_rule(item)]
+rules = complex_modifications.get("rules")
+if not isinstance(rules, list):
+    rules = []
+    complex_modifications["rules"] = rules
 
-simple_modifications[:] = [
-    item for item in simple_modifications
-    if item.get("from", {}).get("key_code") != "right_command"
+def is_right_command_to_f18(candidate):
+    if not isinstance(candidate, dict):
+        return False
+    source = candidate.get("from")
+    targets = candidate.get("to")
+    return (
+        isinstance(source, dict)
+        and source.get("key_code") == "right_command"
+        and isinstance(targets, list)
+        and any(isinstance(target, dict) and target.get("key_code") == "f18" for target in targets)
+    )
+
+def remove_legacy_simple_mappings(container):
+    mappings = container.get("simple_modifications")
+    if isinstance(mappings, list):
+        mappings[:] = [item for item in mappings if not is_right_command_to_f18(item)]
+
+rules[:] = [
+    item for item in rules
+    if not isinstance(item, dict) or item.get("description") != rule["description"]
 ]
-simple_modifications.insert(0, {
-    "from": {"key_code": "right_command"},
-    "to": [{"key_code": "f18"}],
-})
+
+remove_legacy_simple_mappings(profile)
+for device in profile.get("devices", []):
+    if isinstance(device, dict):
+        remove_legacy_simple_mappings(device)
+
+rules.insert(0, rule)
 
 with open(asset_path, "w", encoding="utf-8") as handle:
     json.dump(asset, handle, ensure_ascii=False, indent=2)

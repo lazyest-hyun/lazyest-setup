@@ -11,6 +11,14 @@ let package = Package(
         .executable(name: "MacBootstrapSetup", targets: ["MacBootstrapSetup"])
     ],
     targets: [
-        .executableTarget(name: "MacBootstrapSetup")
+        .target(name: "MacBootstrapSetupCore"),
+        .executableTarget(
+            name: "MacBootstrapSetup",
+            dependencies: ["MacBootstrapSetupCore"]
+        ),
+        .testTarget(
+            name: "MacBootstrapSetupCoreTests",
+            dependencies: ["MacBootstrapSetupCore"]
+        )
     ]
 )

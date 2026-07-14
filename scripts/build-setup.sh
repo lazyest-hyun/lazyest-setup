@@ -21,5 +21,27 @@ echo "  swift: $(swift --version | head -1)"
 if ((DRY_RUN)); then
   echo "[dry-run] swift build --package-path $pkg -c release --product MacBootstrapSetup"
 else
-  run_cmd swift build --package-path "$pkg" -c release --product MacBootstrapSetup
+  module_cache="/private/tmp/mac-bootstrap-setup-module-cache"
+  if CLANG_MODULE_CACHE_PATH="$module_cache" SWIFTPM_MODULECACHE_OVERRIDE="$module_cache" \
+    swift build --package-path "$pkg" -c release --product MacBootstrapSetup; then
+    exit 0
+  fi
+
+  fallback_sdk="/Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk"
+  if [ ! -d "$fallback_sdk" ]; then
+    echo "  blocked: the active Swift compiler and macOS SDK are incompatible"
+    exit 1
+  fi
+  target="$(uname -m)-apple-macosx13.0"
+  echo "  warning: active SDK is incompatible; retrying with $fallback_sdk"
+  SDKROOT="$fallback_sdk" \
+    CLANG_MODULE_CACHE_PATH="$module_cache" \
+    SWIFTPM_MODULECACHE_OVERRIDE="$module_cache" \
+    swift build \
+      --disable-sandbox \
+      --package-path "$pkg" \
+      -c release \
+      --product MacBootstrapSetup \
+      --sdk "$fallback_sdk" \
+      --triple "$target"
 fi

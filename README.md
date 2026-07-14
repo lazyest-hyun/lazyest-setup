@@ -2,7 +2,7 @@
 
 한국어 사용자와 개발자를 위한 **일회성 macOS 초기 설정 앱**입니다. `MacBootstrapSetup.app`에서 필요한 항목만 선택해 적용하고, 초기 설정이 끝나면 Setup 앱을 삭제할 수 있습니다.
 
-- Current version: [`0.3.1`](VERSION)
+- Current version: [`0.3.2`](VERSION)
 - macOS 13+
 - Apple Silicon Mac에서 테스트
 - [The Unlicense](UNLICENSE)
@@ -28,7 +28,7 @@ Setup의 `Agent` 탭에서 설치 버튼을 누르면 별도 Agent 프로젝트�
 ### 텍스트와 키보드
 
 - Gureum 두벌식 입력 소스 등록
-- 오른쪽 Command를 `F18`로 변경
+- Karabiner Complex Modification으로 오른쪽 Command를 `F18`로 변경
 - 이전 입력 소스 단축키 비활성화 및 다음 입력 소스를 `F18`로 설정
 - 키 반복, 길게 눌러 악센트, 기능 키, Globe/Fn 키 설정
 - 맞춤법 자동 수정, 스페이스 두 번 마침표, 인라인 자동 완성 설정

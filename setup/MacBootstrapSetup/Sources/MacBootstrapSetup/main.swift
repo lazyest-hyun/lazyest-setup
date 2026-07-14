@@ -1,6 +1,7 @@
 import AppKit
 import Carbon
 import Foundation
+import MacBootstrapSetupCore
 
 enum SetupLanguage: String {
     case automatic = "auto"
@@ -1995,8 +1996,7 @@ final class SetupWindowController: NSWindowController {
     }
 
     private func symbolicHotKeyIsF18(_ symbolic: [String: Any], _ key: String) -> Bool {
-        symbolicHotKeyParameters(symbolic, key) == [65535, 79, 0] ||
-            symbolicHotKeyParameters(symbolic, key) == [65535, 79, 8388608]
+        symbolicHotKeyParameters(symbolic, key) == [65535, 79, 0]
     }
 
     private func symbolicHotKeyEnabled(_ symbolic: [String: Any], _ key: String) -> Bool? {
@@ -2066,11 +2066,12 @@ final class SetupWindowController: NSWindowController {
     }
 
     private func karabinerMappingApplied() -> Bool {
-        let path = NSHomeDirectory() + "/.config/karabiner/karabiner.json"
-        guard let text = try? String(contentsOfFile: path, encoding: .utf8).lowercased() else {
+        let url = URL(fileURLWithPath: NSHomeDirectory())
+            .appendingPathComponent(".config/karabiner/karabiner.json")
+        guard let data = try? Data(contentsOf: url) else {
             return false
         }
-        return text.contains("right_command") && text.contains("f18")
+        return KarabinerMappingState.isApplied(data: data)
     }
 
     private func isKarabinerRunning() -> Bool {
