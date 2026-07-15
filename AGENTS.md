@@ -9,4 +9,4 @@ When the user explicitly asks to install MacBootstrapSetup, run this exact comma
 - This builds current source locally, installs `/Applications/MacBootstrapSetup.app`, then removes the temporary source and build output.
 - Do not install the separate Agent, Homebrew, other apps, or apply any macOS settings.
 - If Swift is missing, run `xcode-select --install`, wait for the user's macOS approval, then rerun the command.
-- If the user did not explicitly request Setup installation, do not install, uninstall, or change macOS settings.
+- After any Setup source or UI change, run `./bootstrap.sh install-setup` and `open /Applications/MacBootstrapSetup.app` so `/Applications` always has the tested build. Do not apply Setup actions or change macOS settings unless requested.
