@@ -86,7 +86,10 @@ try:
     rules = selected.get("complex_modifications", {}).get("rules", [])
     complex_applied = any(
         isinstance(rule, dict)
-        and rule.get("description") == "MacBootstrap: right_command to F18"
+        and rule.get("description") in {
+            "Lazyest Setup: right_command to F18",
+            "MacBootstrap: right_command to F18",
+        }
         and any(
             isinstance(manipulator, dict)
             and manipulator.get("type") == "basic"

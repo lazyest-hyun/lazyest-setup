@@ -32,9 +32,9 @@ printf '    %s\n' "${DOCK_REMOVE_LABELS[@]}"
 echo "  apply command: ./bootstrap.sh dock-cleanup"
 echo "  safety: creates a timestamped backup before changing the Dock plist"
 echo
-echo "Separate Agent:"
-echo "  repository: $AGENT_REPOSITORY"
-echo "  install command: ./bootstrap.sh install-agent"
+echo "Separate Flow:"
+echo "  repository: $FLOW_REPOSITORY"
+echo "  install command: ./bootstrap.sh install-flow"
 echo
 echo "Manual checks:"
 echo "  Gureum input source add/remove"

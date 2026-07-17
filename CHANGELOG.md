@@ -2,9 +2,12 @@
 
 This project uses the Setup app version in [`VERSION`](VERSION). GitHub Releases are not required.
 
-## Unreleased
+## 0.4.0 - 2026-07-17
 
-- Updated the pinned MacBootstrapAgent source to `0.2.2` with one immediate screenshot-copy control.
+- Rebranded the one-time app and Swift package as Lazyest Setup.
+- Renamed the separate runtime bridge from Agent to Lazyest Flow while preserving legacy installs and settings.
+- Pinned the Flow installer to the matching Lazyest Flow 0.5.0 source commit.
+- Kept existing bundle identifiers and Karabiner rule compatibility so the rename does not reset permissions or duplicate mappings.
 
 ## 0.3.2 - 2026-07-13
 
@@ -20,7 +23,7 @@ This project uses the Setup app version in [`VERSION`](VERSION). GitHub Releases
 ## 0.3.0 - 2026-07-10
 
 - Split the always-running MacBootstrapAgent into its own repository and Swift package.
-- Kept MacBootstrapSetup focused on one-time macOS and app setup.
+- Kept LazyestSetup focused on one-time macOS and app setup.
 - Changed the Setup Agent row to download and install the separate Agent project directly.
 - Gave Setup its own language settings and independent build command.
 

@@ -1,7 +1,8 @@
 import Foundation
 
 public enum KarabinerMappingState {
-    public static let ownedRuleDescription = "MacBootstrap: right_command to F18"
+    public static let ownedRuleDescription = "Lazyest Setup: right_command to F18"
+    public static let legacyOwnedRuleDescription = "MacBootstrap: right_command to F18"
 
     public static func isApplied(data: Data) -> Bool {
         guard
@@ -25,7 +26,8 @@ public enum KarabinerMappingState {
 
         return rules.contains { rule in
             guard
-                rule["description"] as? String == ownedRuleDescription,
+                let description = rule["description"] as? String,
+                [ownedRuleDescription, legacyOwnedRuleDescription].contains(description),
                 let manipulators = rule["manipulators"] as? [[String: Any]]
             else {
                 return false

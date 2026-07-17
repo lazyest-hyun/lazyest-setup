@@ -7,15 +7,15 @@ source "$SCRIPT_DIR/lib.sh"
 
 parse_common_flags "$@"
 
-echo "INSTALL_EXTERNAL_AGENT"
+echo "INSTALL_EXTERNAL_FLOW"
 echo "  dry-run: $(bool_label "$DRY_RUN")"
-echo "  repository: $AGENT_REPOSITORY"
-echo "  ref: $AGENT_REF"
+echo "  repository: $FLOW_REPOSITORY"
+echo "  ref: $FLOW_REF"
 
-if [ -n "${MAC_BOOTSTRAP_AGENT_SOURCE_DIR:-}" ]; then
-  source_dir="$MAC_BOOTSTRAP_AGENT_SOURCE_DIR"
+if [ -n "${LAZYEST_FLOW_SOURCE_DIR:-}" ]; then
+  source_dir="$LAZYEST_FLOW_SOURCE_DIR"
   if [ ! -x "$source_dir/bootstrap.sh" ]; then
-    echo "  blocked: Agent bootstrap not found at $source_dir/bootstrap.sh" >&2
+    echo "  blocked: Flow bootstrap not found at $source_dir/bootstrap.sh" >&2
     exit 1
   fi
   echo "  source override: $source_dir"
@@ -27,7 +27,7 @@ if [ -n "${MAC_BOOTSTRAP_AGENT_SOURCE_DIR:-}" ]; then
   exit 0
 fi
 
-archive_url="$(agent_archive_url)"
+archive_url="$(flow_archive_url)"
 if ((DRY_RUN)); then
   echo "[dry-run] download $archive_url"
   echo "[dry-run] extract the separate mac-bootstrap-agent project"
@@ -51,8 +51,9 @@ archive="$temp_dir/agent.tar.gz"
 /usr/bin/tar -xzf "$archive" -C "$temp_dir"
 source_dir="$(find "$temp_dir" -mindepth 1 -maxdepth 1 -type d -name 'mac-bootstrap-agent-*' -print -quit)"
 if [ -z "$source_dir" ] || [ ! -x "$source_dir/bootstrap.sh" ]; then
-  echo "  blocked: downloaded Agent source is invalid" >&2
+  echo "  blocked: downloaded Flow source is invalid" >&2
   exit 1
 fi
 
 "$source_dir/bootstrap.sh" install
+echo "INSTALL_FLOW_OK"

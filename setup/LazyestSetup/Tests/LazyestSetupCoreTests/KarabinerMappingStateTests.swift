@@ -1,10 +1,17 @@
 import Foundation
-@testable import MacBootstrapSetupCore
+@testable import LazyestSetupCore
 import XCTest
 
 final class KarabinerMappingStateTests: XCTestCase {
     func testExactOwnedComplexRuleIsApplied() throws {
         let data = try fixture(selectedRules: [ownedRule()])
+        XCTAssertTrue(KarabinerMappingState.isApplied(data: data))
+    }
+
+    func testLegacyOwnedComplexRuleRemainsAppliedDuringMigration() throws {
+        var rule = ownedRule()
+        rule["description"] = KarabinerMappingState.legacyOwnedRuleDescription
+        let data = try fixture(selectedRules: [rule])
         XCTAssertTrue(KarabinerMappingState.isApplied(data: data))
     }
 

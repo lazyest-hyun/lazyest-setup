@@ -1,7 +1,7 @@
 import AppKit
 import Carbon
 import Foundation
-import MacBootstrapSetupCore
+import LazyestSetupCore
 
 enum SetupLanguage: String {
     case automatic = "auto"
@@ -12,7 +12,7 @@ enum SetupLanguage: String {
 func sharedLanguageConfigPath() -> URL {
     let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
         ?? URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Library/Application Support", isDirectory: true)
-    return base.appendingPathComponent("MacBootstrapSetup", isDirectory: true).appendingPathComponent("language.conf")
+    return base.appendingPathComponent("LazyestSetup", isDirectory: true).appendingPathComponent("language.conf")
 }
 
 func savedLanguageCode() -> String {
@@ -42,12 +42,12 @@ func effectiveLanguage() -> SetupLanguage {
 
 func localized(_ key: String) -> String {
     let korean: [String: String] = [
-        "app.title": "Mac 초기 설정",
+        "app.title": "Lazyest Setup",
         "tab.install": "설치",
         "tab.text": "텍스트/키보드",
         "tab.desktop": "데스크톱",
         "tab.dock": "Dock",
-        "tab.runtime": "Agent",
+        "tab.runtime": "Flow",
         "language.auto": "자동",
         "language.ko": "한국어",
         "language.en": "English",
@@ -127,8 +127,8 @@ func localized(_ key: String) -> String {
         "dock.apply": "선택 적용",
         "dock.selected": "선택됨",
         "dock.current": "현재 Dock",
-        "row.agent.title": "MacBootstrapAgent",
-        "row.agent.detail": "별도 프로젝트로 설치되는 메뉴 막대 앱.",
+        "row.flow.title": "Lazyest Flow",
+        "row.flow.detail": "별도 프로젝트로 설치되는 메뉴 막대 앱.",
         "button.install": "설치",
         "button.open": "열기",
         "button.done": "완료",
@@ -165,9 +165,9 @@ func localized(_ key: String) -> String {
         "status.needsRelogin": "반영 대기",
         "status.needsLogout": "로그아웃 필요",
         "status.manualCheck": "수동 확인",
-        "status.agentInstalled": "Agent 설치됨",
-        "status.agentFailed": "Agent 설치 실패",
-        "status.agentInstalling": "Agent 다운로드 및 설치 중",
+        "status.flowInstalled": "Flow 설치됨",
+        "status.flowFailed": "Flow 설치 실패",
+        "status.flowInstalling": "Flow 다운로드 및 설치 중",
         "status.opened": "열림",
         "status.applying": "적용 중",
         "status.failed": "실패",
@@ -185,12 +185,12 @@ func localized(_ key: String) -> String {
         return value
     }
     let english: [String: String] = [
-        "app.title": "One-Time Mac Setup",
+        "app.title": "Lazyest Setup",
         "tab.install": "Install",
         "tab.text": "Text & Keyboard",
         "tab.desktop": "Desktop",
         "tab.dock": "Dock",
-        "tab.runtime": "Agent",
+        "tab.runtime": "Flow",
         "language.auto": "Auto",
         "language.ko": "한국어",
         "language.en": "English",
@@ -270,8 +270,8 @@ func localized(_ key: String) -> String {
         "dock.apply": "Apply Selection",
         "dock.selected": "selected",
         "dock.current": "in Dock",
-        "row.agent.title": "MacBootstrapAgent",
-        "row.agent.detail": "Menu bar app installed from its separate project.",
+        "row.flow.title": "Lazyest Flow",
+        "row.flow.detail": "Menu bar app installed from its separate project.",
         "button.install": "Install",
         "button.open": "Open",
         "button.done": "Done",
@@ -308,9 +308,9 @@ func localized(_ key: String) -> String {
         "status.needsRelogin": "Pending refresh",
         "status.needsLogout": "Needs logout",
         "status.manualCheck": "Manual check",
-        "status.agentInstalled": "Agent installed",
-        "status.agentFailed": "Agent install failed",
-        "status.agentInstalling": "Downloading and installing Agent",
+        "status.flowInstalled": "Flow installed",
+        "status.flowFailed": "Flow install failed",
+        "status.flowInstalling": "Downloading and installing Flow",
         "status.opened": "Opened",
         "status.applying": "Applying",
         "status.failed": "Failed",
@@ -416,7 +416,7 @@ final class SetupWindowController: NSWindowController {
     private let globeKeyStatus = NSTextField(labelWithString: "")
     private let linearMouseStatus = NSTextField(labelWithString: "")
     private let amphetamineStatus = NSTextField(labelWithString: "")
-    private let agentStatus = NSTextField(labelWithString: "")
+    private let flowStatus = NSTextField(labelWithString: "")
     private lazy var spellingPrimaryButton = button("Disable", #selector(toggleSpelling))
     private lazy var periodPrimaryButton = button("Disable", #selector(togglePeriod))
     private lazy var inlinePrimaryButton = button("Disable", #selector(toggleInline))
@@ -450,8 +450,8 @@ final class SetupWindowController: NSWindowController {
     private lazy var teamsPrimaryButton = button("Install", #selector(primaryTeams))
     private lazy var slackPrimaryButton = button("Install", #selector(primarySlack))
     private lazy var amphetaminePrimaryButton = button("App Store", #selector(primaryAmphetamine))
-    private lazy var agentPrimaryButton = button("Install", #selector(primaryAgent))
-    private lazy var agentRemoveButton = button("Remove", #selector(removeAgent))
+    private lazy var flowPrimaryButton = button("Install", #selector(primaryFlow))
+    private lazy var flowRemoveButton = button("Remove", #selector(removeFlow))
 
     init() {
         let window = NSWindow(
@@ -803,9 +803,9 @@ final class SetupWindowController: NSWindowController {
 
     private func runtimeTab() -> NSTabViewItem {
         tab(localized("tab.runtime"), [
-            row(title: localized("row.agent.title"), detail: localized("row.agent.detail"), status: agentStatus, buttons: [
-                agentPrimaryButton,
-                agentRemoveButton
+            row(title: localized("row.flow.title"), detail: localized("row.flow.detail"), status: flowStatus, buttons: [
+                flowPrimaryButton,
+                flowRemoveButton
             ])
         ])
     }
@@ -1019,7 +1019,7 @@ final class SetupWindowController: NSWindowController {
         setGlobeKeyState()
         setInstallableAppState(status: linearMouseStatus, button: linearMousePrimaryButton, appName: "LinearMouse", brewInstalled: brewInstalled)
         setAppStoreState(status: amphetamineStatus, button: amphetaminePrimaryButton, appName: "Amphetamine")
-        refreshAgentState()
+        refreshFlowState()
         updateRowStyles()
         statusLabel.stringValue = localized("status.refreshed")
         window?.contentView?.layoutSubtreeIfNeeded()
@@ -1288,57 +1288,57 @@ final class SetupWindowController: NSWindowController {
         NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
     }
     @objc private func openProjectFolder() { NSWorkspace.shared.open(URL(fileURLWithPath: projectRoot())) }
-    @objc private func primaryAgent() {
-        if appExists("MacBootstrapAgent") {
-            openAgent()
+    @objc private func primaryFlow() {
+        if appExists("Lazyest Flow") {
+            openFlow()
         } else {
-            installAgent()
+            installFlow()
         }
     }
 
-    private func installAgent() {
-        statusLabel.stringValue = localized("status.agentInstalling")
-        agentPrimaryButton.isEnabled = false
-        agentRemoveButton.isEnabled = false
+    private func installFlow() {
+        statusLabel.stringValue = localized("status.flowInstalling")
+        flowPrimaryButton.isEnabled = false
+        flowRemoveButton.isEnabled = false
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self else { return }
-            let output = self.runScript(["install-agent"])
+            let output = self.runScript(["install-flow"])
             DispatchQueue.main.async {
-                self.statusLabel.stringValue = output.contains("INSTALL_AGENT_OK")
-                    ? localized("status.agentInstalled")
-                    : localized("status.agentFailed")
-                self.refreshAgentState()
+                self.statusLabel.stringValue = output.contains("INSTALL_FLOW_OK")
+                    ? localized("status.flowInstalled")
+                    : localized("status.flowFailed")
+                self.refreshFlowState()
                 self.updateRowStyles()
             }
         }
     }
 
-    private func openAgent() {
-        let opened = NSWorkspace.shared.open(URL(fileURLWithPath: "/Applications/MacBootstrapAgent.app"))
+    private func openFlow() {
+        let opened = NSWorkspace.shared.open(URL(fileURLWithPath: "/Applications/Lazyest Flow.app"))
         statusLabel.stringValue = opened ? localized("status.opened") : localized("status.failed")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-            self?.refreshAgentState()
+            self?.refreshFlowState()
             self?.updateRowStyles()
         }
     }
-    @objc private func removeAgent() {
-        _ = runScript(["uninstall-agent"])
-        refreshAgentState()
+    @objc private func removeFlow() {
+        _ = runScript(["uninstall-flow"])
+        refreshFlowState()
         updateRowStyles()
     }
 
     @objc private func removeSetupApp() {
         let alert = NSAlert()
-        alert.messageText = effectiveLanguage() == .korean ? "MacBootstrapSetup.app을 제거할까요?" : "Remove MacBootstrapSetup.app?"
+        alert.messageText = effectiveLanguage() == .korean ? "Lazyest Setup.app을 제거할까요?" : "Remove Lazyest Setup.app?"
         alert.informativeText = effectiveLanguage() == .korean
-            ? "일회성 Setup 앱만 제거합니다. MacBootstrapAgent.app은 유지됩니다."
-            : "This removes only the one-time setup app. MacBootstrapAgent.app remains installed."
+            ? "일회성 Setup 앱만 제거합니다. Lazyest Flow.app은 유지됩니다."
+            : "This removes only the one-time setup app. Lazyest Flow.app remains installed."
         alert.addButton(withTitle: localized("button.remove"))
         alert.addButton(withTitle: effectiveLanguage() == .korean ? "취소" : "Cancel")
         guard alert.runModal() == .alertFirstButtonReturn else { return }
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/bin/sh")
-        process.arguments = ["-c", "sleep 1; rm -rf /Applications/MacBootstrapSetup.app"]
+        process.arguments = ["-c", "sleep 1; rm -rf '/Applications/Lazyest Setup.app'"]
         try? process.run()
         NSApplication.shared.terminate(nil)
     }
@@ -1842,31 +1842,31 @@ final class SetupWindowController: NSWindowController {
         return labels
     }
 
-    private func refreshAgentState() {
-        let installed = appExists("MacBootstrapAgent")
-        let running = isProcessRunning("MacBootstrapAgent")
-        agentPrimaryButton.target = self
-        agentPrimaryButton.action = #selector(primaryAgent)
-        agentRemoveButton.target = self
-        agentRemoveButton.action = #selector(removeAgent)
+    private func refreshFlowState() {
+        let installed = appExists("Lazyest Flow")
+        let running = isProcessRunning("LazyestFlow")
+        flowPrimaryButton.target = self
+        flowPrimaryButton.action = #selector(primaryFlow)
+        flowRemoveButton.target = self
+        flowRemoveButton.action = #selector(removeFlow)
         if running {
-            agentStatus.stringValue = localized("status.running")
-            agentPrimaryButton.title = localized("button.open")
-            agentRemoveButton.isEnabled = true
-            agentRemoveButton.isHidden = false
+            flowStatus.stringValue = localized("status.running")
+            flowPrimaryButton.title = localized("button.open")
+            flowRemoveButton.isEnabled = true
+            flowRemoveButton.isHidden = false
         } else if installed {
-            agentStatus.stringValue = localized("status.installed")
-            agentPrimaryButton.title = localized("button.open")
-            agentRemoveButton.isEnabled = true
-            agentRemoveButton.isHidden = false
+            flowStatus.stringValue = localized("status.installed")
+            flowPrimaryButton.title = localized("button.open")
+            flowRemoveButton.isEnabled = true
+            flowRemoveButton.isHidden = false
         } else {
-            agentStatus.stringValue = localized("status.missing")
-            agentPrimaryButton.title = localized("button.install")
-            agentRemoveButton.isEnabled = false
-            agentRemoveButton.isHidden = true
+            flowStatus.stringValue = localized("status.missing")
+            flowPrimaryButton.title = localized("button.install")
+            flowRemoveButton.isEnabled = false
+            flowRemoveButton.isHidden = true
         }
-        agentRemoveButton.title = localized("button.remove")
-        agentPrimaryButton.isEnabled = true
+        flowRemoveButton.title = localized("button.remove")
+        flowPrimaryButton.isEnabled = true
     }
 
     private func isProcessRunning(_ name: String) -> Bool {

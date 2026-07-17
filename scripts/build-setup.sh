@@ -19,11 +19,11 @@ fi
 
 echo "  swift: $(swift --version | head -1)"
 if ((DRY_RUN)); then
-  echo "[dry-run] swift build --package-path $pkg -c release --product MacBootstrapSetup"
+  echo "[dry-run] swift build --package-path $pkg -c release --product LazyestSetup"
 else
   module_cache="/private/tmp/mac-bootstrap-setup-module-cache"
   if CLANG_MODULE_CACHE_PATH="$module_cache" SWIFTPM_MODULECACHE_OVERRIDE="$module_cache" \
-    swift build --package-path "$pkg" -c release --product MacBootstrapSetup; then
+    swift build --package-path "$pkg" -c release --product LazyestSetup; then
     exit 0
   fi
 
@@ -41,7 +41,7 @@ else
       --disable-sandbox \
       --package-path "$pkg" \
       -c release \
-      --product MacBootstrapSetup \
+      --product LazyestSetup \
       --sdk "$fallback_sdk" \
       --triple "$target"
 fi

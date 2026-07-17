@@ -1,6 +1,6 @@
 # mac-bootstrap Skill
 
-Use this skill for the one-time MacBootstrapSetup project. Runtime Agent work belongs in the separate `mac-bootstrap-agent` repository.
+Use this skill for the one-time Lazyest Setup project. Runtime Flow work belongs in the separate `mac-bootstrap-agent` repository.
 
 ## Principles
 
@@ -17,10 +17,10 @@ Use this skill for the one-time MacBootstrapSetup project. Runtime Agent work be
 3. Preview the requested action with its `--dry-run` option.
 4. Build Setup with `./bootstrap.sh build-setup` when source changed.
 5. Install Setup only when requested with `./bootstrap.sh install-setup`.
-6. Treat `./bootstrap.sh install-agent` as a bridge to the separate Agent repository.
+6. Treat `./bootstrap.sh install-flow` as a bridge to the separate Agent repository.
 
 ## Boundaries
 
 - Setup owns app installation, Korean input, keyboard defaults, desktop defaults, and Dock configuration.
-- MacBootstrapAgent owns app hotkeys, screenshot clipboard copy, sleep prevention, and Dock anchoring.
-- Do not add Agent source or runtime defaults back into this repository.
+- Lazyest Flow owns app hotkeys, screenshot clipboard copy, sleep prevention, and Dock anchoring.
+- Do not add Flow source or runtime defaults back into this repository.

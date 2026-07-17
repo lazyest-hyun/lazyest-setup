@@ -17,5 +17,8 @@ if [ -d "$setup_app" ]; then
 else
   echo "  setup app already absent"
 fi
+legacy_setup_app="/Applications/MacBootstrapSetup.app"
+if [ -d "$legacy_setup_app" ]; then
+  run_cmd rm -rf "$legacy_setup_app"
+fi
 echo "  note: this script does not quit a running setup app"
-

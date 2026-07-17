@@ -27,14 +27,14 @@ Usage:
   ./bootstrap.sh dock-apply [--dry-run] [--no-restart-ui]
   ./bootstrap.sh dock-cleanup [--dry-run] [--no-restart-ui]
   ./bootstrap.sh build-setup [--dry-run]
-  ./bootstrap.sh install-agent [--dry-run]
-  ./bootstrap.sh uninstall-agent [--dry-run]
+  ./bootstrap.sh install-flow [--dry-run]
+  ./bootstrap.sh uninstall-flow [--dry-run]
   ./bootstrap.sh install-setup [--dry-run]
   ./bootstrap.sh uninstall-setup [--dry-run]
 
 Commands:
   help              Show this help.
-  version           Print the MacBootstrapSetup source version.
+  version           Print the Lazyest Setup source version.
   audit             Read-only state summary.
   plan              Read-only native defaults and Dock plan.
   install-plan      Read-only optional app install plan and official links.
@@ -54,10 +54,10 @@ Commands:
   dock-cleanup      Remove configured default Dock icons, with plist backup.
   dock-apply        Apply an explicit default-app Dock checklist, with plist backup.
   build-setup       Build the one-time Swift Setup app, or preview with --dry-run.
-  install-agent     Download and install the separate MacBootstrapAgent project.
-  uninstall-agent   Remove only MacBootstrapAgent.app.
-  install-setup     Install only the one-time MacBootstrapSetup.app.
-  uninstall-setup   Remove only MacBootstrapSetup.app.
+  install-flow     Download and install the separate Lazyest Flow project.
+  uninstall-flow   Remove only Lazyest Flow.app.
+  install-setup     Install only the one-time Lazyest Setup.app.
+  uninstall-setup   Remove only Lazyest Setup.app.
 EOF
 }
 
@@ -126,11 +126,11 @@ case "$cmd" in
   build-setup)
     exec "$ROOT_DIR/scripts/build-setup.sh" "$@"
     ;;
-  install-agent)
-    exec "$ROOT_DIR/scripts/install-agent.sh" "$@"
+  install-flow)
+    exec "$ROOT_DIR/scripts/install-flow.sh" "$@"
     ;;
-  uninstall-agent)
-    exec "$ROOT_DIR/scripts/uninstall-agent.sh" "$@"
+  uninstall-flow)
+    exec "$ROOT_DIR/scripts/uninstall-flow.sh" "$@"
     ;;
   install-setup)
     exec "$ROOT_DIR/scripts/install-setup.sh" "$@"

@@ -73,25 +73,25 @@ app_exists() {
 }
 
 setup_package_dir() {
-  echo "$ROOT_DIR/setup/MacBootstrapSetup"
+  echo "$ROOT_DIR/setup/LazyestSetup"
 }
 
 setup_binary_path() {
-  echo "$(setup_package_dir)/.build/release/MacBootstrapSetup"
+  echo "$(setup_package_dir)/.build/release/LazyestSetup"
 }
 
-agent_app_path() {
-  echo "/Applications/MacBootstrapAgent.app"
+flow_app_path() {
+  echo "/Applications/Lazyest Flow.app"
 }
 
 setup_app_path() {
-  echo "/Applications/MacBootstrapSetup.app"
+  echo "/Applications/Lazyest Setup.app"
 }
 
 launch_agent_plist() {
   echo "$HOME/Library/LaunchAgents/com.estaid.mac-bootstrap-agent.plist"
 }
 
-agent_archive_url() {
-  printf '%s/archive/%s.tar.gz\n' "$AGENT_REPOSITORY" "$AGENT_REF"
+flow_archive_url() {
+  printf '%s/archive/%s.tar.gz\n' "$FLOW_REPOSITORY" "$FLOW_REF"
 }

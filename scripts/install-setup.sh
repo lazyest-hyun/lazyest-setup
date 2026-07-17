@@ -42,17 +42,23 @@ if [ ! -x "$setup_binary" ]; then
   exit 0
 fi
 
-if pgrep -x MacBootstrapSetup >/dev/null 2>&1; then
-  if ((DRY_RUN)); then
-    echo "[dry-run] stop the existing MacBootstrapSetup process"
-  else
-    pkill -x MacBootstrapSetup || true
-    sleep 0.3
+for process_name in LazyestSetup MacBootstrapSetup; do
+  if pgrep -x "$process_name" >/dev/null 2>&1; then
+    if ((DRY_RUN)); then
+      echo "[dry-run] stop the existing $process_name process"
+    else
+      pkill -x "$process_name" || true
+      sleep 0.3
+    fi
   fi
-fi
+done
 
 if [ -d "$setup_app" ]; then
   run_cmd rm -rf "$setup_app"
+fi
+legacy_setup_app="/Applications/MacBootstrapSetup.app"
+if [ -d "$legacy_setup_app" ]; then
+  run_cmd rm -rf "$legacy_setup_app"
 fi
 run_cmd mkdir -p "$setup_app/Contents/MacOS" "$setup_app/Contents/Resources"
 if ((DRY_RUN)); then
@@ -65,10 +71,10 @@ if ((DRY_RUN)); then
     echo "[dry-run] ad-hoc sign $setup_app (stable local identity not found)"
   fi
 else
-  cp "$setup_binary" "$setup_app/Contents/MacOS/MacBootstrapSetup"
-  chmod +x "$setup_app/Contents/MacOS/MacBootstrapSetup"
-  if [ -f "$ROOT_DIR/setup/MacBootstrapSetup/Assets/AppIcon.icns" ]; then
-    cp "$ROOT_DIR/setup/MacBootstrapSetup/Assets/AppIcon.icns" "$setup_app/Contents/Resources/AppIcon.icns"
+  cp "$setup_binary" "$setup_app/Contents/MacOS/LazyestSetup"
+  chmod +x "$setup_app/Contents/MacOS/LazyestSetup"
+  if [ -f "$ROOT_DIR/setup/LazyestSetup/Assets/AppIcon.icns" ]; then
+    cp "$ROOT_DIR/setup/LazyestSetup/Assets/AppIcon.icns" "$setup_app/Contents/Resources/AppIcon.icns"
   fi
   printf '%s\n' "$ROOT_DIR" >"$setup_app/Contents/Resources/ProjectRoot.txt"
   cat >"$setup_app/Contents/Info.plist" <<PLIST
@@ -77,13 +83,13 @@ else
 <plist version="1.0">
 <dict>
   <key>CFBundleExecutable</key>
-  <string>MacBootstrapSetup</string>
+  <string>LazyestSetup</string>
   <key>CFBundleIdentifier</key>
   <string>com.estaid.mac-bootstrap-setup</string>
   <key>CFBundleName</key>
-  <string>MacBootstrapSetup</string>
+  <string>Lazyest Setup</string>
   <key>CFBundleDisplayName</key>
-  <string>MacBootstrapSetup</string>
+  <string>Lazyest Setup</string>
   <key>CFBundleIconFile</key>
   <string>AppIcon</string>
   <key>CFBundlePackageType</key>

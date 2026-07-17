@@ -40,7 +40,7 @@ asset_path = os.path.expanduser("~/.config/karabiner/assets/complex_modification
 backup_dir = os.path.expanduser("~/.local/share/mac-bootstrap/backups")
 
 rule = {
-    "description": "MacBootstrap: right_command to F18",
+    "description": "Lazyest Setup: right_command to F18",
     "manipulators": [
         {
             "type": "basic",
@@ -54,7 +54,7 @@ rule = {
 }
 
 asset = {
-    "title": "Mac Bootstrap",
+    "title": "Lazyest Setup",
     "rules": [rule],
 }
 
@@ -119,9 +119,13 @@ def remove_legacy_simple_mappings(container):
     if isinstance(mappings, list):
         mappings[:] = [item for item in mappings if not is_right_command_to_f18(item)]
 
+owned_rule_descriptions = {
+    rule["description"],
+    "MacBootstrap: right_command to F18",
+}
 rules[:] = [
     item for item in rules
-    if not isinstance(item, dict) or item.get("description") != rule["description"]
+    if not isinstance(item, dict) or item.get("description") not in owned_rule_descriptions
 ]
 
 remove_legacy_simple_mappings(profile)

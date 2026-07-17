@@ -43,7 +43,10 @@ print(f"  backup: {backup_path}")
 with open(config_path, "r", encoding="utf-8") as handle:
     config = json.load(handle)
 
-owned_rule_description = "MacBootstrap: right_command to F18"
+owned_rule_descriptions = {
+    "Lazyest Setup: right_command to F18",
+    "MacBootstrap: right_command to F18",
+}
 
 def is_right_command_to_f18(candidate):
     if not isinstance(candidate, dict):
@@ -73,7 +76,7 @@ for profile in config.get("profiles", []):
     if isinstance(rules, list):
         rules[:] = [
             item for item in rules
-            if not isinstance(item, dict) or item.get("description") != owned_rule_description
+            if not isinstance(item, dict) or item.get("description") not in owned_rule_descriptions
         ]
 
 with open(config_path, "w", encoding="utf-8") as handle:
