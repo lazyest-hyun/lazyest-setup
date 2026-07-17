@@ -1,6 +1,6 @@
 # mac-bootstrap Skill
 
-Use this skill for the one-time Lazyest Setup project. Runtime Flow work belongs in the separate `mac-bootstrap-agent` repository.
+Use this skill for the one-time Lazyest Setup project. Runtime Flow work belongs in the separate `lazyest-flow` repository.
 
 ## Principles
 

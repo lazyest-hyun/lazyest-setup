@@ -30,7 +30,7 @@ fi
 archive_url="$(flow_archive_url)"
 if ((DRY_RUN)); then
   echo "[dry-run] download $archive_url"
-  echo "[dry-run] extract the separate mac-bootstrap-agent project"
+  echo "[dry-run] extract the separate lazyest-flow project"
   echo "[dry-run] run its ./bootstrap.sh install"
   exit 0
 fi
@@ -40,7 +40,7 @@ if ! command -v swift >/dev/null 2>&1; then
   exit 1
 fi
 
-temp_dir="$(mktemp -d "${TMPDIR:-/tmp}/mac-bootstrap-agent.XXXXXX")"
+temp_dir="$(mktemp -d "${TMPDIR:-/tmp}/lazyest-flow.XXXXXX")"
 cleanup() {
   rm -rf "$temp_dir"
 }
@@ -49,7 +49,7 @@ trap cleanup EXIT
 archive="$temp_dir/agent.tar.gz"
 /usr/bin/curl --fail --location --silent --show-error --retry 2 "$archive_url" --output "$archive"
 /usr/bin/tar -xzf "$archive" -C "$temp_dir"
-source_dir="$(find "$temp_dir" -mindepth 1 -maxdepth 1 -type d -name 'mac-bootstrap-agent-*' -print -quit)"
+source_dir="$(find "$temp_dir" -mindepth 1 -maxdepth 1 -type d -name 'lazyest-flow-*' -print -quit)"
 if [ -z "$source_dir" ] || [ ! -x "$source_dir/bootstrap.sh" ]; then
   echo "  blocked: downloaded Flow source is invalid" >&2
   exit 1

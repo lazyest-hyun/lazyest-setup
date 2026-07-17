@@ -12,7 +12,7 @@
 사용자가 **Setup 설치**를 명시적으로 요청했다면, 추가 조사나 dry-run 없이 아래 한 명령으로 설치하고 실행합니다.
 
 ```sh
-(workdir="$(mktemp -d)" && trap 'rm -rf "$workdir"' EXIT && git clone --depth 1 --quiet https://github.com/hyunn515/mac-bootstrap.git "$workdir" && "$workdir/bootstrap.sh" install-setup && open "/Applications/Lazyest Setup.app")
+(workdir="$(mktemp -d)" && trap 'rm -rf "$workdir"' EXIT && git clone --depth 1 --quiet https://github.com/hyunn515/lazyest-setup.git "$workdir" && "$workdir/bootstrap.sh" install-setup && open "/Applications/Lazyest Setup.app")
 ```
 
 - 최신 소스만 얕게 받아 현재 Mac에서 빌드하고 `/Applications/Lazyest Setup.app`에 설치한 뒤 임시 소스와 빌드 산출물을 제거합니다.
@@ -23,7 +23,7 @@
 
 ## Flow는 별도 프로젝트입니다
 
-상시 실행 메뉴 막대 앱은 [mac-bootstrap-agent](https://github.com/hyunn515/mac-bootstrap-agent)에서 독립적으로 개발하고 설치합니다.
+상시 실행 메뉴 막대 앱은 [Lazyest Flow](https://github.com/hyunn515/lazyest-flow)에서 독립적으로 개발하고 설치합니다.
 
 Setup의 `Flow` 탭에서 설치 버튼을 누르면 별도 Flow 프로젝트를 내려받아 `/Applications/Lazyest Flow.app`으로 설치합니다. Setup 저장소에는 Flow 소스나 런타임 설정을 포함하지 않습니다.
 
@@ -57,7 +57,7 @@ Setup의 `Flow` 탭에서 설치 버튼을 누르면 별도 Flow 프로젝트를
 ## 수동 설치
 
 ```sh
-git clone https://github.com/hyunn515/mac-bootstrap.git
+git clone https://github.com/hyunn515/lazyest-setup.git
 cd mac-bootstrap
 
 ./bootstrap.sh audit
