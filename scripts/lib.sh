@@ -85,7 +85,7 @@ flow_app_path() {
 }
 
 setup_app_path() {
-  echo "/Applications/Lazyest Setup.app"
+  echo "${MAC_BOOTSTRAP_SETUP_APP_PATH:-/Applications/Lazyest Setup.app}"
 }
 
 launch_agent_plist() {

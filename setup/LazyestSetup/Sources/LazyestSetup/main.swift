@@ -43,6 +43,8 @@ func effectiveLanguage() -> SetupLanguage {
 func localized(_ key: String) -> String {
     let korean: [String: String] = [
         "app.title": "Lazyest Setup",
+        "app.subtitle": "새 Mac에서 필요한 항목만 골라 한 번씩 설정합니다. 선택하지 않은 항목은 바꾸지 않습니다.",
+        "app.impact": "일부 입력기·키보드 변경은 로그아웃이 필요합니다. 적용 전 현재 상태와 영향을 확인하세요. 매일 쓰는 기능은 별도 앱 Flow에서 관리합니다.",
         "tab.install": "설치",
         "tab.text": "텍스트/키보드",
         "tab.desktop": "데스크톱",
@@ -186,6 +188,8 @@ func localized(_ key: String) -> String {
     }
     let english: [String: String] = [
         "app.title": "Lazyest Setup",
+        "app.subtitle": "Choose only what this Mac needs. Setup leaves every unselected item unchanged.",
+        "app.impact": "Some input and keyboard changes require logout. Review each current state and impact before applying. Everyday controls live in the separate Flow app.",
         "tab.install": "Install",
         "tab.text": "Text & Keyboard",
         "tab.desktop": "Desktop",
@@ -455,7 +459,7 @@ final class SetupWindowController: NSWindowController {
 
     init() {
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 900, height: 620),
+            contentRect: NSRect(x: 0, y: 0, width: 900, height: 660),
             styleMask: [.titled, .closable, .miniaturizable, .resizable],
             backing: .buffered,
             defer: false
@@ -514,6 +518,20 @@ final class SetupWindowController: NSWindowController {
         configureLanguagePopup()
         header.addArrangedSubview(languagePopup)
         root.addArrangedSubview(header)
+
+        let subtitle = NSTextField(wrappingLabelWithString: localized("app.subtitle"))
+        subtitle.font = NSFont.systemFont(ofSize: 13, weight: .medium)
+        subtitle.textColor = .labelColor
+        subtitle.maximumNumberOfLines = 2
+        root.addArrangedSubview(subtitle)
+        subtitle.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
+
+        let impact = NSTextField(wrappingLabelWithString: localized("app.impact"))
+        impact.font = NSFont.systemFont(ofSize: 11)
+        impact.textColor = .secondaryLabelColor
+        impact.maximumNumberOfLines = 2
+        root.addArrangedSubview(impact)
+        impact.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
 
         let tabs = NSTabView()
         tabs.translatesAutoresizingMaskIntoConstraints = false

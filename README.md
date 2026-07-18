@@ -12,7 +12,7 @@
 사용자가 **Setup 설치**를 명시적으로 요청했다면, 추가 조사나 dry-run 없이 아래 한 명령으로 설치하고 실행합니다.
 
 ```sh
-(workdir="$(mktemp -d)" && trap 'rm -rf "$workdir"' EXIT && git clone --depth 1 --quiet https://github.com/hyunn515/lazyest-setup.git "$workdir" && "$workdir/bootstrap.sh" install-setup && open "/Applications/Lazyest Setup.app")
+(workdir="$(mktemp -d)" && trap 'rm -rf "$workdir"' EXIT && git clone --depth 1 --quiet https://github.com/lazyest-hyun/lazyest-setup.git "$workdir" && "$workdir/bootstrap.sh" install-setup && open "/Applications/Lazyest Setup.app")
 ```
 
 - 최신 소스만 얕게 받아 현재 Mac에서 빌드하고 `/Applications/Lazyest Setup.app`에 설치한 뒤 임시 소스와 빌드 산출물을 제거합니다.
@@ -96,6 +96,24 @@ Setup 앱:
 ./bootstrap.sh install-flow [--dry-run]
 ./bootstrap.sh uninstall-flow [--dry-run]
 ```
+
+## 배포 패키지 준비
+
+공개 배포용 ZIP은 Developer ID Application 인증서와 Apple 공증 프로필이 준비된 Mac에서만 만듭니다. 값 자체는 저장소에 기록하지 않고 셸 환경으로 전달합니다.
+
+```sh
+LAZYEST_CODESIGN_IDENTITY="Developer ID Application: ..." \
+LAZYEST_TEAM_ID="..." \
+LAZYEST_NOTARY_PROFILE="lazyest-notary" \
+./scripts/package-macos-release.sh --preflight
+
+LAZYEST_CODESIGN_IDENTITY="Developer ID Application: ..." \
+LAZYEST_TEAM_ID="..." \
+LAZYEST_NOTARY_PROFILE="lazyest-notary" \
+./scripts/package-macos-release.sh
+```
+
+완료되면 `dist/Lazyest-Setup-<version>-macOS.zip`과 SHA-256 파일이 생깁니다. 이 명령은 GitHub Release나 App Store 등록을 만들지 않습니다.
 
 macOS 설정 명령 전체는 `./bootstrap.sh help`에서 확인할 수 있습니다. 실제 적용 전에는 대응하는 `--dry-run`을 먼저 사용할 수 있습니다.
 
