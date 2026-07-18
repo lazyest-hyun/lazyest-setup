@@ -2,7 +2,7 @@
 
 한국어 사용자와 개발자를 위한 **일회성 macOS 초기 설정 앱**입니다. `Lazyest Setup.app`에서 필요한 항목만 선택해 적용하고, 초기 설정이 끝나면 Setup 앱을 삭제할 수 있습니다.
 
-- Current version: [`0.4.0`](VERSION)
+- Current version: [`1.0.0`](VERSION)
 - macOS 13+
 - Apple Silicon Mac에서 테스트
 - [The Unlicense](UNLICENSE)

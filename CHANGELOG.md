@@ -1,9 +1,11 @@
 # Changelog
 
-## Unreleased
+## 1.0.0 - 2026-07-18
 
 - Bundled the setup runtime scripts and configuration inside the app so actions continue to work after an installer removes its temporary source checkout.
 - Resolved the bundled runtime relative to the app instead of persisting a machine-specific source path.
+- Clarified that only selected settings are changed and added inset spacing to the launch guidance.
+- Added Developer ID signing, notarization, Gatekeeper verification, and SHA-256 release packaging.
 
 This project uses the Setup app version in [`VERSION`](VERSION). GitHub Releases are not required.
 

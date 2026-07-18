@@ -519,19 +519,27 @@ final class SetupWindowController: NSWindowController {
         header.addArrangedSubview(languagePopup)
         root.addArrangedSubview(header)
 
+        let description = NSStackView()
+        description.orientation = .vertical
+        description.alignment = .width
+        description.spacing = 4
+        description.edgeInsets = NSEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+
         let subtitle = NSTextField(wrappingLabelWithString: localized("app.subtitle"))
         subtitle.font = NSFont.systemFont(ofSize: 13, weight: .medium)
         subtitle.textColor = .labelColor
+        subtitle.alignment = .left
         subtitle.maximumNumberOfLines = 2
-        root.addArrangedSubview(subtitle)
-        subtitle.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
+        description.addArrangedSubview(subtitle)
 
         let impact = NSTextField(wrappingLabelWithString: localized("app.impact"))
         impact.font = NSFont.systemFont(ofSize: 11)
         impact.textColor = .secondaryLabelColor
+        impact.alignment = .left
         impact.maximumNumberOfLines = 2
-        root.addArrangedSubview(impact)
-        impact.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
+        description.addArrangedSubview(impact)
+        root.addArrangedSubview(description)
+        description.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
 
         let tabs = NSTabView()
         tabs.translatesAutoresizingMaskIntoConstraints = false
