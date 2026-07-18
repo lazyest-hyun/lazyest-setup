@@ -2201,7 +2201,10 @@ func projectRoot() -> String {
     if let url = Bundle.main.url(forResource: "ProjectRoot", withExtension: "txt"),
        let value = try? String(contentsOf: url, encoding: .utf8).trimmingCharacters(in: .whitespacesAndNewlines),
        !value.isEmpty {
-        return value
+        if value.hasPrefix("/") {
+            return value
+        }
+        return url.deletingLastPathComponent().appendingPathComponent(value, isDirectory: true).path
     }
     return FileManager.default.currentDirectoryPath
 }

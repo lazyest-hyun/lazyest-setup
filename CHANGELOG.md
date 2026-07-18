@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Bundled the setup runtime scripts and configuration inside the app so actions continue to work after an installer removes its temporary source checkout.
+- Resolved the bundled runtime relative to the app instead of persisting a machine-specific source path.
+
 This project uses the Setup app version in [`VERSION`](VERSION). GitHub Releases are not required.
 
 ## 0.4.0 - 2026-07-17

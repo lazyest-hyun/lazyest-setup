@@ -31,6 +31,15 @@ sign_setup_app() {
   codesign --force --deep --sign - "$setup_app"
 }
 
+copy_runtime_payload() {
+  local runtime_dir="$setup_app/Contents/Resources/Runtime"
+  mkdir -p "$runtime_dir/config" "$runtime_dir/scripts"
+  cp "$ROOT_DIR/bootstrap.sh" "$ROOT_DIR/VERSION" "$runtime_dir/"
+  cp "$ROOT_DIR/config/bootstrap.conf" "$runtime_dir/config/"
+  cp "$ROOT_DIR/scripts/"*.sh "$runtime_dir/scripts/"
+  chmod +x "$runtime_dir/bootstrap.sh" "$runtime_dir/scripts/"*.sh
+}
+
 echo "INSTALL_SETUP"
 echo "  dry-run: $(bool_label "$DRY_RUN")"
 echo "  binary: $setup_binary"
@@ -76,7 +85,8 @@ else
   if [ -f "$ROOT_DIR/setup/LazyestSetup/Assets/AppIcon.icns" ]; then
     cp "$ROOT_DIR/setup/LazyestSetup/Assets/AppIcon.icns" "$setup_app/Contents/Resources/AppIcon.icns"
   fi
-  printf '%s\n' "$ROOT_DIR" >"$setup_app/Contents/Resources/ProjectRoot.txt"
+  copy_runtime_payload
+  printf '%s\n' "Runtime" >"$setup_app/Contents/Resources/ProjectRoot.txt"
   cat >"$setup_app/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
