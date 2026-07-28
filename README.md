@@ -25,7 +25,7 @@
 
 상시 실행 메뉴 막대 앱은 [Lazyest Flow](https://github.com/lazyest-hyun/lazyest-flow)에서 독립적으로 개발하고 설치합니다.
 
-Setup의 `Flow` 탭에서 Flow가 없을 때 버튼을 누르면 [최신 GitHub Release 페이지](https://github.com/lazyest-hyun/lazyest-flow/releases/latest)를 엽니다. 사용자가 arm64용 ZIP/DMG를 직접 선택해 내려받습니다. Setup 저장소에는 Flow 소스나 런타임 설정을 포함하지 않습니다.
+Setup의 `Flow` 탭에서 Flow가 없을 때 버튼을 누르면 [최신 GitHub Release 페이지](https://github.com/lazyest-hyun/lazyest-flow/releases/latest)를 엽니다. 사용자는 PKG 설치 프로그램을 내려받아 실행합니다. Setup 저장소에는 Flow 소스나 런타임 설정을 포함하지 않습니다.
 
 ## Setup 기능
 
@@ -100,21 +100,23 @@ Flow 릴리즈 페이지:
 
 ## 배포 패키지 준비
 
-공개 배포용 ZIP은 Developer ID Application 인증서와 Apple 공증 프로필이 준비된 Mac에서만 만듭니다. 값 자체는 저장소에 기록하지 않고 셸 환경으로 전달합니다.
+공개 배포용 PKG는 Developer ID Application, Developer ID Installer 인증서와 Apple 공증 프로필이 준비된 Mac에서만 만듭니다. 값 자체는 저장소에 기록하지 않고 셸 환경으로 전달합니다.
 
 ```sh
 LAZYEST_CODESIGN_IDENTITY="Developer ID Application: ..." \
+LAZYEST_INSTALLER_IDENTITY="Developer ID Installer: ..." \
 LAZYEST_TEAM_ID="..." \
 LAZYEST_NOTARY_PROFILE="lazyest-notary" \
 ./scripts/package-macos-release.sh --preflight
 
 LAZYEST_CODESIGN_IDENTITY="Developer ID Application: ..." \
+LAZYEST_INSTALLER_IDENTITY="Developer ID Installer: ..." \
 LAZYEST_TEAM_ID="..." \
 LAZYEST_NOTARY_PROFILE="lazyest-notary" \
 ./scripts/package-macos-release.sh
 ```
 
-완료되면 `dist/Lazyest-Setup-<version>-macOS.zip`과 SHA-256 파일이 생깁니다. 이 명령은 GitHub Release나 App Store 등록을 만들지 않습니다.
+완료되면 `dist/Lazyest-Setup-<version>-macOS.pkg`와 SHA-256 파일이 생깁니다. 이 명령은 GitHub Release나 App Store 등록을 만들지 않습니다.
 
 macOS 설정 명령 전체는 `./bootstrap.sh help`에서 확인할 수 있습니다. 실제 적용 전에는 대응하는 `--dry-run`을 먼저 사용할 수 있습니다.
 
@@ -128,7 +130,7 @@ macOS 설정 명령 전체는 `./bootstrap.sh help`에서 확인할 수 있습�
 
 ## Flow 릴리즈 방식
 
-Flow 저장소와 최신 릴리즈 페이지는 [`config/bootstrap.conf`](config/bootstrap.conf)의 `FLOW_REPOSITORY`, `FLOW_RELEASE_PAGE_URL`에서 확인할 수 있습니다. Setup은 릴리즈 파일을 자동 설치하거나 빌드하지 않고, GitHub의 최신 릴리즈 페이지를 엽니다. 사용자가 공개 릴리즈의 arm64 ZIP/DMG를 선택합니다.
+Flow 저장소와 최신 릴리즈 페이지는 [`config/bootstrap.conf`](config/bootstrap.conf)의 `FLOW_REPOSITORY`, `FLOW_RELEASE_PAGE_URL`에서 확인할 수 있습니다. Setup은 릴리즈 파일을 자동 설치하거나 빌드하지 않고, GitHub의 최신 릴리즈 페이지를 엽니다. 사용자는 공개 릴리즈의 PKG 설치 프로그램을 실행합니다.
 
 Flow 릴리즈를 내려받아 사용하는 데는 사용자 Mac에 Swift나 전체 Xcode를 설치할 필요가 없습니다. Setup 앱 자체를 소스에서 빌드할 때만 Swift/Apple Command Line Tools가 필요합니다.
 
