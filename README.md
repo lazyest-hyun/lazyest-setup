@@ -17,15 +17,15 @@
 
 - 최신 소스만 얕게 받아 현재 Mac에서 빌드하고 `/Applications/Lazyest Setup.app`에 설치한 뒤 임시 소스와 빌드 산출물을 제거합니다.
 - Flow 설치, Homebrew 설치, 앱 설치, macOS 설정 적용은 수행하지 않습니다. Setup UI에서 사용자가 고른 항목만 나중에 변경됩니다.
-- Swift 도구 모음이 없으면 `xcode-select --install`로 macOS 설치 확인을 열고, 사용자가 승인한 뒤 위 명령을 다시 실행합니다.
+- Setup 소스를 직접 빌드할 때 Swift 도구 모음이 없으면 `xcode-select --install`로 macOS 설치 확인을 열고, 사용자가 승인한 뒤 위 명령을 다시 실행합니다.
 
 ![Lazyest Setup 앱 설치 화면](docs/images/setup-install.png)
 
 ## Flow는 별도 프로젝트입니다
 
-상시 실행 메뉴 막대 앱은 [Lazyest Flow](https://github.com/hyunn515/lazyest-flow)에서 독립적으로 개발하고 설치합니다.
+상시 실행 메뉴 막대 앱은 [Lazyest Flow](https://github.com/lazyest-hyun/lazyest-flow)에서 독립적으로 개발하고 설치합니다.
 
-Setup의 `Flow` 탭에서 설치 버튼을 누르면 별도 Flow 프로젝트를 내려받아 `/Applications/Lazyest Flow.app`으로 설치합니다. Setup 저장소에는 Flow 소스나 런타임 설정을 포함하지 않습니다.
+Setup의 `Flow` 탭에서 Flow가 없을 때 버튼을 누르면 [최신 GitHub Release 페이지](https://github.com/lazyest-hyun/lazyest-flow/releases/latest)를 엽니다. 사용자가 arm64용 ZIP/DMG를 직접 선택해 내려받습니다. Setup 저장소에는 Flow 소스나 런타임 설정을 포함하지 않습니다.
 
 ## Setup 기능
 
@@ -40,6 +40,7 @@ Setup의 `Flow` 탭에서 설치 버튼을 누르면 별도 Flow 프로젝트를
 ### 텍스트와 키보드
 
 - Gureum 두벌식 입력 소스 등록
+- Gureum 입력 소스 등록에는 Apple Command Line Tools의 Swift가 필요하며, 전체 Xcode는 필요하지 않습니다.
 - Karabiner Complex Modification으로 오른쪽 Command를 `F18`로 변경
 - 이전 입력 소스 단축키 비활성화 및 다음 입력 소스를 `F18`로 설정
 - 키 반복, 길게 눌러 악센트, 기능 키, Globe/Fn 키 설정
@@ -57,8 +58,8 @@ Setup의 `Flow` 탭에서 설치 버튼을 누르면 별도 Flow 프로젝트를
 ## 수동 설치
 
 ```sh
-git clone https://github.com/hyunn515/lazyest-setup.git
-cd mac-bootstrap
+git clone https://github.com/lazyest-hyun/lazyest-setup.git
+cd lazyest-setup
 
 ./bootstrap.sh audit
 ./bootstrap.sh plan
@@ -90,7 +91,7 @@ Setup 앱:
 ./bootstrap.sh uninstall-setup [--dry-run]
 ```
 
-별도 Flow 연결:
+Flow 릴리즈 페이지:
 
 ```sh
 ./bootstrap.sh install-flow [--dry-run]
@@ -123,13 +124,13 @@ macOS 설정 명령 전체는 `./bootstrap.sh help`에서 확인할 수 있습�
 - 기본 앱 단축키나 상시 실행 기능을 추가하지 않습니다.
 - 비밀번호, 토큰, Keychain 값과 전체 환경변수를 저장하거나 출력하지 않습니다.
 - `sudo` 또는 생체 인증이 필요하면 사용자가 직접 확인합니다.
-- Flow 설치는 기존 `~/Library/Application Support/Lazyest Flow/` 설정을 덮어쓰지 않습니다.
+- Flow 릴리즈 페이지를 여는 동작은 기존 `~/Library/Application Support/Lazyest Flow/` 설정을 변경하지 않습니다.
 
-## Flow 설치 방식
+## Flow 릴리즈 방식
 
-Flow 저장소와 설치할 리비전은 [`config/bootstrap.conf`](config/bootstrap.conf)의 `FLOW_REPOSITORY`, `FLOW_REF`에서 변경할 수 있습니다. Setup은 해당 소스를 임시 폴더에 내려받고 Flow 저장소의 설치 명령을 실행한 뒤 임시 파일을 삭제합니다.
+Flow 저장소와 최신 릴리즈 페이지는 [`config/bootstrap.conf`](config/bootstrap.conf)의 `FLOW_REPOSITORY`, `FLOW_RELEASE_PAGE_URL`에서 확인할 수 있습니다. Setup은 릴리즈 파일을 자동 설치하거나 빌드하지 않고, GitHub의 최신 릴리즈 페이지를 엽니다. 사용자가 공개 릴리즈의 arm64 ZIP/DMG를 선택합니다.
 
-현재는 GitHub Release 바이너리 대신 소스 빌드를 사용하므로 Swift 도구 모음이 필요합니다.
+Flow 릴리즈를 내려받아 사용하는 데는 사용자 Mac에 Swift나 전체 Xcode를 설치할 필요가 없습니다. Setup 앱 자체를 소스에서 빌드할 때만 Swift/Apple Command Line Tools가 필요합니다.
 
 ## 검증
 

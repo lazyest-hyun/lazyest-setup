@@ -92,6 +92,6 @@ launch_agent_plist() {
   echo "$HOME/Library/LaunchAgents/com.estaid.mac-bootstrap-agent.plist"
 }
 
-flow_archive_url() {
-  printf '%s/archive/%s.tar.gz\n' "$FLOW_REPOSITORY" "$FLOW_REF"
+flow_release_page_url() {
+  printf '%s\n' "$FLOW_RELEASE_PAGE_URL"
 }

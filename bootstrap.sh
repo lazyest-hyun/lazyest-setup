@@ -54,7 +54,7 @@ Commands:
   dock-cleanup      Remove configured default Dock icons, with plist backup.
   dock-apply        Apply an explicit default-app Dock checklist, with plist backup.
   build-setup       Build the one-time Swift Setup app, or preview with --dry-run.
-  install-flow     Download and install the separate Lazyest Flow project.
+  install-flow     Open the latest Lazyest Flow GitHub Release page.
   uninstall-flow   Remove only Lazyest Flow.app.
   install-setup     Install only the one-time Lazyest Setup.app.
   uninstall-setup   Remove only Lazyest Setup.app.

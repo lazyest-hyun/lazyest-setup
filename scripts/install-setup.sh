@@ -127,6 +127,8 @@ else
   <string>$version</string>
   <key>LSMinimumSystemVersion</key>
   <string>13.0</string>
+  <key>LSMultipleInstancesProhibited</key>
+  <true/>
 </dict>
 </plist>
 PLIST

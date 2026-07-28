@@ -1,5 +1,6 @@
 import AppKit
 import Carbon
+import Darwin
 import Foundation
 import LazyestSetupCore
 
@@ -46,6 +47,7 @@ func localized(_ key: String) -> String {
         "app.subtitle": "새 Mac에서 필요한 항목만 골라 한 번씩 설정합니다. 선택하지 않은 항목은 바꾸지 않습니다.",
         "app.impact": "일부 입력기·키보드 변경은 로그아웃이 필요합니다. 적용 전 현재 상태와 영향을 확인하세요. 매일 쓰는 기능은 별도 앱 Flow에서 관리합니다.",
         "tab.install": "설치",
+        "tab.sequence": "순차 설정",
         "tab.text": "텍스트/키보드",
         "tab.desktop": "데스크톱",
         "tab.dock": "Dock",
@@ -60,7 +62,7 @@ func localized(_ key: String) -> String {
         "section.communication": "커뮤니케이션",
         "section.utility": "편의",
         "row.homebrew.title": "Homebrew",
-        "row.homebrew.detail": "앱 설치에 필요합니다.",
+        "row.homebrew.detail": "앱 설치용입니다. 전체 Xcode는 필요하지 않으며, Homebrew가 필요할 때만 Command Line Tools를 안내합니다.",
         "row.chrome.title": "Google Chrome",
         "row.chrome.detail": "기본 웹 브라우저.",
         "row.arc.title": "Arc",
@@ -94,13 +96,13 @@ func localized(_ key: String) -> String {
         "row.amphetamine.title": "Amphetamine",
         "row.amphetamine.detail": "선택 App Store 대안.",
         "row.gureum.title": "구름 입력기",
-        "row.gureum.detail": "설치 후 로그아웃해야 입력 소스에 나타납니다.",
+        "row.gureum.detail": "설치 후 로그아웃해야 입력 소스에 나타납니다. 등록에는 Command Line Tools의 Swift가 필요합니다.",
         "row.gureumOption.title": "구름 Option 키",
         "row.gureumOption.detail": "한글 입력 중에도 Option 조합 특수문자를 사용합니다.",
         "row.karabiner.title": "Karabiner-Elements",
         "row.karabiner.detail": "오른쪽 Command를 F18로.",
         "row.inputSource.title": "입력 소스 설정",
-        "row.inputSource.detail": "Gureum / Han 2set 등록 후 Apple 두벌식을 제거합니다.",
+        "row.inputSource.detail": "Gureum / Han 2set 등록 후 Apple 두벌식을 제거합니다. 전체 Xcode는 필요하지 않습니다.",
         "row.inputShortcut.title": "입력 소스 단축키",
         "row.inputShortcut.detail": "이전 입력 소스는 끄고 다음 입력 소스는 F18로 설정합니다.",
         "row.keyRepeat.title": "키 반복 속도",
@@ -121,18 +123,24 @@ func localized(_ key: String) -> String {
         "row.click.detail": "배경화면을 클릭해도 창이 사라지지 않게 합니다.",
         "row.wallpaper.title": "검정 배경화면",
         "row.wallpaper.detail": "macOS 내장 검은색 배경.",
+        "row.hotCornerMissionControl.title": "전체 화면 오른쪽 위",
+        "row.hotCornerMissionControl.detail": "여러 모니터에서는 가장 오른쪽 모니터의 바깥쪽 위 모서리에서 Mission Control을 엽니다.",
+        "row.hotCornerDesktop.title": "전체 화면 오른쪽 아래",
+        "row.hotCornerDesktop.detail": "여러 모니터에서는 가장 오른쪽 모니터의 바깥쪽 아래 모서리에서 데스크톱을 봅니다.",
         "row.dockAutohide.title": "Dock 자동 숨김",
         "row.dockAutohide.detail": "Dock을 평소에는 숨기고 가장자리에서만 표시합니다.",
         "row.dock.title": "Dock 정리",
         "row.dock.detail": "체크한 기본 앱만 Dock에 유지합니다.",
-        "dock.hint": "Finder는 macOS 고정 항목이라 따로 관리하지 않습니다. 체크를 켜면 Dock에 추가하고, 끄면 Dock에서 제거합니다.",
+        "dock.hint": "Finder는 macOS 고정 항목이라 따로 관리하지 않습니다. 체크를 켜면 Dock에 추가하고, 끄면 Dock에서 제거합니다. 적용 실패 시 실패 상태를 표시합니다.",
         "dock.apply": "선택 적용",
         "dock.selected": "선택됨",
         "dock.current": "현재 Dock",
         "row.flow.title": "Lazyest Flow",
-        "row.flow.detail": "별도 프로젝트로 설치되는 메뉴 막대 앱.",
+        "row.flow.detail": "GitHub 최신 릴리즈에서 내려받는 메뉴 막대 앱.",
         "button.install": "설치",
         "button.open": "열기",
+        "button.openRelease": "최신 릴리즈",
+        "button.guidedSetup": "간편 설정 시작",
         "button.done": "완료",
         "button.reset": "초기화",
         "button.enable": "켜기",
@@ -155,6 +163,7 @@ func localized(_ key: String) -> String {
         "status.partiallyApplied": "부분 적용",
         "status.systemColor": "시스템 색상",
         "status.homebrewFirst": "Homebrew 먼저",
+        "status.commandLineToolsFirst": "Command Line Tools 필요",
         "status.gureumFirst": "구름 먼저",
         "status.appstore": "App Store",
         "status.off": "꺼짐",
@@ -169,7 +178,7 @@ func localized(_ key: String) -> String {
         "status.manualCheck": "수동 확인",
         "status.flowInstalled": "Flow 설치됨",
         "status.flowFailed": "Flow 설치 실패",
-        "status.flowInstalling": "Flow 다운로드 및 설치 중",
+        "status.flowInstalling": "Flow 최신 릴리즈 여는 중",
         "status.opened": "열림",
         "status.applying": "적용 중",
         "status.failed": "실패",
@@ -178,6 +187,59 @@ func localized(_ key: String) -> String {
         "status.startedTerminal": "Terminal에서 설치 시작",
         "status.installHomebrewFirst": "Homebrew를 먼저 설치하세요",
         "status.settingsApplied": "설정 적용됨",
+        "sequence.title": "간편 설정",
+        "sequence.windowTitle": "간편 설정",
+        "sequence.subtitle": "앱 설치 제외",
+        "sequence.homebrew": "Homebrew",
+        "sequence.homebrew.detail": "Terminal에서 비밀번호 입력",
+        "sequence.desktop": "데스크톱",
+        "sequence.desktop.detail": "배경화면 · 데스크톱 클릭",
+        "sequence.dock": "Dock",
+        "sequence.dock.detail": "앱 · Safari · 메모 · 시스템 설정 · 캘린더",
+        "sequence.text": "텍스트/키보드",
+        "sequence.text.detail": "한글 입력기 · 오른쪽 Command 전환 · 키보드",
+        "sequence.appsExcluded": "앱 설치는 설치 탭에서 필요할 때 직접 진행하세요.",
+        "sequence.start": "적용",
+        "sequence.next": "적용",
+        "sequence.apply": "적용",
+        "sequence.applyContinue": "적용하고 계속",
+        "sequence.finish": "적용하고 완료",
+        "sequence.homebrewAction": "설치 시작",
+        "sequence.homebrewReady": "완료",
+        "sequence.back": "이전",
+        "sequence.close": "닫기",
+        "sequence.restart": "처음으로",
+        "sequence.waitingHomebrew": "Terminal에서 비밀번호를 입력하세요.",
+        "sequence.desktop.wallpaper": "검정 배경화면",
+        "sequence.desktop.click": "바탕화면 클릭 동작 끄기",
+        "sequence.desktop.hotCornerMissionControl": "가장 오른쪽 화면 위: 열린 창 전체 보기",
+        "sequence.desktop.hotCornerDesktop": "가장 오른쪽 화면 아래: 데스크톱 보기",
+        "sequence.text.gureum": "구름으로 한글 입력",
+        "sequence.text.gureum.detail": "구름 설치 · 두벌식 입력 소스 등록 · Option 키 특수문자",
+        "sequence.text.commandSwitch": "오른쪽 Command로 한/영 전환",
+        "sequence.text.commandSwitch.detail": "Karabiner: 오른쪽 Command → F18 · macOS: F18 → 다음 입력 소스",
+        "sequence.text.ready": "준비됨",
+        "sequence.text.installRequired": "설치 필요",
+        "sequence.text.inputRegistrationRequired": "입력 소스 등록 필요",
+        "sequence.text.permissionRequired": "Karabiner 권한 허용 필요",
+        "sequence.text.installStarted": "Terminal에서 입력기 설치를 시작했습니다. 완료 후 다시 적용하세요.",
+        "sequence.text.gureumLogoutRequired": "구름 설치 후 로그아웃한 다음 다시 적용하세요.",
+        "sequence.text.karabinerPermissionRequired": "Karabiner를 열었습니다. 드라이버 권한을 허용한 다음 다시 적용하세요.",
+        "sequence.text.switchFailed": "오른쪽 Command와 입력 소스 전환을 함께 적용하지 못했습니다.",
+        "sequence.text.typing": "키 반복과 길게 누르기",
+        "sequence.text.typing.detail": "반복 속도를 빠르게 하고 길게 누르면 문자를 반복합니다.",
+        "sequence.text.function": "기능 키와 Globe 키",
+        "sequence.text.function.detail": "F1–F12를 기본 기능 키로 사용하고 Globe 키 동작을 정리합니다.",
+        "sequence.text.autocorrect": "맞춤법·마침표·인라인 자동완성 끄기",
+        "sequence.text.autocorrect.detail": "자동 교정과 예측 입력으로 글자가 바뀌는 동작을 끕니다.",
+        "sequence.stage.homebrew": "Homebrew",
+        "sequence.stage.desktop": "데스크톱",
+        "sequence.stage.dock": "Dock",
+        "sequence.stage.text": "텍스트/키보드",
+        "sequence.finished": "순차 설정 완료",
+        "sequence.selectionTitle": "진행할 항목",
+        "sequence.selectionDetail": "필요하지 않은 단계는 체크를 끄면 건너뜁니다.",
+        "sequence.progressDone": "완료",
         "alert.logout.title": "지금 로그아웃할까요?",
         "alert.logout.gureum": "구름 입력기는 설치 후 로그아웃해야 입력 소스 목록에 나타납니다. 저장하지 않은 작업을 먼저 정리하세요.",
         "alert.logout.now": "지금 로그아웃",
@@ -191,6 +253,7 @@ func localized(_ key: String) -> String {
         "app.subtitle": "Choose only what this Mac needs. Setup leaves every unselected item unchanged.",
         "app.impact": "Some input and keyboard changes require logout. Review each current state and impact before applying. Everyday controls live in the separate Flow app.",
         "tab.install": "Install",
+        "tab.sequence": "Guided Setup",
         "tab.text": "Text & Keyboard",
         "tab.desktop": "Desktop",
         "tab.dock": "Dock",
@@ -205,7 +268,7 @@ func localized(_ key: String) -> String {
         "section.communication": "Communication",
         "section.utility": "Utilities",
         "row.homebrew.title": "Homebrew",
-        "row.homebrew.detail": "Required for cask installs.",
+        "row.homebrew.detail": "For app installs. Full Xcode is not required; Homebrew may request only Command Line Tools.",
         "row.chrome.title": "Google Chrome",
         "row.chrome.detail": "Primary web browser.",
         "row.arc.title": "Arc",
@@ -239,13 +302,13 @@ func localized(_ key: String) -> String {
         "row.amphetamine.title": "Amphetamine",
         "row.amphetamine.detail": "Optional App Store alternative.",
         "row.gureum.title": "Gureum Input Method",
-        "row.gureum.detail": "Log out after install so it appears in Input Sources.",
+        "row.gureum.detail": "Log out after install so it appears in Input Sources. Registration uses Swift from Command Line Tools.",
         "row.gureumOption.title": "Gureum Option Key",
         "row.gureumOption.detail": "Use Option-key special characters while typing Korean.",
         "row.karabiner.title": "Karabiner-Elements",
         "row.karabiner.detail": "Right Command to F18.",
         "row.inputSource.title": "Input Source Settings",
-        "row.inputSource.detail": "Register Gureum / Han 2set, then remove Apple 2-set Korean.",
+        "row.inputSource.detail": "Register Gureum / Han 2set, then remove Apple 2-set Korean. Full Xcode is not required.",
         "row.inputShortcut.title": "Input Source Shortcuts",
         "row.inputShortcut.detail": "Disable previous input source and set next input source to F18.",
         "row.keyRepeat.title": "Key Repeat",
@@ -266,18 +329,24 @@ func localized(_ key: String) -> String {
         "row.click.detail": "Keep windows visible when clicking the wallpaper.",
         "row.wallpaper.title": "Black wallpaper",
         "row.wallpaper.detail": "Built-in macOS black wallpaper.",
+        "row.hotCornerMissionControl.title": "Overall top-right corner",
+        "row.hotCornerMissionControl.detail": "With multiple displays, use the outer top-right corner of the rightmost display for Mission Control.",
+        "row.hotCornerDesktop.title": "Overall bottom-right corner",
+        "row.hotCornerDesktop.detail": "With multiple displays, use the outer bottom-right corner of the rightmost display to show the desktop.",
         "row.dockAutohide.title": "Automatically hide Dock",
         "row.dockAutohide.detail": "Hide the Dock until the pointer reaches the screen edge.",
         "row.dock.title": "Dock cleanup",
         "row.dock.detail": "Keep only the checked default apps in the Dock.",
-        "dock.hint": "Finder is a fixed macOS Dock item and is not managed here. Checked apps are added to the Dock; unchecked apps are removed.",
+        "dock.hint": "Finder is a fixed macOS Dock item and is not managed here. Checked apps are added; unchecked apps are removed. Failures are shown instead of reported as success.",
         "dock.apply": "Apply Selection",
         "dock.selected": "selected",
         "dock.current": "in Dock",
         "row.flow.title": "Lazyest Flow",
-        "row.flow.detail": "Menu bar app installed from its separate project.",
+        "row.flow.detail": "Menu bar app downloaded from the latest GitHub release.",
         "button.install": "Install",
         "button.open": "Open",
+        "button.openRelease": "Latest Release",
+        "button.guidedSetup": "Start Quick Setup",
         "button.done": "Done",
         "button.reset": "Reset",
         "button.enable": "Enable",
@@ -300,6 +369,7 @@ func localized(_ key: String) -> String {
         "status.partiallyApplied": "Partially applied",
         "status.systemColor": "System color",
         "status.homebrewFirst": "Homebrew first",
+        "status.commandLineToolsFirst": "Command Line Tools required",
         "status.gureumFirst": "Gureum first",
         "status.appstore": "App Store",
         "status.off": "Off",
@@ -314,7 +384,7 @@ func localized(_ key: String) -> String {
         "status.manualCheck": "Manual check",
         "status.flowInstalled": "Flow installed",
         "status.flowFailed": "Flow install failed",
-        "status.flowInstalling": "Downloading and installing Flow",
+        "status.flowInstalling": "Opening the latest Flow release",
         "status.opened": "Opened",
         "status.applying": "Applying",
         "status.failed": "Failed",
@@ -323,6 +393,59 @@ func localized(_ key: String) -> String {
         "status.startedTerminal": "Started install in Terminal",
         "status.installHomebrewFirst": "Install Homebrew first",
         "status.settingsApplied": "Settings applied",
+        "sequence.title": "Quick Setup",
+        "sequence.windowTitle": "Quick Setup",
+        "sequence.subtitle": "App installs excluded",
+        "sequence.homebrew": "Homebrew",
+        "sequence.homebrew.detail": "Enter your password in Terminal",
+        "sequence.desktop": "Desktop",
+        "sequence.desktop.detail": "Wallpaper · desktop click",
+        "sequence.dock": "Dock",
+        "sequence.dock.detail": "Apps · Safari · Notes · System Settings · Calendar",
+        "sequence.text": "Text & Keyboard",
+        "sequence.text.detail": "Korean input · Right Command switching · keyboard",
+        "sequence.appsExcluded": "Install apps from the Install tab whenever you need them.",
+        "sequence.start": "Apply",
+        "sequence.next": "Apply",
+        "sequence.apply": "Apply",
+        "sequence.applyContinue": "Apply & Continue",
+        "sequence.finish": "Apply & Finish",
+        "sequence.homebrewAction": "Start install",
+        "sequence.homebrewReady": "Done",
+        "sequence.back": "Back",
+        "sequence.close": "Close",
+        "sequence.restart": "Start over",
+        "sequence.waitingHomebrew": "Enter your password in Terminal.",
+        "sequence.desktop.wallpaper": "Black wallpaper",
+        "sequence.desktop.click": "Disable click-to-show desktop",
+        "sequence.desktop.hotCornerMissionControl": "Rightmost display top: show all windows",
+        "sequence.desktop.hotCornerDesktop": "Rightmost display bottom: show desktop",
+        "sequence.text.gureum": "Type Korean with Gureum",
+        "sequence.text.gureum.detail": "Install Gureum · register 2-set input source · Option-key symbols",
+        "sequence.text.commandSwitch": "Switch input with Right Command",
+        "sequence.text.commandSwitch.detail": "Karabiner: Right Command → F18 · macOS: F18 → next input source",
+        "sequence.text.ready": "Ready",
+        "sequence.text.installRequired": "Install required",
+        "sequence.text.inputRegistrationRequired": "Input source registration required",
+        "sequence.text.permissionRequired": "Allow Karabiner permission",
+        "sequence.text.installStarted": "Input-method installation started in Terminal. Apply again when it finishes.",
+        "sequence.text.gureumLogoutRequired": "Log out after installing Gureum, then apply again.",
+        "sequence.text.karabinerPermissionRequired": "Karabiner is open. Allow its driver, then apply again.",
+        "sequence.text.switchFailed": "Could not apply Right Command and input-source switching together.",
+        "sequence.text.typing": "Key repeat and press-and-hold",
+        "sequence.text.typing.detail": "Use a fast repeat rate and repeat characters when holding a key.",
+        "sequence.text.function": "Function keys and Globe key",
+        "sequence.text.function.detail": "Use F1–F12 as standard function keys and configure the Globe key.",
+        "sequence.text.autocorrect": "Disable spelling, period, and inline prediction",
+        "sequence.text.autocorrect.detail": "Prevent automatic correction and prediction from changing typed text.",
+        "sequence.stage.homebrew": "Homebrew",
+        "sequence.stage.desktop": "Desktop",
+        "sequence.stage.dock": "Dock",
+        "sequence.stage.text": "Text & Keyboard",
+        "sequence.finished": "Guided setup complete",
+        "sequence.selectionTitle": "Steps to run",
+        "sequence.selectionDetail": "Turn off a step to skip it.",
+        "sequence.progressDone": "Complete",
         "alert.logout.title": "Log out now?",
         "alert.logout.gureum": "Gureum appears in Input Sources only after logging out after install. Save your work first.",
         "alert.logout.now": "Log Out Now",
@@ -379,6 +502,21 @@ final class SetupWindowController: NSWindowController {
     private var statusPills: [NSTextField] = []
     private var statusRows: [(status: NSTextField, box: NSBox)] = []
     private var dockCheckboxes: [String: NSButton] = [:]
+    private var sequenceDockCheckboxes: [String: NSButton] = [:]
+    private var sequenceStepButtons: [String: NSButton] = [:]
+    private var sequenceDesktopCheckboxes: [String: NSButton] = [:]
+    private var sequenceTextCheckboxes: [String: NSButton] = [:]
+    private var sequenceTextDetailLabels: [String: NSTextField] = [:]
+    private weak var sequenceDesktopOptions: NSView?
+    private weak var sequenceTextOptions: NSView?
+    private weak var sequenceDockTitle: NSTextField?
+    private weak var sequenceDockScrollView: NSScrollView?
+    private var sequenceStepIndex = 0
+    private var sequenceRunning = false
+    private var sequenceFinished = false
+    private var sequenceHomebrewPromptStarted = false
+    private var sequenceWindow: NSWindow?
+    private var dockStateLoaded = false
     private var activationObserver: NSObjectProtocol?
     private var spellingPreferenceState: BooleanPreferenceState = .inherited
     private var periodPreferenceState: BooleanPreferenceState = .inherited
@@ -392,8 +530,15 @@ final class SetupWindowController: NSWindowController {
     private let inlineStatus = NSTextField(labelWithString: "")
     private let clickDesktopStatus = NSTextField(labelWithString: "")
     private let wallpaperStatus = NSTextField(labelWithString: "")
+    private let hotCornerMissionControlStatus = NSTextField(labelWithString: "")
+    private let hotCornerDesktopStatus = NSTextField(labelWithString: "")
     private let dockAutohideStatus = NSTextField(labelWithString: "")
     private let dockStatus = NSTextField(labelWithString: "")
+    private let sequenceStatus = NSTextField(labelWithString: localized("status.ready"))
+    private let sequenceProgress = NSTextField(labelWithString: "")
+    private let sequenceStageTitle = NSTextField(labelWithString: "")
+    private let sequenceStageDetail = NSTextField(labelWithString: "")
+    private lazy var sequenceBackButton = button(localized("sequence.back"), #selector(goBackSequence))
     private let homebrewStatus = NSTextField(labelWithString: "")
     private let chromeStatus = NSTextField(labelWithString: "")
     private let arcStatus = NSTextField(labelWithString: "")
@@ -426,8 +571,11 @@ final class SetupWindowController: NSWindowController {
     private lazy var inlinePrimaryButton = button("Disable", #selector(toggleInline))
     private lazy var clickDesktopPrimaryButton = button("Apply", #selector(toggleClickDesktop))
     private lazy var wallpaperPrimaryButton = button("Apply", #selector(applyWallpaper))
+    private lazy var hotCornerMissionControlButton = button("Apply", #selector(toggleHotCornerMissionControl))
+    private lazy var hotCornerDesktopButton = button("Apply", #selector(toggleHotCornerDesktop))
     private lazy var dockAutohidePrimaryButton = button("Enable", #selector(toggleDockAutohide))
     private lazy var dockPrimaryButton = button("Apply Selection", #selector(applyDockSelection))
+    private lazy var sequencePrimaryButton = button("Run Guided Setup", #selector(startOrContinueSequence))
     private lazy var homebrewPrimaryButton = button("Install", #selector(installHomebrew))
     private lazy var chromePrimaryButton = button("Open", #selector(primaryChrome))
     private lazy var arcPrimaryButton = button("Install", #selector(primaryArc))
@@ -468,7 +616,7 @@ final class SetupWindowController: NSWindowController {
         window.isReleasedWhenClosed = false
         super.init(window: window)
         buildUI()
-        refresh()
+        refresh(forceDock: true)
         activationObserver = NotificationCenter.default.addObserver(
             forName: NSApplication.didBecomeActiveNotification,
             object: nil,
@@ -516,6 +664,9 @@ final class SetupWindowController: NSWindowController {
         header.addArrangedSubview(title)
         header.addArrangedSubview(NSView())
         configureLanguagePopup()
+        let guidedSetupButton = button(localized("button.guidedSetup"), #selector(openGuidedSetupWindow))
+        guidedSetupButton.controlSize = .large
+        header.addArrangedSubview(guidedSetupButton)
         header.addArrangedSubview(languagePopup)
         root.addArrangedSubview(header)
 
@@ -584,8 +735,318 @@ final class SetupWindowController: NSWindowController {
         let values = [SetupLanguage.automatic.rawValue, SetupLanguage.korean.rawValue, SetupLanguage.english.rawValue]
         let index = max(0, min(languagePopup.indexOfSelectedItem, values.count - 1))
         saveLanguageCode(values[index])
+        sequenceWindow?.close()
+        sequenceWindow = nil
         buildUI()
-        refresh()
+        refresh(forceDock: true)
+    }
+
+    @objc private func openGuidedSetupWindow() {
+        if let sequenceWindow {
+            sequenceWindow.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+            return
+        }
+
+        if brewPath() != nil && sequenceStepIndex == 0 && !sequenceRunning && !sequenceFinished {
+            sequenceStepIndex = 1
+        }
+        let sequenceItem = sequenceTab()
+        guard let contentView = sequenceItem.view else { return }
+        let sequenceWindow = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 820, height: 400),
+            styleMask: [.titled, .closable, .miniaturizable, .resizable],
+            backing: .buffered,
+            defer: false
+        )
+        sequenceWindow.title = localized("sequence.windowTitle")
+        sequenceWindow.contentView = contentView
+        sequenceWindow.minSize = NSSize(width: 720, height: 360)
+        sequenceWindow.isReleasedWhenClosed = false
+        sequenceWindow.center()
+        self.sequenceWindow = sequenceWindow
+        updateSequenceStepUI()
+        sequenceWindow.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
+    private func sequenceTab() -> NSTabViewItem {
+        let item = NSTabViewItem(identifier: localized("tab.sequence"))
+        item.label = localized("tab.sequence")
+        sequenceDockCheckboxes.removeAll()
+        sequenceStepButtons.removeAll()
+        sequenceDesktopCheckboxes.removeAll()
+        sequenceTextCheckboxes.removeAll()
+        sequenceTextDetailLabels.removeAll()
+        sequenceDesktopOptions = nil
+        sequenceTextOptions = nil
+        sequenceDockTitle = nil
+        sequenceDockScrollView = nil
+
+        let container = NSView()
+        let root = NSStackView()
+        root.orientation = .vertical
+        root.alignment = .width
+        root.spacing = 16
+        root.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(root)
+
+        let header = NSStackView()
+        header.orientation = .horizontal
+        header.alignment = .centerY
+        let title = NSTextField(labelWithString: localized("sequence.title"))
+        title.font = NSFont.boldSystemFont(ofSize: 22)
+        header.addArrangedSubview(title)
+        header.addArrangedSubview(NSView())
+        sequenceProgress.font = NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .semibold)
+        sequenceProgress.textColor = .secondaryLabelColor
+        header.addArrangedSubview(sequenceProgress)
+        root.addArrangedSubview(header)
+
+        let stepBar = NSStackView()
+        stepBar.orientation = .horizontal
+        stepBar.alignment = .centerY
+        stepBar.distribution = .fillEqually
+        stepBar.spacing = 8
+        for key in ["homebrew", "desktop", "dock", "text"] {
+            let stepButton = NSButton(title: localized("sequence.\(key)"), target: self, action: #selector(selectSequenceStep(_:)))
+            stepButton.identifier = NSUserInterfaceItemIdentifier(key)
+            stepButton.isBordered = false
+            stepButton.bezelStyle = .inline
+            stepButton.controlSize = .large
+            sequenceStepButtons[key] = stepButton
+            stepBar.addArrangedSubview(stepButton)
+        }
+        root.addArrangedSubview(stepBar)
+        stepBar.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
+
+        sequenceStageTitle.font = NSFont.boldSystemFont(ofSize: 17)
+        sequenceStageDetail.textColor = .secondaryLabelColor
+        sequenceStageDetail.font = NSFont.systemFont(ofSize: 12)
+        sequenceStageDetail.lineBreakMode = .byTruncatingTail
+        let stage = NSBox()
+        stage.boxType = .custom
+        stage.cornerRadius = 12
+        stage.borderColor = NSColor.separatorColor
+        stage.borderWidth = 1
+        stage.fillColor = NSColor.controlBackgroundColor
+        stage.contentViewMargins = NSSize(width: 18, height: 16)
+        stage.heightAnchor.constraint(equalToConstant: 92).isActive = true
+        let stageStack = NSStackView(views: [sequenceStageTitle, sequenceStageDetail])
+        stageStack.orientation = .vertical
+        stageStack.spacing = 5
+        stageStack.translatesAutoresizingMaskIntoConstraints = false
+        stage.contentView?.addSubview(stageStack)
+        NSLayoutConstraint.activate([
+            stageStack.leadingAnchor.constraint(equalTo: stage.contentView!.leadingAnchor),
+            stageStack.trailingAnchor.constraint(equalTo: stage.contentView!.trailingAnchor),
+            stageStack.topAnchor.constraint(equalTo: stage.contentView!.topAnchor),
+            stageStack.bottomAnchor.constraint(equalTo: stage.contentView!.bottomAnchor)
+        ])
+        root.addArrangedSubview(stage)
+        stage.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
+
+        let desktopOptionGroup = sequenceOptionsBox([
+            ("wallpaper", localized("sequence.desktop.wallpaper")),
+            ("click", localized("sequence.desktop.click")),
+            ("hotCornerMissionControl", localized("sequence.desktop.hotCornerMissionControl")),
+            ("hotCornerDesktop", localized("sequence.desktop.hotCornerDesktop"))
+        ])
+        let desktopOptions = desktopOptionGroup.box
+        sequenceDesktopCheckboxes = desktopOptionGroup.buttons
+        root.addArrangedSubview(desktopOptions)
+        desktopOptions.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
+        sequenceDesktopOptions = desktopOptions
+
+        let textChoices: [(String, String, String)] = [
+            ("gureum", localized("sequence.text.gureum"), localized("sequence.text.gureum.detail")),
+            ("commandSwitch", localized("sequence.text.commandSwitch"), localized("sequence.text.commandSwitch.detail")),
+            ("typing", localized("sequence.text.typing"), localized("sequence.text.typing.detail")),
+            ("function", localized("sequence.text.function"), localized("sequence.text.function.detail")),
+            ("autocorrect", localized("sequence.text.autocorrect"), localized("sequence.text.autocorrect.detail"))
+        ]
+        let textOptionGroup = sequenceTextOptionsBox(textChoices)
+        let textOptions = textOptionGroup.box
+        sequenceTextCheckboxes = textOptionGroup.buttons
+        sequenceTextDetailLabels = textOptionGroup.details
+        root.addArrangedSubview(textOptions)
+        textOptions.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
+        sequenceTextOptions = textOptions
+
+        let dockTitle = NSTextField(labelWithString: localized("row.dock.title"))
+        dockTitle.font = NSFont.boldSystemFont(ofSize: 13)
+        dockTitle.alignment = .left
+        root.addArrangedSubview(dockTitle)
+        sequenceDockTitle = dockTitle
+        dockTitle.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
+
+        let dockScroll = NSScrollView()
+        dockScroll.hasVerticalScroller = true
+        dockScroll.drawsBackground = false
+        dockScroll.borderType = .bezelBorder
+        let dockDocument = FlippedView(frame: NSRect(x: 0, y: 0, width: 760, height: CGFloat(dockChoices.count * 30)))
+        dockDocument.autoresizingMask = [.width]
+        let dockList = NSStackView()
+        dockList.orientation = .vertical
+        dockList.alignment = .leading
+        dockList.spacing = 2
+        dockList.translatesAutoresizingMaskIntoConstraints = false
+        dockDocument.addSubview(dockList)
+        for choice in dockChoices {
+            let checkbox = NSButton(checkboxWithTitle: choice.title, target: nil, action: nil)
+            checkbox.font = NSFont.systemFont(ofSize: 12)
+            checkbox.isEnabled = FileManager.default.fileExists(atPath: choice.path)
+            checkbox.state = sequenceDockDefaultSelected(choice) ? .on : .off
+            sequenceDockCheckboxes[choice.title] = checkbox
+            dockList.addArrangedSubview(checkbox)
+        }
+        NSLayoutConstraint.activate([
+            dockList.leadingAnchor.constraint(equalTo: dockDocument.leadingAnchor, constant: 12),
+            dockList.trailingAnchor.constraint(equalTo: dockDocument.trailingAnchor, constant: -12),
+            dockList.topAnchor.constraint(equalTo: dockDocument.topAnchor, constant: 10)
+        ])
+        dockScroll.documentView = dockDocument
+        dockScroll.heightAnchor.constraint(equalToConstant: 180).isActive = true
+        root.addArrangedSubview(dockScroll)
+        sequenceDockScrollView = dockScroll
+        dockScroll.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
+
+        root.addArrangedSubview(NSView())
+
+        let actions = NSStackView()
+        actions.orientation = .horizontal
+        actions.spacing = 10
+        actions.addArrangedSubview(sequenceStatus)
+        actions.addArrangedSubview(NSView())
+        sequenceBackButton.title = localized("sequence.back")
+        sequenceBackButton.controlSize = .large
+        actions.addArrangedSubview(sequenceBackButton)
+        sequencePrimaryButton.title = sequenceFinished ? localized("sequence.restart") : localized("sequence.apply")
+        sequencePrimaryButton.keyEquivalent = "\r"
+        sequencePrimaryButton.controlSize = .large
+        actions.addArrangedSubview(sequencePrimaryButton)
+        root.addArrangedSubview(actions)
+        actions.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
+
+        NSLayoutConstraint.activate([
+            root.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 24),
+            root.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -24),
+            root.topAnchor.constraint(equalTo: container.topAnchor, constant: 24),
+            root.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -24)
+        ])
+        item.view = container
+        updateSequenceStepUI()
+        return item
+    }
+
+    private func sequenceOptionsBox(
+        _ choices: [(String, String)]
+    ) -> (box: NSBox, buttons: [String: NSButton]) {
+        let box = NSBox()
+        box.boxType = .custom
+        box.cornerRadius = 10
+        box.borderColor = NSColor.separatorColor
+        box.borderWidth = 1
+        box.fillColor = NSColor.controlBackgroundColor
+        box.contentViewMargins = NSSize(width: 16, height: 12)
+        let stack = NSStackView()
+        var buttons: [String: NSButton] = [:]
+        stack.orientation = .vertical
+        stack.alignment = .leading
+        stack.spacing = 9
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        for (key, title) in choices {
+            let checkbox = NSButton(checkboxWithTitle: title, target: nil, action: nil)
+            checkbox.state = .on
+            checkbox.font = NSFont.systemFont(ofSize: 13)
+            buttons[key] = checkbox
+            stack.addArrangedSubview(checkbox)
+        }
+        box.heightAnchor.constraint(equalToConstant: CGFloat(choices.count * 28 + 24)).isActive = true
+        box.contentView?.addSubview(stack)
+        NSLayoutConstraint.activate([
+            stack.leadingAnchor.constraint(equalTo: box.contentView!.leadingAnchor),
+            stack.trailingAnchor.constraint(lessThanOrEqualTo: box.contentView!.trailingAnchor),
+            stack.topAnchor.constraint(equalTo: box.contentView!.topAnchor),
+            stack.bottomAnchor.constraint(equalTo: box.contentView!.bottomAnchor)
+        ])
+        return (box, buttons)
+    }
+
+    private func sequenceTextOptionsBox(
+        _ choices: [(String, String, String)]
+    ) -> (box: NSBox, buttons: [String: NSButton], details: [String: NSTextField]) {
+        let box = NSBox()
+        box.boxType = .custom
+        box.cornerRadius = 10
+        box.borderColor = NSColor.separatorColor
+        box.borderWidth = 1
+        box.fillColor = NSColor.controlBackgroundColor
+        box.contentViewMargins = NSSize(width: 16, height: 12)
+
+        let stack = NSStackView()
+        stack.orientation = .vertical
+        stack.alignment = .leading
+        stack.distribution = .fillEqually
+        stack.spacing = 12
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        var buttons: [String: NSButton] = [:]
+        var details: [String: NSTextField] = [:]
+
+        for (key, title, detail) in choices {
+            let row = NSStackView()
+            row.orientation = .vertical
+            row.alignment = .leading
+            row.spacing = 2
+
+            let checkbox = NSButton(checkboxWithTitle: title, target: nil, action: nil)
+            checkbox.state = .on
+            checkbox.font = NSFont.systemFont(ofSize: 13, weight: .medium)
+            buttons[key] = checkbox
+            row.addArrangedSubview(checkbox)
+
+            let detailLabel = NSTextField(labelWithString: detail)
+            detailLabel.font = NSFont.systemFont(ofSize: 11)
+            detailLabel.textColor = .secondaryLabelColor
+            detailLabel.lineBreakMode = .byTruncatingTail
+            details[key] = detailLabel
+            row.addArrangedSubview(detailLabel)
+            stack.addArrangedSubview(row)
+        }
+
+        box.heightAnchor.constraint(equalToConstant: CGFloat(choices.count * 49 + 24)).isActive = true
+        box.contentView?.addSubview(stack)
+        NSLayoutConstraint.activate([
+            stack.leadingAnchor.constraint(equalTo: box.contentView!.leadingAnchor),
+            stack.trailingAnchor.constraint(lessThanOrEqualTo: box.contentView!.trailingAnchor),
+            stack.topAnchor.constraint(equalTo: box.contentView!.topAnchor),
+            stack.bottomAnchor.constraint(equalTo: box.contentView!.bottomAnchor)
+        ])
+        return (box, buttons, details)
+    }
+
+    @objc private func selectSequenceStep(_ sender: NSButton) {
+        guard let key = sender.identifier?.rawValue,
+              let index = ["homebrew", "desktop", "dock", "text"].firstIndex(of: key) else { return }
+        sequenceStepIndex = index
+        sequenceRunning = false
+        sequenceFinished = false
+        sequenceStatus.stringValue = localized("status.ready")
+        updateSequenceStepUI()
+    }
+
+    @objc private func goBackSequence() {
+        guard sequenceStepIndex > 0 else { return }
+        sequenceStepIndex -= 1
+        sequenceRunning = false
+        sequenceFinished = false
+        sequenceStatus.stringValue = localized("status.ready")
+        updateSequenceStepUI()
+    }
+
+    private func sequenceDockDefaultSelected(_ choice: DockChoice) -> Bool {
+        let defaults = Set(["앱", "Apps", "Launchpad", "Safari", "메모", "Notes", "시스템 설정", "System Settings", "캘린더", "Calendar"])
+        return !defaults.isDisjoint(with: Set(choice.aliases))
     }
 
     private func textKeyboardTab() -> NSTabViewItem {
@@ -636,6 +1097,12 @@ final class SetupWindowController: NSWindowController {
             ]),
             row(title: localized("row.wallpaper.title"), detail: localized("row.wallpaper.detail"), status: wallpaperStatus, buttons: [
                 wallpaperPrimaryButton
+            ]),
+            row(title: localized("row.hotCornerMissionControl.title"), detail: localized("row.hotCornerMissionControl.detail"), status: hotCornerMissionControlStatus, buttons: [
+                hotCornerMissionControlButton
+            ]),
+            row(title: localized("row.hotCornerDesktop.title"), detail: localized("row.hotCornerDesktop.detail"), status: hotCornerDesktopStatus, buttons: [
+                hotCornerDesktopButton
             ])
         ])
     }
@@ -979,9 +1446,9 @@ final class SetupWindowController: NSWindowController {
         return button
     }
 
-    @objc private func refreshPressed() { refresh() }
+    @objc private func refreshPressed() { refresh(forceDock: true) }
 
-    private func refresh() {
+    private func refresh(forceDock: Bool = false) {
         spellingPreferenceState = booleanPreferenceState("-g", "NSAutomaticSpellingCorrectionEnabled")
         periodPreferenceState = booleanPreferenceState("-g", "NSAutomaticPeriodSubstitutionEnabled")
         inlinePreferenceState = booleanPreferenceState("-g", "NSAutomaticInlinePredictionEnabled")
@@ -1015,7 +1482,15 @@ final class SetupWindowController: NSWindowController {
         }
         wallpaperPrimaryButton.title = localized("button.apply")
         wallpaperPrimaryButton.isEnabled = true
-        refreshDockState()
+        let missionControlCornerApplied = hotCornerApplied(cornerKey: "wvous-tr-corner", action: 2)
+        hotCornerMissionControlStatus.stringValue = missionControlCornerApplied ? localized("status.applied") : localized("status.notApplied")
+        hotCornerMissionControlButton.title = missionControlCornerApplied ? localized("button.reset") : localized("button.apply")
+        hotCornerMissionControlButton.isEnabled = true
+        let desktopCornerApplied = hotCornerApplied(cornerKey: "wvous-br-corner", action: 4)
+        hotCornerDesktopStatus.stringValue = desktopCornerApplied ? localized("status.applied") : localized("status.notApplied")
+        hotCornerDesktopButton.title = desktopCornerApplied ? localized("button.reset") : localized("button.apply")
+        hotCornerDesktopButton.isEnabled = true
+        refreshDockState(force: forceDock)
         setHomebrewState(installed: brewInstalled)
         setInstallableAppState(status: chromeStatus, button: chromePrimaryButton, appName: "Google Chrome", brewInstalled: brewInstalled)
         setInstallableAppState(status: arcStatus, button: arcPrimaryButton, appName: "Arc", brewInstalled: brewInstalled)
@@ -1094,6 +1569,30 @@ final class SetupWindowController: NSWindowController {
         )
     }
 
+    @objc private func toggleHotCornerMissionControl() {
+        toggleHotCorner(cornerKey: "wvous-tr-corner", modifierKey: "wvous-tr-modifier", action: 2)
+    }
+
+    @objc private func toggleHotCornerDesktop() {
+        toggleHotCorner(cornerKey: "wvous-br-corner", modifierKey: "wvous-br-modifier", action: 4)
+    }
+
+    private func toggleHotCorner(cornerKey: String, modifierKey: String, action: Int) {
+        if hotCornerApplied(cornerKey: cornerKey, action: action) {
+            _ = runDefaults(["delete", "com.apple.dock", cornerKey])
+            _ = runDefaults(["delete", "com.apple.dock", modifierKey])
+        } else {
+            _ = runDefaults(["write", "com.apple.dock", cornerKey, "-int", "\(action)"])
+            _ = runDefaults(["write", "com.apple.dock", modifierKey, "-int", "0"])
+        }
+        _ = runProcess("/usr/bin/killall", ["Dock"])
+        refresh()
+    }
+
+    private func hotCornerApplied(cornerKey: String, action: Int) -> Bool {
+        defaultValue("com.apple.dock", cornerKey) == "\(action)"
+    }
+
     @objc private func applyWallpaper() {
         let path = blackWallpaperPath()
         let process = Process()
@@ -1110,8 +1609,340 @@ final class SetupWindowController: NSWindowController {
 
     @objc private func applyDockSelection() {
         let output = runScript(["dock-apply"], extraEnv: ["MAC_BOOTSTRAP_DOCK_KEEP_LABELS": selectedDockAliases().joined(separator: "\n")])
-        statusLabel.stringValue = output.contains("blocked:") ? localized("status.dockBlocked") : localized("status.dockApplied")
-        refreshDockState()
+        statusLabel.stringValue = output.contains("DOCK_APPLY_OK") && !output.contains("blocked:")
+            ? localized("status.dockApplied")
+            : localized("status.dockBlocked")
+        refreshDockState(force: true)
+    }
+
+    @objc private func startOrContinueSequence() {
+        if sequenceFinished {
+            sequenceFinished = false
+            sequenceRunning = false
+            sequenceStepIndex = brewPath() == nil ? 0 : 1
+            sequenceHomebrewPromptStarted = false
+            sequenceStatus.stringValue = localized("status.ready")
+            updateSequenceStepUI()
+            sequenceWindow?.close()
+            return
+        }
+        if !sequenceRunning {
+            sequenceRunning = true
+            sequenceHomebrewPromptStarted = false
+            sequenceStatus.stringValue = localized("status.applying")
+        }
+        advanceSequence()
+    }
+
+    private func advanceSequence() {
+        let order = ["homebrew", "desktop", "dock", "text"]
+        guard sequenceStepIndex < order.count else {
+            sequenceRunning = false
+            sequenceFinished = true
+            sequenceHomebrewPromptStarted = false
+            sequenceStatus.stringValue = localized("sequence.finished")
+            sequencePrimaryButton.title = localized("sequence.restart")
+            updateSequenceStepUI()
+            refresh()
+            return
+        }
+
+        let key = order[sequenceStepIndex]
+        switch key {
+        case "homebrew":
+            if brewPath() == nil && !sequenceHomebrewPromptStarted {
+                sequenceHomebrewPromptStarted = true
+                runInstallInTerminal(#"/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)""#)
+                sequenceStatus.stringValue = localized("sequence.waitingHomebrew")
+            } else if brewPath() != nil {
+                sequenceStatus.stringValue = localized("status.installed")
+            } else {
+                sequenceStatus.stringValue = localized("sequence.waitingHomebrew")
+            }
+            sequenceStepIndex += 1
+        case "desktop":
+            applySequenceDesktop()
+            sequenceStatus.stringValue = localized("status.settingsApplied")
+            sequenceStepIndex += 1
+        case "dock":
+            guard applySequenceDock() else { return }
+            sequenceStepIndex += 1
+        case "text":
+            guard applySequenceText() else { return }
+            sequenceStepIndex += 1
+        default:
+            sequenceStepIndex += 1
+        }
+
+        if sequenceStepIndex < order.count {
+            updateSequenceStepUI()
+        } else {
+            advanceSequence()
+        }
+    }
+
+    private func updateSequenceStepUI() {
+        let order = ["homebrew", "desktop", "dock", "text"]
+        guard !sequenceFinished, sequenceStepIndex < order.count else {
+            sequenceProgress.stringValue = localized("sequence.progressDone")
+            sequenceStageTitle.stringValue = localized("sequence.finished")
+            sequenceStageDetail.stringValue = ""
+            sequencePrimaryButton.title = localized("sequence.close")
+            sequenceBackButton.isHidden = true
+            sequenceDesktopOptions?.isHidden = true
+            sequenceTextOptions?.isHidden = true
+            sequenceDockTitle?.isHidden = true
+            sequenceDockScrollView?.isHidden = true
+            sequenceStatus.isHidden = false
+            for (key, button) in sequenceStepButtons {
+                button.title = "✓ \(localized("sequence.\(key)"))"
+                button.contentTintColor = .systemGreen
+            }
+            resizeSequenceWindow(for: "finished")
+            return
+        }
+
+        let key = order[sequenceStepIndex]
+        sequenceProgress.stringValue = "\(sequenceStepIndex + 1) / \(order.count)"
+        sequenceStageTitle.stringValue = localized("sequence.stage.\(key)")
+        sequenceStageDetail.stringValue = key == "homebrew" && brewPath() != nil
+            ? localized("status.installed")
+            : localized("sequence.\(key).detail")
+        if key == "homebrew" {
+            sequencePrimaryButton.title = brewPath() == nil
+                ? localized("sequence.homebrewAction")
+                : localized("sequence.homebrewReady")
+        } else if key == "text" {
+            sequencePrimaryButton.title = localized("sequence.finish")
+        } else {
+            sequencePrimaryButton.title = localized("sequence.applyContinue")
+        }
+        for (index, stepKey) in order.enumerated() {
+            guard let button = sequenceStepButtons[stepKey] else { continue }
+            if index < sequenceStepIndex {
+                button.title = "✓ \(localized("sequence.\(stepKey)"))"
+                button.contentTintColor = .systemGreen
+                button.font = NSFont.systemFont(ofSize: 12, weight: .medium)
+            } else {
+                button.title = localized("sequence.\(stepKey)")
+                button.contentTintColor = index == sequenceStepIndex ? .controlAccentColor : .secondaryLabelColor
+                button.font = NSFont.systemFont(ofSize: 12, weight: index == sequenceStepIndex ? .semibold : .regular)
+            }
+        }
+        sequenceBackButton.isHidden = false
+        sequenceBackButton.isEnabled = sequenceStepIndex > 0
+        sequenceStatus.isHidden = sequenceStatus.stringValue == localized("status.ready")
+        sequenceDesktopOptions?.isHidden = key != "desktop"
+        sequenceTextOptions?.isHidden = key != "text"
+        sequenceDockTitle?.isHidden = key != "dock"
+        sequenceDockScrollView?.isHidden = key != "dock"
+        if key == "text" {
+            updateSequenceTextDependencyLabels()
+        }
+        resizeSequenceWindow(for: key)
+        sequenceWindow?.contentView?.layoutSubtreeIfNeeded()
+        sequenceWindow?.displayIfNeeded()
+    }
+
+    private func resizeSequenceWindow(for key: String) {
+        guard let sequenceWindow else { return }
+        let targetHeight: CGFloat
+        switch key {
+        case "desktop":
+            targetHeight = 520
+        case "dock":
+            targetHeight = 590
+        case "text":
+            targetHeight = 650
+        default:
+            targetHeight = 400
+        }
+        guard abs(sequenceWindow.contentLayoutRect.height - targetHeight) > 1 else { return }
+        sequenceWindow.setContentSize(NSSize(width: sequenceWindow.contentLayoutRect.width, height: targetHeight))
+    }
+
+    private func updateSequenceTextDependencyLabels() {
+        let gureumState: String
+        if inputMethodStatus("Gureum") != "Installed" {
+            gureumState = localized("sequence.text.installRequired")
+        } else if !gureumInputSourceRegistered() {
+            gureumState = localized("sequence.text.inputRegistrationRequired")
+        } else {
+            gureumState = localized("sequence.text.ready")
+        }
+        sequenceTextDetailLabels["gureum"]?.stringValue =
+            "\(localized("sequence.text.gureum.detail"))  ·  \(gureumState)"
+
+        let commandState: String
+        if !appExists("Karabiner-Elements") {
+            commandState = localized("sequence.text.installRequired")
+        } else if !karabinerDriverReady() {
+            commandState = localized("sequence.text.permissionRequired")
+        } else {
+            commandState = localized("sequence.text.ready")
+        }
+        sequenceTextDetailLabels["commandSwitch"]?.stringValue =
+            "\(localized("sequence.text.commandSwitch.detail"))  ·  \(commandState)"
+    }
+
+    private func applySequenceDesktop() {
+        if sequenceDesktopCheckboxes["click"]?.state == .on,
+           clickDesktopPreferenceState != .disabled {
+            _ = runDefaults(["write", "com.apple.WindowManager", "EnableStandardClickToShowDesktop", "-bool", "false"])
+        }
+        if sequenceDesktopCheckboxes["wallpaper"]?.state == .on {
+            applyWallpaper()
+        }
+        var dockRestartRequired = false
+        if sequenceDesktopCheckboxes["hotCornerMissionControl"]?.state == .on,
+           !hotCornerApplied(cornerKey: "wvous-tr-corner", action: 2) {
+            _ = runDefaults(["write", "com.apple.dock", "wvous-tr-corner", "-int", "2"])
+            _ = runDefaults(["write", "com.apple.dock", "wvous-tr-modifier", "-int", "0"])
+            dockRestartRequired = true
+        }
+        if sequenceDesktopCheckboxes["hotCornerDesktop"]?.state == .on,
+           !hotCornerApplied(cornerKey: "wvous-br-corner", action: 4) {
+            _ = runDefaults(["write", "com.apple.dock", "wvous-br-corner", "-int", "4"])
+            _ = runDefaults(["write", "com.apple.dock", "wvous-br-modifier", "-int", "0"])
+            dockRestartRequired = true
+        }
+        if dockRestartRequired {
+            _ = runProcess("/usr/bin/killall", ["Dock"])
+        }
+    }
+
+    private func applySequenceDock() -> Bool {
+        if dockAutohidePreferenceState != .enabled {
+            guard applySequenceBoolean(domain: "com.apple.dock", key: "autohide", value: true) else {
+                sequenceStatus.stringValue = localized("status.failed")
+                return false
+            }
+            _ = runProcess("/usr/bin/killall", ["Dock"])
+        }
+        let labels = sequenceDockAliases().joined(separator: "\n")
+        let output = runScript(["dock-apply"], extraEnv: ["MAC_BOOTSTRAP_DOCK_KEEP_LABELS": labels])
+        guard output.contains("DOCK_APPLY_OK") && !output.contains("blocked:") else {
+            sequenceStatus.stringValue = localized("status.dockBlocked")
+            return false
+        }
+        sequenceStatus.stringValue = localized("status.dockApplied")
+        refreshDockState(force: true)
+        return true
+    }
+
+    private func applySequenceText() -> Bool {
+        var missingCasks: [String] = []
+        if sequenceTextCheckboxes["gureum"]?.state == .on,
+           inputMethodStatus("Gureum") != "Installed" {
+            missingCasks.append("gureumkim")
+        }
+        if sequenceTextCheckboxes["commandSwitch"]?.state == .on,
+           !appExists("Karabiner-Elements") {
+            missingCasks.append("karabiner-elements")
+        }
+        if !missingCasks.isEmpty {
+            guard let brew = brewPath() else {
+                sequenceStepIndex = 0
+                sequenceStatus.stringValue = localized("status.installHomebrewFirst")
+                updateSequenceStepUI()
+                return false
+            }
+            let casks = missingCasks.map(shellQuote).joined(separator: " ")
+            runInstallInTerminal("sudo -v && \(shellQuote(brew)) install --cask \(casks)")
+            sequenceStatus.stringValue = localized("sequence.text.installStarted")
+            sequenceStatus.isHidden = false
+            return false
+        }
+
+        if sequenceTextCheckboxes["gureum"]?.state == .on {
+            if !swiftToolchainAvailable() && !gureumInputSourceRegistered() {
+                installCommandLineTools()
+                sequenceStatus.stringValue = localized("status.commandLineToolsFirst")
+                sequenceStatus.isHidden = false
+                return false
+            }
+            let sourceOutput = runScript(["apply-input-sources"])
+            if sourceOutput.contains("blocked:") || !gureumInputSourceRegistered() {
+                sequenceStatus.stringValue = localized("sequence.text.gureumLogoutRequired")
+                sequenceStatus.isHidden = false
+                updateSequenceTextDependencyLabels()
+                return false
+            }
+            let optionOutput = runScript(["apply-gureum-option-key"])
+            if optionOutput.contains("blocked:") {
+                sequenceStatus.stringValue = localized("status.failed")
+                sequenceStatus.isHidden = false
+                return false
+            }
+        }
+
+        if sequenceTextCheckboxes["commandSwitch"]?.state == .on {
+            guard karabinerDriverReady() else {
+                openApp("Karabiner-Elements")
+                sequenceStatus.stringValue = localized("sequence.text.karabinerPermissionRequired")
+                sequenceStatus.isHidden = false
+                updateSequenceTextDependencyLabels()
+                return false
+            }
+            let shortcutOutput = runScript(["apply-input-shortcuts"])
+            let karabinerOutput = runScript(["apply-karabiner"])
+            guard !shortcutOutput.contains("blocked:"),
+                  !karabinerOutput.contains("blocked:"),
+                  inputSourceShortcutApplied(),
+                  karabinerMappingApplied() else {
+                sequenceStatus.stringValue = localized("sequence.text.switchFailed")
+                sequenceStatus.isHidden = false
+                return false
+            }
+        }
+
+        if sequenceTextCheckboxes["autocorrect"]?.state == .on {
+            let globalBooleans: [(String, String, BooleanPreferenceState)] = [
+                ("-g", "NSAutomaticSpellingCorrectionEnabled", spellingPreferenceState),
+                ("-g", "NSAutomaticPeriodSubstitutionEnabled", periodPreferenceState),
+                ("-g", "NSAutomaticInlinePredictionEnabled", inlinePreferenceState)
+            ]
+            for (domain, key, state) in globalBooleans where state != .disabled {
+                guard applySequenceBoolean(domain: domain, key: key, value: false) else {
+                    sequenceStatus.stringValue = localized("status.failed")
+                    return false
+                }
+            }
+        }
+
+        var commands: [String] = []
+        if sequenceTextCheckboxes["typing"]?.state == .on {
+            commands.append(contentsOf: ["apply-key-repeat", "apply-press-and-hold"])
+        }
+        if sequenceTextCheckboxes["function"]?.state == .on {
+            commands.append(contentsOf: ["apply-function-keys", "apply-globe-key"])
+        }
+        for command in commands {
+            let output = runScript([command])
+            if output.contains("blocked:") {
+                sequenceStatus.stringValue = localized("status.failed")
+                return false
+            }
+        }
+        sequenceStatus.stringValue = localized("status.settingsApplied")
+        return true
+    }
+
+    private func applySequenceBoolean(domain: String, key: String, value: Bool) -> Bool {
+        guard runDefaults(["write", domain, key, "-bool", value ? "true" : "false"]) else {
+            return false
+        }
+        let expected: BooleanPreferenceState = value ? .enabled : .disabled
+        return booleanPreferenceState(domain, key) == expected
+    }
+
+    private func sequenceDockAliases() -> [String] {
+        var aliases: [String] = []
+        for choice in dockChoices {
+            guard sequenceDockCheckboxes[choice.title]?.state == .on else { continue }
+            aliases.append(contentsOf: choice.aliases)
+        }
+        return aliases
     }
 
     @objc private func toggleDockAutohide() {
@@ -1133,6 +1964,14 @@ final class SetupWindowController: NSWindowController {
     @objc private func openTeams() { openURL("https://www.microsoft.com/microsoft-teams/download-app") }
     @objc private func openSlack() { openURL("https://slack.com/downloads/mac") }
     @objc private func openAmphetamine() { openURL("https://apps.apple.com/app/amphetamine/id937984704") }
+    @objc private func installCommandLineTools() {
+        if swiftToolchainAvailable() {
+            statusLabel.stringValue = localized("status.installed")
+            refresh()
+            return
+        }
+        runInstallInTerminal("/usr/bin/xcode-select --install")
+    }
     @objc private func installHomebrew() {
         runInstallInTerminal(#"/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)""#)
     }
@@ -1140,7 +1979,11 @@ final class SetupWindowController: NSWindowController {
         if inputMethodStatus("Gureum") != "Installed" {
             installGureum()
         } else if !gureumInputSourceRegistered() {
-            confirmLogoutForGureum()
+            if swiftToolchainAvailable() {
+                confirmLogoutForGureum()
+            } else {
+                installCommandLineTools()
+            }
         } else {
             openKeyboardSettings()
         }
@@ -1203,7 +2046,11 @@ final class SetupWindowController: NSWindowController {
             return
         }
         if inputMethodStatus("Gureum") == "Installed" && !gureumInputSourceRegistered() {
-            confirmLogoutForGureum()
+            if swiftToolchainAvailable() {
+                confirmLogoutForGureum()
+            } else {
+                installCommandLineTools()
+            }
             return
         }
         let output = runScript(["apply-input-sources"])
@@ -1318,25 +2165,14 @@ final class SetupWindowController: NSWindowController {
         if appExists("Lazyest Flow") {
             openFlow()
         } else {
-            installFlow()
+            openFlowRelease()
         }
     }
 
-    private func installFlow() {
+    private func openFlowRelease() {
         statusLabel.stringValue = localized("status.flowInstalling")
-        flowPrimaryButton.isEnabled = false
-        flowRemoveButton.isEnabled = false
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            guard let self else { return }
-            let output = self.runScript(["install-flow"])
-            DispatchQueue.main.async {
-                self.statusLabel.stringValue = output.contains("INSTALL_FLOW_OK")
-                    ? localized("status.flowInstalled")
-                    : localized("status.flowFailed")
-                self.refreshFlowState()
-                self.updateRowStyles()
-            }
-        }
+        openURL("https://github.com/lazyest-hyun/lazyest-flow/releases/latest")
+        statusLabel.stringValue = localized("status.opened")
     }
 
     private func openFlow() {
@@ -1562,8 +2398,9 @@ final class SetupWindowController: NSWindowController {
             gureumPrimaryButton.title = localized("button.open")
             gureumPrimaryButton.isEnabled = true
         } else if inputMethodStatus("Gureum") == "Installed" {
-            gureumStatus.stringValue = localized("status.needsLogout")
-            gureumPrimaryButton.title = localized("button.logout")
+            let swiftAvailable = swiftToolchainAvailable()
+            gureumStatus.stringValue = swiftAvailable ? localized("status.needsLogout") : localized("status.commandLineToolsFirst")
+            gureumPrimaryButton.title = swiftAvailable ? localized("button.logout") : localized("button.install")
             gureumPrimaryButton.isEnabled = true
         } else if brewInstalled {
             gureumStatus.stringValue = localized("status.missing")
@@ -1598,8 +2435,9 @@ final class SetupWindowController: NSWindowController {
             inputSourcePrimaryButton.title = localized("button.applySettings")
             inputSourcePrimaryButton.isEnabled = false
         } else if !gureumInputSourceRegistered() {
-            inputSourceStatus.stringValue = localized("status.needsLogout")
-            inputSourcePrimaryButton.title = localized("button.logout")
+            let swiftAvailable = swiftToolchainAvailable()
+            inputSourceStatus.stringValue = swiftAvailable ? localized("status.needsLogout") : localized("status.commandLineToolsFirst")
+            inputSourcePrimaryButton.title = swiftAvailable ? localized("button.logout") : localized("button.install")
             inputSourcePrimaryButton.isEnabled = true
         } else if inputSourcesApplied() {
             inputSourceStatus.stringValue = localized("status.applied")
@@ -1739,6 +2577,12 @@ final class SetupWindowController: NSWindowController {
         if statusField === clickDesktopStatus {
             return clickDesktopPreferenceState == .disabled ? .success : .neutral
         }
+        if statusField === hotCornerMissionControlStatus {
+            return hotCornerApplied(cornerKey: "wvous-tr-corner", action: 2) ? .success : .neutral
+        }
+        if statusField === hotCornerDesktopStatus {
+            return hotCornerApplied(cornerKey: "wvous-br-corner", action: 4) ? .success : .neutral
+        }
         if statusField === gureumOptionStatus,
            status == localized("status.on") || status == localized("status.off") {
             return status == localized("status.on") ? .success : .neutral
@@ -1816,7 +2660,8 @@ final class SetupWindowController: NSWindowController {
         button.isEnabled = true
     }
 
-    private func refreshDockState() {
+    private func refreshDockState(force: Bool = false) {
+        guard force || !dockStateLoaded else { return }
         let labels = currentDockLabels()
         var selected = 0
         var present = 0
@@ -1832,6 +2677,7 @@ final class SetupWindowController: NSWindowController {
         dockStatus.stringValue = "\(selectedText) / \(presentText)"
         dockPrimaryButton.title = localized("dock.apply")
         dockPrimaryButton.isEnabled = true
+        dockStateLoaded = true
     }
 
     private func selectedDockAliases() -> [String] {
@@ -1887,7 +2733,7 @@ final class SetupWindowController: NSWindowController {
             flowRemoveButton.isHidden = false
         } else {
             flowStatus.stringValue = localized("status.missing")
-            flowPrimaryButton.title = localized("button.install")
+            flowPrimaryButton.title = localized("button.openRelease")
             flowRemoveButton.isEnabled = false
             flowRemoveButton.isHidden = true
         }
@@ -2194,6 +3040,12 @@ final class SetupWindowController: NSWindowController {
         return nil
     }
 
+    private func swiftToolchainAvailable() -> Bool {
+        let path = processOutput("/usr/bin/xcrun", ["--find", "swift"])
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return !path.isEmpty && commandExists(path)
+    }
+
     private func copy(_ text: String) {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(text, forType: .string)
@@ -2233,6 +3085,14 @@ func projectRoot() -> String {
         return url.deletingLastPathComponent().appendingPathComponent(value, isDirectory: true).path
     }
     return FileManager.default.currentDirectoryPath
+}
+
+let bundleIdentifier = Bundle.main.bundleIdentifier ?? "com.estaid.mac-bootstrap-setup"
+let currentProcessID = ProcessInfo.processInfo.processIdentifier
+if let existing = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier)
+    .first(where: { $0.processIdentifier != currentProcessID }) {
+    existing.activate(options: [.activateAllWindows, .activateIgnoringOtherApps])
+    exit(0)
 }
 
 let app = NSApplication.shared

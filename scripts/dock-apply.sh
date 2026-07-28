@@ -132,7 +132,11 @@ def item_label(item):
 
 def should_keep_managed_label(label):
     label_key = normalized(label)
-    return label_key in keep_labels
+    for _, aliases, _ in catalog:
+        alias_keys = {normalized(alias) for alias in aliases}
+        if label_key in alias_keys:
+            return not keep_labels.isdisjoint(alias_keys)
+    return False
 
 for item in apps:
     label = item_label(item)
@@ -229,3 +233,5 @@ if ((restart_ui)); then
 else
   echo "  Dock restart skipped; pass --restart-ui or relaunch Dock to see changes"
 fi
+
+echo "DOCK_APPLY_OK"

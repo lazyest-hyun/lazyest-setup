@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.1.0 - 2026-07-28
+
+- Added Quick Setup as a focused, step-by-step flow for Homebrew, desktop, Dock, and text/keyboard settings while leaving optional app installs separate.
+- Added independent top-right Mission Control and bottom-right Show Desktop Hot Corner settings, including rightmost-display guidance for multi-monitor Macs.
+- Made the Dock checklist load current state once, refresh only on request, preserve localized aliases, and report apply failures instead of showing false success.
+- Linked Gureum installation, input-source registration, Karabiner, right Command to F18, and the F18 input-source shortcut as one dependency-aware keyboard flow.
+- Clarified that end users do not need full Xcode and that Swift from Command Line Tools is requested only for Gureum input-source registration.
+- Changed the Flow action to open the latest public Lazyest Flow release instead of building Flow source on the user's Mac.
+- Prevented multiple Lazyest Setup instances from running at the same time.
+
 ## 1.0.0 - 2026-07-18
 
 - Bundled the setup runtime scripts and configuration inside the app so actions continue to work after an installer removes its temporary source checkout.
@@ -7,13 +17,13 @@
 - Clarified that only selected settings are changed and added inset spacing to the launch guidance.
 - Added Developer ID signing, notarization, Gatekeeper verification, and SHA-256 release packaging.
 
-This project uses the Setup app version in [`VERSION`](VERSION). GitHub Releases are not required.
+This project uses the Setup app version in [`VERSION`](VERSION). Public GitHub Releases contain the signed and notarized ZIP and DMG downloads.
 
 ## 0.4.0 - 2026-07-17
 
 - Rebranded the one-time app and Swift package as Lazyest Setup.
 - Renamed the separate runtime bridge from Agent to Lazyest Flow while preserving legacy installs and settings.
-- Pinned the Flow installer to the matching Lazyest Flow 0.5.0 source commit.
+- Changed the Flow action from a source build to opening the latest GitHub Release page.
 - Kept existing bundle identifiers and Karabiner rule compatibility so the rename does not reset permissions or duplicate mappings.
 
 ## 0.3.2 - 2026-07-13
