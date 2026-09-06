@@ -1,0 +1,1916 @@
+{
+  "scope": "Production AppKit views with synthetic state; offscreen, no window shown or settings actions. Coordinates are content-relative points from top-left.",
+  "sourceSHA256": "c6da82c1882bbffb7f3b75f5696f2cc65ff8aaa8b60da7cc767ad5cba7f179a2",
+  "routes": [
+    {
+      "height": 660,
+      "layout": [
+        {
+          "height": 28,
+          "id": "layout.main.header",
+          "width": 784,
+          "x": 18,
+          "y": 18
+        },
+        {
+          "height": 24,
+          "id": "layout.main.tabs",
+          "width": 784,
+          "x": 18,
+          "y": 94
+        },
+        {
+          "height": 468,
+          "id": "layout.main.body",
+          "width": 784,
+          "x": 18,
+          "y": 134
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Disable Click-to-Show Desktop",
+          "width": 197.5,
+          "x": 47,
+          "y": 159
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Disable Click-to-Show Desktop",
+          "width": 146,
+          "x": 389,
+          "y": 160
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Black wallpaper",
+          "width": 102,
+          "x": 47,
+          "y": 213
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Black wallpaper",
+          "width": 146,
+          "x": 389,
+          "y": 214
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Overall top-right corner",
+          "width": 151.5,
+          "x": 47,
+          "y": 267
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Overall top-right corner",
+          "width": 146,
+          "x": 389,
+          "y": 268
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Overall bottom-right corner",
+          "width": 175.5,
+          "x": 47,
+          "y": 321
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Overall bottom-right corner",
+          "width": 146,
+          "x": 389,
+          "y": 322
+        },
+        {
+          "height": 24,
+          "id": "layout.main.footer",
+          "width": 784,
+          "x": 18,
+          "y": 618
+        }
+      ],
+      "route": "desktop",
+      "width": 820,
+      "language": "en"
+    },
+    {
+      "height": 660,
+      "layout": [
+        {
+          "height": 28,
+          "id": "layout.main.header",
+          "width": 784,
+          "x": 18,
+          "y": 18
+        },
+        {
+          "height": 24,
+          "id": "layout.main.tabs",
+          "width": 784,
+          "x": 18,
+          "y": 94
+        },
+        {
+          "height": 468,
+          "id": "layout.main.body",
+          "width": 784,
+          "x": 18,
+          "y": 134
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Automatically hide Dock",
+          "width": 154,
+          "x": 47,
+          "y": 159
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Automatically hide Dock",
+          "width": 146,
+          "x": 389,
+          "y": 160
+        },
+        {
+          "height": 24,
+          "id": "layout.main.footer",
+          "width": 784,
+          "x": 18,
+          "y": 618
+        }
+      ],
+      "route": "dock",
+      "width": 820,
+      "language": "en"
+    },
+    {
+      "height": 660,
+      "layout": [
+        {
+          "height": 28,
+          "id": "layout.main.header",
+          "width": 784,
+          "x": 18,
+          "y": 18
+        },
+        {
+          "height": 24,
+          "id": "layout.main.tabs",
+          "width": 784,
+          "x": 18,
+          "y": 94
+        },
+        {
+          "height": 468,
+          "id": "layout.main.body",
+          "width": 784,
+          "x": 18,
+          "y": 134
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Lazyest Flow",
+          "width": 84.5,
+          "x": 47,
+          "y": 159
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Lazyest Flow",
+          "width": 146,
+          "x": 389,
+          "y": 160
+        },
+        {
+          "height": 24,
+          "id": "layout.main.footer",
+          "width": 784,
+          "x": 18,
+          "y": 618
+        }
+      ],
+      "route": "flow",
+      "width": 820,
+      "language": "en"
+    },
+    {
+      "height": 650,
+      "layout": [
+        {
+          "height": 26,
+          "id": "layout.guided.header",
+          "width": 672,
+          "x": 24,
+          "y": 24
+        },
+        {
+          "height": 24,
+          "id": "layout.guided.tabs",
+          "width": 672,
+          "x": 24,
+          "y": 66
+        },
+        {
+          "height": 92,
+          "id": "layout.guided.stage",
+          "width": 672,
+          "x": 24,
+          "y": 106
+        },
+        {
+          "height": 20,
+          "id": "layout.guided.stageTitle",
+          "width": 72.5,
+          "x": 41,
+          "y": 123
+        },
+        {
+          "height": 15,
+          "id": "layout.guided.stageDetail",
+          "width": 146,
+          "x": 41,
+          "y": 148
+        },
+        {
+          "height": 28,
+          "id": "layout.guided.actions",
+          "width": 672,
+          "x": 24,
+          "y": 598
+        },
+        {
+          "height": 28,
+          "id": "layout.guided.primary",
+          "width": 170,
+          "x": 526,
+          "y": 598
+        }
+      ],
+      "route": "guided-desktop",
+      "width": 720,
+      "language": "en"
+    },
+    {
+      "height": 650,
+      "layout": [
+        {
+          "height": 26,
+          "id": "layout.guided.header",
+          "width": 672,
+          "x": 24,
+          "y": 24
+        },
+        {
+          "height": 24,
+          "id": "layout.guided.tabs",
+          "width": 672,
+          "x": 24,
+          "y": 66
+        },
+        {
+          "height": 92,
+          "id": "layout.guided.stage",
+          "width": 672,
+          "x": 24,
+          "y": 106
+        },
+        {
+          "height": 20,
+          "id": "layout.guided.stageTitle",
+          "width": 46,
+          "x": 41,
+          "y": 123
+        },
+        {
+          "height": 15,
+          "id": "layout.guided.stageDetail",
+          "width": 283,
+          "x": 41,
+          "y": 148
+        },
+        {
+          "height": 28,
+          "id": "layout.guided.actions",
+          "width": 672,
+          "x": 24,
+          "y": 598
+        },
+        {
+          "height": 28,
+          "id": "layout.guided.primary",
+          "width": 170,
+          "x": 526,
+          "y": 598
+        }
+      ],
+      "route": "guided-dock",
+      "width": 720,
+      "language": "en"
+    },
+    {
+      "height": 650,
+      "layout": [
+        {
+          "height": 26,
+          "id": "layout.guided.header",
+          "width": 672,
+          "x": 24,
+          "y": 24
+        },
+        {
+          "height": 24,
+          "id": "layout.guided.tabs",
+          "width": 672,
+          "x": 24,
+          "y": 66
+        },
+        {
+          "height": 92,
+          "id": "layout.guided.stage",
+          "width": 672,
+          "x": 24,
+          "y": 106
+        },
+        {
+          "height": 20,
+          "id": "layout.guided.stageTitle",
+          "width": 193,
+          "x": 41,
+          "y": 123
+        },
+        {
+          "height": 15,
+          "id": "layout.guided.stageDetail",
+          "width": 4,
+          "x": 41,
+          "y": 148
+        },
+        {
+          "height": 28,
+          "id": "layout.guided.actions",
+          "width": 672,
+          "x": 24,
+          "y": 598
+        },
+        {
+          "height": 28,
+          "id": "layout.guided.primary",
+          "width": 170,
+          "x": 526,
+          "y": 598
+        }
+      ],
+      "route": "guided-finished",
+      "width": 720,
+      "language": "en"
+    },
+    {
+      "height": 650,
+      "layout": [
+        {
+          "height": 26,
+          "id": "layout.guided.header",
+          "width": 672,
+          "x": 24,
+          "y": 24
+        },
+        {
+          "height": 24,
+          "id": "layout.guided.tabs",
+          "width": 672,
+          "x": 24,
+          "y": 66
+        },
+        {
+          "height": 92,
+          "id": "layout.guided.stage",
+          "width": 672,
+          "x": 24,
+          "y": 106
+        },
+        {
+          "height": 20,
+          "id": "layout.guided.stageTitle",
+          "width": 93.5,
+          "x": 41,
+          "y": 123
+        },
+        {
+          "height": 15,
+          "id": "layout.guided.stageDetail",
+          "width": 184.5,
+          "x": 41,
+          "y": 148
+        },
+        {
+          "height": 28,
+          "id": "layout.guided.actions",
+          "width": 672,
+          "x": 24,
+          "y": 598
+        },
+        {
+          "height": 28,
+          "id": "layout.guided.primary",
+          "width": 170,
+          "x": 526,
+          "y": 598
+        }
+      ],
+      "route": "guided-homebrew",
+      "width": 720,
+      "language": "en"
+    },
+    {
+      "height": 650,
+      "layout": [
+        {
+          "height": 26,
+          "id": "layout.guided.header",
+          "width": 672,
+          "x": 24,
+          "y": 24
+        },
+        {
+          "height": 24,
+          "id": "layout.guided.tabs",
+          "width": 672,
+          "x": 24,
+          "y": 66
+        },
+        {
+          "height": 92,
+          "id": "layout.guided.stage",
+          "width": 672,
+          "x": 24,
+          "y": 106
+        },
+        {
+          "height": 20,
+          "id": "layout.guided.stageTitle",
+          "width": 137,
+          "x": 41,
+          "y": 123
+        },
+        {
+          "height": 15,
+          "id": "layout.guided.stageDetail",
+          "width": 296,
+          "x": 41,
+          "y": 148
+        },
+        {
+          "height": 28,
+          "id": "layout.guided.actions",
+          "width": 672,
+          "x": 24,
+          "y": 598
+        },
+        {
+          "height": 28,
+          "id": "layout.guided.primary",
+          "width": 170,
+          "x": 526,
+          "y": 598
+        }
+      ],
+      "route": "guided-text",
+      "width": 720,
+      "language": "en"
+    },
+    {
+      "height": 660,
+      "layout": [
+        {
+          "height": 28,
+          "id": "layout.main.header",
+          "width": 784,
+          "x": 18,
+          "y": 18
+        },
+        {
+          "height": 24,
+          "id": "layout.main.tabs",
+          "width": 784,
+          "x": 18,
+          "y": 94
+        },
+        {
+          "height": 468,
+          "id": "layout.main.body",
+          "width": 784,
+          "x": 18,
+          "y": 134
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Homebrew",
+          "width": 71.5,
+          "x": 47,
+          "y": 187
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Homebrew",
+          "width": 146,
+          "x": 389,
+          "y": 188
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Google Chrome",
+          "width": 100.5,
+          "x": 47,
+          "y": 269
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Google Chrome",
+          "width": 146,
+          "x": 389,
+          "y": 270
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Arc",
+          "width": 25.5,
+          "x": 47,
+          "y": 323
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Arc",
+          "width": 146,
+          "x": 389,
+          "y": 324
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Aside",
+          "width": 39,
+          "x": 47,
+          "y": 377
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Aside",
+          "width": 146,
+          "x": 389,
+          "y": 378
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Raycast",
+          "width": 53,
+          "x": 47,
+          "y": 431
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Raycast",
+          "width": 146,
+          "x": 389,
+          "y": 432
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Codex",
+          "width": 43.5,
+          "x": 47,
+          "y": 513
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Codex",
+          "width": 146,
+          "x": 389,
+          "y": 514
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Claude",
+          "width": 47.5,
+          "x": 47,
+          "y": 567
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Claude",
+          "width": 146,
+          "x": 389,
+          "y": 568
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Devin Desktop",
+          "width": 94.5,
+          "x": 47,
+          "y": 621
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Devin Desktop",
+          "width": 146,
+          "x": 389,
+          "y": 622
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Docker Desktop",
+          "width": 103.5,
+          "x": 47,
+          "y": 675
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Docker Desktop",
+          "width": 146,
+          "x": 389,
+          "y": 676
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Cursor",
+          "width": 46,
+          "x": 47,
+          "y": 757
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Cursor",
+          "width": 146,
+          "x": 389,
+          "y": 758
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Visual Studio Code",
+          "width": 121.5,
+          "x": 47,
+          "y": 811
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Visual Studio Code",
+          "width": 146,
+          "x": 389,
+          "y": 812
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Zed",
+          "width": 28,
+          "x": 47,
+          "y": 865
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Zed",
+          "width": 146,
+          "x": 389,
+          "y": 866
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.iTerm2",
+          "width": 46.5,
+          "x": 47,
+          "y": 919
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.iTerm2",
+          "width": 146,
+          "x": 389,
+          "y": 920
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Microsoft Teams",
+          "width": 107,
+          "x": 47,
+          "y": 1001
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Microsoft Teams",
+          "width": 146,
+          "x": 389,
+          "y": 1002
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Slack",
+          "width": 38,
+          "x": 47,
+          "y": 1055
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Slack",
+          "width": 146,
+          "x": 389,
+          "y": 1056
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.LinearMouse",
+          "width": 84,
+          "x": 47,
+          "y": 1137
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.LinearMouse",
+          "width": 146,
+          "x": 389,
+          "y": 1138
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Amphetamine",
+          "width": 90.5,
+          "x": 47,
+          "y": 1191
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Amphetamine",
+          "width": 146,
+          "x": 389,
+          "y": 1192
+        },
+        {
+          "height": 24,
+          "id": "layout.main.footer",
+          "width": 784,
+          "x": 18,
+          "y": 618
+        }
+      ],
+      "route": "install",
+      "width": 820,
+      "language": "en"
+    },
+    {
+      "height": 660,
+      "layout": [
+        {
+          "height": 28,
+          "id": "layout.main.header",
+          "width": 784,
+          "x": 18,
+          "y": 18
+        },
+        {
+          "height": 24,
+          "id": "layout.main.tabs",
+          "width": 784,
+          "x": 18,
+          "y": 94
+        },
+        {
+          "height": 468,
+          "id": "layout.main.body",
+          "width": 784,
+          "x": 18,
+          "y": 134
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Gureum Input Method",
+          "width": 139.5,
+          "x": 47,
+          "y": 159
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Gureum Input Method",
+          "width": 146,
+          "x": 389,
+          "y": 160
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Gureum Option Key",
+          "width": 125,
+          "x": 47,
+          "y": 213
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Gureum Option Key",
+          "width": 146,
+          "x": 389,
+          "y": 214
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Karabiner-Elements",
+          "width": 127,
+          "x": 47,
+          "y": 267
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Karabiner-Elements",
+          "width": 146,
+          "x": 389,
+          "y": 268
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Input Source Settings",
+          "width": 138.5,
+          "x": 47,
+          "y": 321
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Input Source Settings",
+          "width": 146,
+          "x": 389,
+          "y": 322
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Input Source Shortcuts",
+          "width": 147.5,
+          "x": 47,
+          "y": 375
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Input Source Shortcuts",
+          "width": 146,
+          "x": 389,
+          "y": 376
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Key Repeat",
+          "width": 74,
+          "x": 47,
+          "y": 429
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Key Repeat",
+          "width": 146,
+          "x": 389,
+          "y": 430
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Press-and-hold accents",
+          "width": 153.5,
+          "x": 47,
+          "y": 483
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Press-and-hold accents",
+          "width": 146,
+          "x": 389,
+          "y": 484
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Function Keys",
+          "width": 91.5,
+          "x": 47,
+          "y": 537
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Function Keys",
+          "width": 146,
+          "x": 389,
+          "y": 538
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Globe Key",
+          "width": 67,
+          "x": 47,
+          "y": 591
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Globe Key",
+          "width": 146,
+          "x": 389,
+          "y": 592
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Spelling correction",
+          "width": 121.5,
+          "x": 47,
+          "y": 645
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Spelling correction",
+          "width": 146,
+          "x": 389,
+          "y": 646
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Double-space period",
+          "width": 134.5,
+          "x": 47,
+          "y": 699
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Double-space period",
+          "width": 146,
+          "x": 389,
+          "y": 700
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Inline prediction",
+          "width": 104,
+          "x": 47,
+          "y": 753
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Inline prediction",
+          "width": 146,
+          "x": 389,
+          "y": 754
+        },
+        {
+          "height": 24,
+          "id": "layout.main.footer",
+          "width": 784,
+          "x": 18,
+          "y": 618
+        }
+      ],
+      "route": "text",
+      "width": 820,
+      "language": "en"
+    },
+    {
+      "height": 660,
+      "layout": [
+        {
+          "height": 28,
+          "id": "layout.main.header",
+          "width": 784,
+          "x": 18,
+          "y": 18
+        },
+        {
+          "height": 24,
+          "id": "layout.main.tabs",
+          "width": 784,
+          "x": 18,
+          "y": 94
+        },
+        {
+          "height": 468,
+          "id": "layout.main.body",
+          "width": 784,
+          "x": 18,
+          "y": 134
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.데스크톱 보기 방지",
+          "width": 101,
+          "x": 47,
+          "y": 159
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.데스크톱 보기 방지",
+          "width": 146,
+          "x": 389,
+          "y": 160
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.검정 배경화면",
+          "width": 75,
+          "x": 47,
+          "y": 213
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.검정 배경화면",
+          "width": 146,
+          "x": 389,
+          "y": 214
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.전체 화면 오른쪽 위",
+          "width": 104.5,
+          "x": 47,
+          "y": 267
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.전체 화면 오른쪽 위",
+          "width": 146,
+          "x": 389,
+          "y": 268
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.전체 화면 오른쪽 아래",
+          "width": 116,
+          "x": 47,
+          "y": 321
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.전체 화면 오른쪽 아래",
+          "width": 146,
+          "x": 389,
+          "y": 322
+        },
+        {
+          "height": 24,
+          "id": "layout.main.footer",
+          "width": 784,
+          "x": 18,
+          "y": 618
+        }
+      ],
+      "route": "desktop",
+      "width": 820,
+      "language": "ko"
+    },
+    {
+      "height": 660,
+      "layout": [
+        {
+          "height": 28,
+          "id": "layout.main.header",
+          "width": 784,
+          "x": 18,
+          "y": 18
+        },
+        {
+          "height": 24,
+          "id": "layout.main.tabs",
+          "width": 784,
+          "x": 18,
+          "y": 94
+        },
+        {
+          "height": 468,
+          "id": "layout.main.body",
+          "width": 784,
+          "x": 18,
+          "y": 134
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Dock 자동 숨김",
+          "width": 88,
+          "x": 47,
+          "y": 159
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Dock 자동 숨김",
+          "width": 146,
+          "x": 389,
+          "y": 160
+        },
+        {
+          "height": 24,
+          "id": "layout.main.footer",
+          "width": 784,
+          "x": 18,
+          "y": 618
+        }
+      ],
+      "route": "dock",
+      "width": 820,
+      "language": "ko"
+    },
+    {
+      "height": 660,
+      "layout": [
+        {
+          "height": 28,
+          "id": "layout.main.header",
+          "width": 784,
+          "x": 18,
+          "y": 18
+        },
+        {
+          "height": 24,
+          "id": "layout.main.tabs",
+          "width": 784,
+          "x": 18,
+          "y": 94
+        },
+        {
+          "height": 468,
+          "id": "layout.main.body",
+          "width": 784,
+          "x": 18,
+          "y": 134
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Lazyest Flow",
+          "width": 84.5,
+          "x": 47,
+          "y": 159
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Lazyest Flow",
+          "width": 146,
+          "x": 389,
+          "y": 160
+        },
+        {
+          "height": 24,
+          "id": "layout.main.footer",
+          "width": 784,
+          "x": 18,
+          "y": 618
+        }
+      ],
+      "route": "flow",
+      "width": 820,
+      "language": "ko"
+    },
+    {
+      "height": 650,
+      "layout": [
+        {
+          "height": 26,
+          "id": "layout.guided.header",
+          "width": 672,
+          "x": 24,
+          "y": 24
+        },
+        {
+          "height": 24,
+          "id": "layout.guided.tabs",
+          "width": 672,
+          "x": 24,
+          "y": 66
+        },
+        {
+          "height": 92,
+          "id": "layout.guided.stage",
+          "width": 672,
+          "x": 24,
+          "y": 106
+        },
+        {
+          "height": 20,
+          "id": "layout.guided.stageTitle",
+          "width": 63,
+          "x": 41,
+          "y": 123
+        },
+        {
+          "height": 15,
+          "id": "layout.guided.stageDetail",
+          "width": 121.5,
+          "x": 41,
+          "y": 148
+        },
+        {
+          "height": 28,
+          "id": "layout.guided.actions",
+          "width": 672,
+          "x": 24,
+          "y": 598
+        },
+        {
+          "height": 28,
+          "id": "layout.guided.primary",
+          "width": 170,
+          "x": 526,
+          "y": 598
+        }
+      ],
+      "route": "guided-desktop",
+      "width": 720,
+      "language": "ko"
+    },
+    {
+      "height": 650,
+      "layout": [
+        {
+          "height": 26,
+          "id": "layout.guided.header",
+          "width": 672,
+          "x": 24,
+          "y": 24
+        },
+        {
+          "height": 24,
+          "id": "layout.guided.tabs",
+          "width": 672,
+          "x": 24,
+          "y": 66
+        },
+        {
+          "height": 92,
+          "id": "layout.guided.stage",
+          "width": 672,
+          "x": 24,
+          "y": 106
+        },
+        {
+          "height": 20,
+          "id": "layout.guided.stageTitle",
+          "width": 46,
+          "x": 41,
+          "y": 123
+        },
+        {
+          "height": 15,
+          "id": "layout.guided.stageDetail",
+          "width": 195.5,
+          "x": 41,
+          "y": 148
+        },
+        {
+          "height": 28,
+          "id": "layout.guided.actions",
+          "width": 672,
+          "x": 24,
+          "y": 598
+        },
+        {
+          "height": 28,
+          "id": "layout.guided.primary",
+          "width": 170,
+          "x": 526,
+          "y": 598
+        }
+      ],
+      "route": "guided-dock",
+      "width": 720,
+      "language": "ko"
+    },
+    {
+      "height": 650,
+      "layout": [
+        {
+          "height": 26,
+          "id": "layout.guided.header",
+          "width": 672,
+          "x": 24,
+          "y": 24
+        },
+        {
+          "height": 24,
+          "id": "layout.guided.tabs",
+          "width": 672,
+          "x": 24,
+          "y": 66
+        },
+        {
+          "height": 92,
+          "id": "layout.guided.stage",
+          "width": 672,
+          "x": 24,
+          "y": 106
+        },
+        {
+          "height": 20,
+          "id": "layout.guided.stageTitle",
+          "width": 100.5,
+          "x": 41,
+          "y": 123
+        },
+        {
+          "height": 15,
+          "id": "layout.guided.stageDetail",
+          "width": 4,
+          "x": 41,
+          "y": 148
+        },
+        {
+          "height": 28,
+          "id": "layout.guided.actions",
+          "width": 672,
+          "x": 24,
+          "y": 598
+        },
+        {
+          "height": 28,
+          "id": "layout.guided.primary",
+          "width": 170,
+          "x": 526,
+          "y": 598
+        }
+      ],
+      "route": "guided-finished",
+      "width": 720,
+      "language": "ko"
+    },
+    {
+      "height": 650,
+      "layout": [
+        {
+          "height": 26,
+          "id": "layout.guided.header",
+          "width": 672,
+          "x": 24,
+          "y": 24
+        },
+        {
+          "height": 24,
+          "id": "layout.guided.tabs",
+          "width": 672,
+          "x": 24,
+          "y": 66
+        },
+        {
+          "height": 92,
+          "id": "layout.guided.stage",
+          "width": 672,
+          "x": 24,
+          "y": 106
+        },
+        {
+          "height": 20,
+          "id": "layout.guided.stageTitle",
+          "width": 93.5,
+          "x": 41,
+          "y": 123
+        },
+        {
+          "height": 15,
+          "id": "layout.guided.stageDetail",
+          "width": 142,
+          "x": 41,
+          "y": 148
+        },
+        {
+          "height": 28,
+          "id": "layout.guided.actions",
+          "width": 672,
+          "x": 24,
+          "y": 598
+        },
+        {
+          "height": 28,
+          "id": "layout.guided.primary",
+          "width": 170,
+          "x": 526,
+          "y": 598
+        }
+      ],
+      "route": "guided-homebrew",
+      "width": 720,
+      "language": "ko"
+    },
+    {
+      "height": 650,
+      "layout": [
+        {
+          "height": 26,
+          "id": "layout.guided.header",
+          "width": 672,
+          "x": 24,
+          "y": 24
+        },
+        {
+          "height": 24,
+          "id": "layout.guided.tabs",
+          "width": 672,
+          "x": 24,
+          "y": 66
+        },
+        {
+          "height": 92,
+          "id": "layout.guided.stage",
+          "width": 672,
+          "x": 24,
+          "y": 106
+        },
+        {
+          "height": 20,
+          "id": "layout.guided.stageTitle",
+          "width": 97.5,
+          "x": 41,
+          "y": 123
+        },
+        {
+          "height": 15,
+          "id": "layout.guided.stageDetail",
+          "width": 227.5,
+          "x": 41,
+          "y": 148
+        },
+        {
+          "height": 28,
+          "id": "layout.guided.actions",
+          "width": 672,
+          "x": 24,
+          "y": 598
+        },
+        {
+          "height": 28,
+          "id": "layout.guided.primary",
+          "width": 170,
+          "x": 526,
+          "y": 598
+        }
+      ],
+      "route": "guided-text",
+      "width": 720,
+      "language": "ko"
+    },
+    {
+      "height": 660,
+      "layout": [
+        {
+          "height": 28,
+          "id": "layout.main.header",
+          "width": 784,
+          "x": 18,
+          "y": 18
+        },
+        {
+          "height": 24,
+          "id": "layout.main.tabs",
+          "width": 784,
+          "x": 18,
+          "y": 94
+        },
+        {
+          "height": 468,
+          "id": "layout.main.body",
+          "width": 784,
+          "x": 18,
+          "y": 134
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Homebrew",
+          "width": 71.5,
+          "x": 47,
+          "y": 187
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Homebrew",
+          "width": 146,
+          "x": 389,
+          "y": 188
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Google Chrome",
+          "width": 100.5,
+          "x": 47,
+          "y": 269
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Google Chrome",
+          "width": 146,
+          "x": 389,
+          "y": 270
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Arc",
+          "width": 25.5,
+          "x": 47,
+          "y": 323
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Arc",
+          "width": 146,
+          "x": 389,
+          "y": 324
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Aside",
+          "width": 39,
+          "x": 47,
+          "y": 377
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Aside",
+          "width": 146,
+          "x": 389,
+          "y": 378
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Raycast",
+          "width": 53,
+          "x": 47,
+          "y": 431
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Raycast",
+          "width": 146,
+          "x": 389,
+          "y": 432
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Codex",
+          "width": 43.5,
+          "x": 47,
+          "y": 513
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Codex",
+          "width": 146,
+          "x": 389,
+          "y": 514
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Claude",
+          "width": 47.5,
+          "x": 47,
+          "y": 567
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Claude",
+          "width": 146,
+          "x": 389,
+          "y": 568
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Devin Desktop",
+          "width": 94.5,
+          "x": 47,
+          "y": 621
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Devin Desktop",
+          "width": 146,
+          "x": 389,
+          "y": 622
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Docker Desktop",
+          "width": 103.5,
+          "x": 47,
+          "y": 675
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Docker Desktop",
+          "width": 146,
+          "x": 389,
+          "y": 676
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Cursor",
+          "width": 46,
+          "x": 47,
+          "y": 757
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Cursor",
+          "width": 146,
+          "x": 389,
+          "y": 758
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Visual Studio Code",
+          "width": 121.5,
+          "x": 47,
+          "y": 811
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Visual Studio Code",
+          "width": 146,
+          "x": 389,
+          "y": 812
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Zed",
+          "width": 28,
+          "x": 47,
+          "y": 865
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Zed",
+          "width": 146,
+          "x": 389,
+          "y": 866
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.iTerm2",
+          "width": 46.5,
+          "x": 47,
+          "y": 919
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.iTerm2",
+          "width": 146,
+          "x": 389,
+          "y": 920
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Microsoft Teams",
+          "width": 107,
+          "x": 47,
+          "y": 1001
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Microsoft Teams",
+          "width": 146,
+          "x": 389,
+          "y": 1002
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Slack",
+          "width": 38,
+          "x": 47,
+          "y": 1055
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Slack",
+          "width": 146,
+          "x": 389,
+          "y": 1056
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.LinearMouse",
+          "width": 84,
+          "x": 47,
+          "y": 1137
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.LinearMouse",
+          "width": 146,
+          "x": 389,
+          "y": 1138
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Amphetamine",
+          "width": 90.5,
+          "x": 47,
+          "y": 1191
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Amphetamine",
+          "width": 146,
+          "x": 389,
+          "y": 1192
+        },
+        {
+          "height": 24,
+          "id": "layout.main.footer",
+          "width": 784,
+          "x": 18,
+          "y": 618
+        }
+      ],
+      "route": "install",
+      "width": 820,
+      "language": "ko"
+    },
+    {
+      "height": 660,
+      "layout": [
+        {
+          "height": 28,
+          "id": "layout.main.header",
+          "width": 784,
+          "x": 18,
+          "y": 18
+        },
+        {
+          "height": 24,
+          "id": "layout.main.tabs",
+          "width": 784,
+          "x": 18,
+          "y": 94
+        },
+        {
+          "height": 468,
+          "id": "layout.main.body",
+          "width": 784,
+          "x": 18,
+          "y": 134
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.구름 입력기",
+          "width": 64,
+          "x": 47,
+          "y": 159
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.구름 입력기",
+          "width": 146,
+          "x": 389,
+          "y": 160
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.구름 Option 키",
+          "width": 86.5,
+          "x": 47,
+          "y": 213
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.구름 Option 키",
+          "width": 146,
+          "x": 389,
+          "y": 214
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.Karabiner-Elements",
+          "width": 127,
+          "x": 47,
+          "y": 267
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.Karabiner-Elements",
+          "width": 146,
+          "x": 389,
+          "y": 268
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.입력 소스 설정",
+          "width": 78.5,
+          "x": 47,
+          "y": 321
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.입력 소스 설정",
+          "width": 146,
+          "x": 389,
+          "y": 322
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.입력 소스 단축키",
+          "width": 90,
+          "x": 47,
+          "y": 375
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.입력 소스 단축키",
+          "width": 146,
+          "x": 389,
+          "y": 376
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.키 반복 속도",
+          "width": 67.5,
+          "x": 47,
+          "y": 429
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.키 반복 속도",
+          "width": 146,
+          "x": 389,
+          "y": 430
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.길게 눌러 악센트",
+          "width": 90,
+          "x": 47,
+          "y": 483
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.길게 눌러 악센트",
+          "width": 146,
+          "x": 389,
+          "y": 484
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.기능 키",
+          "width": 41.5,
+          "x": 47,
+          "y": 537
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.기능 키",
+          "width": 146,
+          "x": 389,
+          "y": 538
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.지구본 키",
+          "width": 52.5,
+          "x": 47,
+          "y": 591
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.지구본 키",
+          "width": 146,
+          "x": 389,
+          "y": 592
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.맞춤법 자동 수정",
+          "width": 90,
+          "x": 47,
+          "y": 645
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.맞춤법 자동 수정",
+          "width": 146,
+          "x": 389,
+          "y": 646
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.스페이스 두 번 마침표",
+          "width": 116,
+          "x": 47,
+          "y": 699
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.스페이스 두 번 마침표",
+          "width": 146,
+          "x": 389,
+          "y": 700
+        },
+        {
+          "height": 16,
+          "id": "layout.row.title.인라인 자동 완성",
+          "width": 90,
+          "x": 47,
+          "y": 753
+        },
+        {
+          "height": 14,
+          "id": "layout.row.status.인라인 자동 완성",
+          "width": 146,
+          "x": 389,
+          "y": 754
+        },
+        {
+          "height": 24,
+          "id": "layout.main.footer",
+          "width": 784,
+          "x": 18,
+          "y": 618
+        }
+      ],
+      "route": "text",
+      "width": 820,
+      "language": "ko"
+    }
+  ]
+}

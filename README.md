@@ -2,14 +2,14 @@
 
 한국어 사용자와 개발자를 위한 **일회성 macOS 초기 설정 앱**입니다. `Lazyest Setup.app`에서 필요한 항목만 선택해 적용하고, 초기 설정이 끝나면 Setup 앱을 삭제할 수 있습니다.
 
-- Current version: [`1.2.0`](VERSION)
+- Current version: [`1.2.1`](VERSION)
 - macOS 13+
 - Apple Silicon Mac에서 검증하며 Intel Mac은 해당 기기에서 소스 빌드
 - [The Unlicense](UNLICENSE)
 
 ## 설치와 배포 상태
 
-2026년 9월 6일 기준 **1.2.0 Apple Silicon DMG**를 로컬에서 준비하고 앱·DMG의 Developer ID 서명, Apple 공증, 스테이플과 Gatekeeper 검증을 완료했습니다. 이 새 버전은 아직 공개 GitHub Release에 게시하지 않았습니다. 공개 페이지에 남아 있는 PKG는 이전 버전이며 이번 DMG와 다릅니다.
+2026년 9월 7일 기준 **1.2.1 Apple Silicon DMG**를 로컬에서 준비하고 앱·DMG의 Developer ID 서명, Apple 공증, 스테이플과 Gatekeeper 검증을 완료했습니다. 이 새 버전은 아직 공개 GitHub Release에 게시하지 않았습니다. 공개 페이지에 남아 있는 PKG는 이전 버전이며 이번 DMG와 다릅니다.
 
 공개되면 DMG와 SHA-256 체크섬을 확인하고 앱을 `/Applications`로 옮겨 실행합니다. 지금 소스에서 설치하려면 다음 안내를 따릅니다.
 
@@ -187,4 +187,4 @@ LAZYEST_NOTARY_PROFILE="lazyest-notary" \
 scripts/package-dmg.sh "$PWD/dist/Lazyest Setup.app" "$PWD/dist/Lazyest-Setup-macOS.dmg"
 ```
 
-DMG를 열고 앱을 Applications로 옮긴 뒤 `/Applications`의 앱을 실행합니다. 현재 검증한 1.2.0 DMG는 Apple Silicon용입니다. 다른 CPU용 배포를 추가하려면 해당 빌드와 실행을 별도로 검증해야 합니다. 소스 변경 후에는 앱을 다시 빌드하고 서명해야 합니다.
+DMG를 열고 앱을 Applications로 옮긴 뒤 `/Applications`의 앱을 실행합니다. 현재 검증한 1.2.1 DMG는 Apple Silicon용입니다. 다른 CPU용 배포를 추가하려면 해당 빌드와 실행을 별도로 검증해야 합니다. 소스 변경 후에는 앱을 다시 빌드하고 서명해야 합니다.

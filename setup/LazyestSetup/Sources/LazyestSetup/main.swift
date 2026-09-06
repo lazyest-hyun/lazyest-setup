@@ -35,6 +35,12 @@ func saveLanguageCode(_ code: String) {
 }
 
 func effectiveLanguage() -> SetupLanguage {
+    if CommandLine.arguments.contains("--export-preview"),
+       let index = CommandLine.arguments.firstIndex(of: "--preview-language"),
+       CommandLine.arguments.indices.contains(index + 1),
+       let language = SetupLanguage(rawValue: CommandLine.arguments[index + 1]) {
+        return language
+    }
     let selected = SetupLanguage(rawValue: savedLanguageCode()) ?? .automatic
     if selected != .automatic {
         return selected
@@ -667,6 +673,7 @@ final class SetupWindowController: NSWindowController {
         let header = NSStackView()
         header.orientation = .horizontal
         header.spacing = 12
+        header.identifier = NSUserInterfaceItemIdentifier("layout.main.header")
         let title = NSTextField(labelWithString: localized("app.title"))
         title.font = NSFont.boldSystemFont(ofSize: 22)
         title.alignment = .left
@@ -716,8 +723,10 @@ final class SetupWindowController: NSWindowController {
         tabs.addTabViewItem(dockTab())
         tabs.addTabViewItem(runtimeTab())
         mainTabs = tabs
+        tabs.identifier = NSUserInterfaceItemIdentifier("layout.main.body")
         mainTabButtons.removeAll()
         let tabBar = NSStackView()
+        tabBar.identifier = NSUserInterfaceItemIdentifier("layout.main.tabs")
         tabBar.orientation = .horizontal
         tabBar.spacing = 8
         tabBar.distribution = .fillEqually
@@ -735,6 +744,7 @@ final class SetupWindowController: NSWindowController {
         tabs.heightAnchor.constraint(greaterThanOrEqualToConstant: 430).isActive = true
 
         let footer = NSStackView()
+        footer.identifier = NSUserInterfaceItemIdentifier("layout.main.footer")
         footer.orientation = .horizontal
         footer.spacing = 10
         statusLabel.textColor = .secondaryLabelColor
@@ -748,6 +758,36 @@ final class SetupWindowController: NSWindowController {
         for section in root.arrangedSubviews {
             section.widthAnchor.constraint(equalTo: root.widthAnchor, constant: -36).isActive = true
         }
+    }
+
+    func previewWindow(route: String, width: CGFloat) -> NSWindow? {
+        guard previewMode else { return nil }
+        let mainRoutes = ["install", "text", "desktop", "dock", "flow"]
+        if let index = mainRoutes.firstIndex(of: route) {
+            selectMainTab(mainTabButtons[index])
+            window?.setContentSize(NSSize(width: max(width, 820), height: 660))
+            return window
+        }
+        let guidedRoutes = ["guided-homebrew", "guided-desktop", "guided-dock", "guided-text", "guided-finished"]
+        guard let index = guidedRoutes.firstIndex(of: route) else { return nil }
+        sequenceStepIndex = index
+        sequenceFinished = index == 4
+        sequenceStatus.stringValue = sequenceFinished ? localized("sequence.finished") : localized("status.ready")
+        guard let content = sequenceTab().view else { return nil }
+        if route == "guided-text" {
+            for (key, dependency) in [("gureum", "inputRegistrationRequired"), ("commandSwitch", "permissionRequired")] {
+                if let detail = sequenceTextDetailLabels[key] {
+                    detail.stringValue += "  ·  \(localized("sequence.text.\(dependency)"))"
+                    detail.toolTip = detail.stringValue
+                }
+            }
+        }
+        let preview = NSWindow(contentRect: NSRect(x: 0, y: 0, width: max(width, 720), height: 650), styleMask: .borderless, backing: .buffered, defer: false)
+        preview.isReleasedWhenClosed = false
+        preview.contentView = content
+        sequenceWindow = preview
+        updateSequenceStepUI()
+        return preview
     }
 
     @objc private func selectMainTab(_ sender: NSButton) {
@@ -795,14 +835,14 @@ final class SetupWindowController: NSWindowController {
         let sequenceItem = sequenceTab()
         guard let contentView = sequenceItem.view else { return }
         let sequenceWindow = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 820, height: 400),
+            contentRect: NSRect(x: 0, y: 0, width: 820, height: 650),
             styleMask: [.titled, .closable, .miniaturizable, .resizable],
             backing: .buffered,
             defer: false
         )
         sequenceWindow.title = localized("sequence.windowTitle")
         sequenceWindow.contentView = contentView
-        sequenceWindow.minSize = NSSize(width: 720, height: 360)
+        sequenceWindow.contentMinSize = NSSize(width: 720, height: 650)
         sequenceWindow.isReleasedWhenClosed = false
         sequenceWindow.center()
         self.sequenceWindow = sequenceWindow
@@ -835,6 +875,7 @@ final class SetupWindowController: NSWindowController {
         let header = NSStackView()
         header.orientation = .horizontal
         header.alignment = .centerY
+        header.identifier = NSUserInterfaceItemIdentifier("layout.guided.header")
         let title = NSTextField(labelWithString: localized("sequence.title"))
         title.font = NSFont.boldSystemFont(ofSize: 22)
         header.addArrangedSubview(title)
@@ -845,27 +886,37 @@ final class SetupWindowController: NSWindowController {
         root.addArrangedSubview(header)
 
         let stepBar = NSStackView()
+        stepBar.identifier = NSUserInterfaceItemIdentifier("layout.guided.tabs")
         stepBar.orientation = .horizontal
         stepBar.alignment = .centerY
         stepBar.distribution = .fillEqually
         stepBar.spacing = 8
+        stepBar.heightAnchor.constraint(equalToConstant: 24).isActive = true
         for key in ["homebrew", "desktop", "dock", "text"] {
             let stepButton = NSButton(title: localized("sequence.\(key)"), target: self, action: #selector(selectSequenceStep(_:)))
             stepButton.identifier = NSUserInterfaceItemIdentifier(key)
             stepButton.isBordered = false
             stepButton.bezelStyle = .inline
             stepButton.controlSize = .large
+            stepButton.font = NSFont.systemFont(ofSize: 12, weight: .medium)
+            stepButton.imagePosition = .imageLeft
+            stepButton.alignment = .left
+            stepButton.image = NSImage(size: NSSize(width: 14, height: 14))
             sequenceStepButtons[key] = stepButton
             stepBar.addArrangedSubview(stepButton)
         }
         root.addArrangedSubview(stepBar)
         stepBar.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
 
+        sequenceStageTitle.identifier = NSUserInterfaceItemIdentifier("layout.guided.stageTitle")
+        sequenceStageDetail.identifier = NSUserInterfaceItemIdentifier("layout.guided.stageDetail")
+        sequencePrimaryButton.identifier = NSUserInterfaceItemIdentifier("layout.guided.primary")
         sequenceStageTitle.font = NSFont.boldSystemFont(ofSize: 17)
         sequenceStageDetail.textColor = .secondaryLabelColor
         sequenceStageDetail.font = NSFont.systemFont(ofSize: 12)
         sequenceStageDetail.lineBreakMode = .byTruncatingTail
         let stage = NSBox()
+        stage.identifier = NSUserInterfaceItemIdentifier("layout.guided.stage")
         stage.boxType = .custom
         stage.cornerRadius = 12
         stage.borderColor = NSColor.separatorColor
@@ -875,6 +926,7 @@ final class SetupWindowController: NSWindowController {
         stage.heightAnchor.constraint(equalToConstant: 92).isActive = true
         let stageStack = NSStackView(views: [sequenceStageTitle, sequenceStageDetail])
         stageStack.orientation = .vertical
+        stageStack.alignment = .leading
         stageStack.spacing = 5
         stageStack.translatesAutoresizingMaskIntoConstraints = false
         stage.contentView?.addSubview(stageStack)
@@ -936,7 +988,7 @@ final class SetupWindowController: NSWindowController {
         for choice in dockChoices {
             let checkbox = NSButton(checkboxWithTitle: choice.title, target: nil, action: nil)
             checkbox.font = NSFont.systemFont(ofSize: 12)
-            checkbox.isEnabled = FileManager.default.fileExists(atPath: choice.path)
+            checkbox.isEnabled = previewMode || FileManager.default.fileExists(atPath: choice.path)
             checkbox.state = sequenceDockDefaultSelected(choice) ? .on : .off
             sequenceDockCheckboxes[choice.title] = checkbox
             dockList.addArrangedSubview(checkbox)
@@ -961,10 +1013,15 @@ final class SetupWindowController: NSWindowController {
         actions.addArrangedSubview(NSView())
         sequenceBackButton.title = localized("sequence.back")
         sequenceBackButton.controlSize = .large
+        sequenceBackButton.widthAnchor.constraint(equalToConstant: 100).isActive = true
         actions.addArrangedSubview(sequenceBackButton)
         sequencePrimaryButton.title = sequenceFinished ? localized("sequence.restart") : localized("sequence.apply")
         sequencePrimaryButton.keyEquivalent = "\r"
         sequencePrimaryButton.controlSize = .large
+        sequencePrimaryButton.widthAnchor.constraint(equalToConstant: 170).isActive = true
+        actions.identifier = NSUserInterfaceItemIdentifier("layout.guided.actions")
+        sequenceStatus.lineBreakMode = .byTruncatingTail
+        sequenceStatus.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         actions.addArrangedSubview(sequencePrimaryButton)
         root.addArrangedSubview(actions)
         actions.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
@@ -1050,16 +1107,20 @@ final class SetupWindowController: NSWindowController {
             detailLabel.font = NSFont.systemFont(ofSize: 11)
             detailLabel.textColor = .secondaryLabelColor
             detailLabel.lineBreakMode = .byTruncatingTail
+            detailLabel.toolTip = detail
+            detailLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
             details[key] = detailLabel
             row.addArrangedSubview(detailLabel)
             stack.addArrangedSubview(row)
+            row.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
+            detailLabel.widthAnchor.constraint(equalTo: row.widthAnchor).isActive = true
         }
 
         box.heightAnchor.constraint(equalToConstant: CGFloat(choices.count * 49 + 24)).isActive = true
         box.contentView?.addSubview(stack)
         NSLayoutConstraint.activate([
             stack.leadingAnchor.constraint(equalTo: box.contentView!.leadingAnchor),
-            stack.trailingAnchor.constraint(lessThanOrEqualTo: box.contentView!.trailingAnchor),
+            stack.trailingAnchor.constraint(equalTo: box.contentView!.trailingAnchor),
             stack.topAnchor.constraint(equalTo: box.contentView!.topAnchor),
             stack.bottomAnchor.constraint(equalTo: box.contentView!.bottomAnchor)
         ])
@@ -1156,6 +1217,7 @@ final class SetupWindowController: NSWindowController {
         let container = NSView()
         let root = NSStackView()
         root.orientation = .vertical
+        root.alignment = .leading
         root.spacing = 12
         root.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(root)
@@ -1173,6 +1235,7 @@ final class SetupWindowController: NSWindowController {
 
         let text = NSStackView()
         text.orientation = .vertical
+        text.alignment = .leading
         text.spacing = 4
         let title = NSTextField(labelWithString: localized("row.dock.title"))
         title.font = NSFont.boldSystemFont(ofSize: 16)
@@ -1186,6 +1249,7 @@ final class SetupWindowController: NSWindowController {
         header.addArrangedSubview(NSView())
         header.addArrangedSubview(dockStatus)
         root.addArrangedSubview(header)
+        header.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
 
         detail.toolTip = localized("dock.hint")
         dockPrimaryButton.toolTip = localized("dock.hint")
@@ -1196,6 +1260,7 @@ final class SetupWindowController: NSWindowController {
         scrollView.borderType = .noBorder
         let documentHeight = CGFloat(dockChoices.count * 42)
         let document = FlippedView(frame: NSRect(x: 0, y: 0, width: 760, height: documentHeight))
+        document.translatesAutoresizingMaskIntoConstraints = false
         let list = NSStackView()
         list.orientation = .vertical
         list.spacing = 8
@@ -1205,7 +1270,7 @@ final class SetupWindowController: NSWindowController {
         for choice in dockChoices {
             let checkbox = NSButton(checkboxWithTitle: choice.title, target: nil, action: nil)
             checkbox.font = NSFont.systemFont(ofSize: 13)
-            checkbox.isEnabled = FileManager.default.fileExists(atPath: choice.path)
+            checkbox.isEnabled = previewMode || FileManager.default.fileExists(atPath: choice.path)
             dockCheckboxes[choice.title] = checkbox
 
             let row = NSBox()
@@ -1235,7 +1300,8 @@ final class SetupWindowController: NSWindowController {
 
         scrollView.documentView = document
         root.addArrangedSubview(scrollView)
-        scrollView.heightAnchor.constraint(greaterThanOrEqualToConstant: 330).isActive = true
+        scrollView.heightAnchor.constraint(greaterThanOrEqualToConstant: 120).isActive = true
+        scrollView.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
 
         let actions = NSStackView()
         actions.orientation = .horizontal
@@ -1244,12 +1310,14 @@ final class SetupWindowController: NSWindowController {
         dockPrimaryButton.title = localized("dock.apply")
         actions.addArrangedSubview(dockPrimaryButton)
         root.addArrangedSubview(actions)
+        actions.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
+        dockPrimaryButton.widthAnchor.constraint(equalToConstant: 110).isActive = true
 
         NSLayoutConstraint.activate([
             root.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 18),
             root.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -18),
-            root.topAnchor.constraint(equalTo: container.topAnchor, constant: 18),
-            root.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -18),
+            root.topAnchor.constraint(equalTo: container.topAnchor, constant: 10),
+            root.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -10),
             list.leadingAnchor.constraint(equalTo: document.leadingAnchor),
             list.trailingAnchor.constraint(equalTo: document.trailingAnchor),
             list.topAnchor.constraint(equalTo: document.topAnchor),
@@ -1336,8 +1404,8 @@ final class SetupWindowController: NSWindowController {
     private func runtimeTab() -> NSTabViewItem {
         tab(localized("tab.runtime"), [
             row(title: localized("row.flow.title"), detail: localized("row.flow.detail"), status: flowStatus, buttons: [
-                flowPrimaryButton,
-                flowRemoveButton
+                flowRemoveButton,
+                flowPrimaryButton
             ])
         ])
     }
@@ -1406,6 +1474,8 @@ final class SetupWindowController: NSWindowController {
         text.spacing = 2
         text.alignment = .leading
         let titleLabel = NSTextField(labelWithString: title)
+        titleLabel.identifier = NSUserInterfaceItemIdentifier("layout.row.title.\(title)")
+        status.identifier = NSUserInterfaceItemIdentifier("layout.row.status.\(title)")
         titleLabel.font = NSFont.systemFont(ofSize: 13, weight: .medium)
         titleLabel.lineBreakMode = .byTruncatingTail
         titleLabel.toolTip = detail
@@ -1438,12 +1508,14 @@ final class SetupWindowController: NSWindowController {
         actions.orientation = .horizontal
         actions.spacing = 8
         actions.alignment = .centerY
-        actions.distribution = .fillEqually
+        actions.distribution = .fill
+        if buttons.count == 1 { actions.addArrangedSubview(NSView()) }
         for button in buttons {
             button.toolTip = detail
             actions.addArrangedSubview(button)
+            button.widthAnchor.constraint(equalToConstant: 110).isActive = true
         }
-        actions.widthAnchor.constraint(equalToConstant: buttons.count > 1 ? 228 : 112).isActive = true
+        actions.widthAnchor.constraint(equalToConstant: 228).isActive = true
 
         root.addArrangedSubview(text)
         let flexibleGap = NSView()
@@ -1464,8 +1536,9 @@ final class SetupWindowController: NSWindowController {
             root.bottomAnchor.constraint(equalTo: box.contentView!.bottomAnchor)
         ])
         if previewMode {
-            status.stringValue = localized("status.missing")
-            for action in buttons { action.title = localized("button.install") }
+            let installed = buttons.contains { $0.title == localized("button.open") }
+            status.stringValue = localized(installed ? "status.installed" : "status.missing")
+            for action in buttons where action.title == localized("button.remove") { action.isEnabled = installed }
         }
         statusPills.append(status)
         statusRows.append((status, box))
@@ -1490,7 +1563,9 @@ final class SetupWindowController: NSWindowController {
     }
 
     private func button(_ title: String, _ action: Selector) -> NSButton {
-        let button = NSButton(title: title, target: self, action: action)
+        let previewLabels = ["Install": "button.install", "Open": "button.open", "Disable": "button.disable", "Enable": "button.enable", "Apply": "button.apply", "Apply Settings": "button.applySettings", "Remove": "button.remove", "Download": "button.openRelease", "App Store": "button.appstore"]
+        let label = previewMode ? previewLabels[title].map(localized) ?? title : title
+        let button = NSButton(title: label, target: self, action: action)
         button.bezelStyle = .rounded
         return button
     }
@@ -1730,6 +1805,15 @@ final class SetupWindowController: NSWindowController {
         }
     }
 
+    private func sequenceStepImage(completed: Bool) -> NSImage {
+        let size = NSSize(width: 14, height: 14)
+        let image = completed
+            ? NSImage(systemSymbolName: "checkmark", accessibilityDescription: localized("sequence.progressDone")) ?? NSImage(size: size)
+            : NSImage(size: size)
+        image.size = size
+        return image
+    }
+
     private func updateSequenceStepUI() {
         let order = ["homebrew", "desktop", "dock", "text"]
         guard !sequenceFinished, sequenceStepIndex < order.count else {
@@ -1744,21 +1828,22 @@ final class SetupWindowController: NSWindowController {
             sequenceDockScrollView?.isHidden = true
             sequenceStatus.isHidden = false
             for (key, button) in sequenceStepButtons {
-                button.title = "✓ \(localized("sequence.\(key)"))"
+                button.title = localized("sequence.\(key)")
+                button.image = sequenceStepImage(completed: true)
                 button.contentTintColor = .systemGreen
             }
-            resizeSequenceWindow(for: "finished")
             return
         }
 
         let key = order[sequenceStepIndex]
         sequenceProgress.stringValue = "\(sequenceStepIndex + 1) / \(order.count)"
         sequenceStageTitle.stringValue = localized("sequence.stage.\(key)")
-        sequenceStageDetail.stringValue = key == "homebrew" && brewPath() != nil
+        let hasHomebrew = !previewMode && brewPath() != nil
+        sequenceStageDetail.stringValue = key == "homebrew" && hasHomebrew
             ? localized("status.installed")
             : localized("sequence.\(key).detail")
         if key == "homebrew" {
-            sequencePrimaryButton.title = brewPath() == nil
+            sequencePrimaryButton.title = !hasHomebrew
                 ? localized("sequence.homebrewAction")
                 : localized("sequence.homebrewReady")
         } else if key == "text" {
@@ -1769,13 +1854,13 @@ final class SetupWindowController: NSWindowController {
         for (index, stepKey) in order.enumerated() {
             guard let button = sequenceStepButtons[stepKey] else { continue }
             if index < sequenceStepIndex {
-                button.title = "✓ \(localized("sequence.\(stepKey)"))"
+                button.title = localized("sequence.\(stepKey)")
+                button.image = sequenceStepImage(completed: true)
                 button.contentTintColor = .systemGreen
-                button.font = NSFont.systemFont(ofSize: 12, weight: .medium)
             } else {
                 button.title = localized("sequence.\(stepKey)")
                 button.contentTintColor = index == sequenceStepIndex ? .controlAccentColor : .secondaryLabelColor
-                button.font = NSFont.systemFont(ofSize: 12, weight: index == sequenceStepIndex ? .semibold : .regular)
+                button.image = sequenceStepImage(completed: false)
             }
         }
         sequenceBackButton.isHidden = false
@@ -1785,29 +1870,11 @@ final class SetupWindowController: NSWindowController {
         sequenceTextOptions?.isHidden = key != "text"
         sequenceDockTitle?.isHidden = key != "dock"
         sequenceDockScrollView?.isHidden = key != "dock"
-        if key == "text" {
+        if key == "text" && !previewMode {
             updateSequenceTextDependencyLabels()
         }
-        resizeSequenceWindow(for: key)
         sequenceWindow?.contentView?.layoutSubtreeIfNeeded()
         sequenceWindow?.displayIfNeeded()
-    }
-
-    private func resizeSequenceWindow(for key: String) {
-        guard let sequenceWindow else { return }
-        let targetHeight: CGFloat
-        switch key {
-        case "desktop":
-            targetHeight = 520
-        case "dock":
-            targetHeight = 590
-        case "text":
-            targetHeight = 650
-        default:
-            targetHeight = 400
-        }
-        guard abs(sequenceWindow.contentLayoutRect.height - targetHeight) > 1 else { return }
-        sequenceWindow.setContentSize(NSSize(width: sequenceWindow.contentLayoutRect.width, height: targetHeight))
     }
 
     private func updateSequenceTextDependencyLabels() {
@@ -1832,6 +1899,7 @@ final class SetupWindowController: NSWindowController {
         }
         sequenceTextDetailLabels["commandSwitch"]?.stringValue =
             "\(localized("sequence.text.commandSwitch.detail"))  ·  \(commandState)"
+        for detail in sequenceTextDetailLabels.values { detail.toolTip = detail.stringValue }
     }
 
     private func applySequenceDesktop() {
@@ -3145,9 +3213,15 @@ if let exportIndex = CommandLine.arguments.firstIndex(of: "--export-preview"),
     app.setActivationPolicy(.prohibited)
     app.appearance = NSAppearance(named: .aqua)
     let controller = SetupWindowController(previewMode: true)
-    guard let view = controller.window?.contentView else { exit(1) }
-    controller.window?.appearance = NSAppearance(named: .aqua)
-    controller.window?.styleMask = .borderless
+    func previewArgument(_ flag: String) -> String? {
+        guard let index = CommandLine.arguments.firstIndex(of: flag), CommandLine.arguments.indices.contains(index + 1) else { return nil }
+        return CommandLine.arguments[index + 1]
+    }
+    let route = previewArgument("--preview-route") ?? "install"
+    let width = previewArgument("--preview-width").flatMap(Double.init) ?? 900
+    guard let previewWindow = controller.previewWindow(route: route, width: width), let view = previewWindow.contentView else { exit(1) }
+    previewWindow.appearance = NSAppearance(named: .aqua)
+    previewWindow.styleMask = .borderless
     view.wantsLayer = true
     view.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
     RunLoop.current.run(until: Date().addingTimeInterval(0.3))
@@ -3162,6 +3236,18 @@ if let exportIndex = CommandLine.arguments.firstIndex(of: "--export-preview"),
         let output = URL(fileURLWithPath: CommandLine.arguments[exportIndex + 1])
         try FileManager.default.createDirectory(at: output.deletingLastPathComponent(), withIntermediateDirectories: true)
         try data.write(to: output, options: .atomic)
+        var layout: [[String: Any]] = []
+        func collectLayout(_ child: NSView) {
+            guard !child.isHidden else { return }
+            if let identifier = child.identifier?.rawValue, identifier.hasPrefix("layout.") {
+                let rect = child.convert(child.bounds, to: view)
+                layout.append(["id": identifier, "x": rect.minX, "y": view.bounds.height - rect.maxY, "width": rect.width, "height": rect.height])
+            }
+            child.subviews.forEach(collectLayout)
+        }
+        collectLayout(view)
+        let report: [String: Any] = ["route": route, "width": view.bounds.width, "height": view.bounds.height, "layout": layout]
+        try JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted, .sortedKeys]).write(to: output.deletingPathExtension().appendingPathExtension("json"))
         exit(0)
     } catch { fputs("Preview export failed: \(error)\n", stderr); exit(1) }
 }
