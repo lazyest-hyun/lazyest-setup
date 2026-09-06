@@ -5,11 +5,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib.sh
 source "$SCRIPT_DIR/lib.sh"
 
+require_python
+
 parse_common_flags "$@"
 
 config_path="$HOME/.config/karabiner/karabiner.json"
 asset_path="$HOME/.config/karabiner/assets/complex_modifications/right_command_to_f18.json"
-backup_dir="$HOME/.local/share/mac-bootstrap/backups"
+backup_dir="$LAZYEST_SETUP_BACKUP_DIR"
 
 echo "RESET_KARABINER"
 echo "  dry-run: $(bool_label "$DRY_RUN")"
@@ -33,7 +35,7 @@ import os
 import shutil
 
 config_path = os.path.expanduser("~/.config/karabiner/karabiner.json")
-backup_dir = os.path.expanduser("~/.local/share/mac-bootstrap/backups")
+backup_dir = os.environ["LAZYEST_SETUP_BACKUP_DIR"]
 
 stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 backup_path = os.path.join(backup_dir, f"karabiner.{stamp}.json")

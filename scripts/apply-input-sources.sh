@@ -5,9 +5,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib.sh
 source "$SCRIPT_DIR/lib.sh"
 
+require_python
+
 parse_common_flags "$@"
 
-backup_dir="$HOME/.local/share/mac-bootstrap/backups"
+backup_dir="$LAZYEST_SETUP_BACKUP_DIR"
 hitoolbox_plist="$HOME/Library/Preferences/com.apple.HIToolbox.plist"
 
 echo "APPLY_INPUT_SOURCES"
@@ -29,8 +31,11 @@ fi
 mkdir -p "$backup_dir"
 
 if command -v swift >/dev/null 2>&1; then
-  tis_status_file="$(mktemp /tmp/mac-bootstrap-gureum-tis.XXXXXX)"
-  TIS_STATUS_FILE="$tis_status_file" swift - <<'SWIFT'
+  tis_status_file="$(mktemp ${TMPDIR:-/tmp}/lazyest-setup-gureum.XXXXXX)"
+  trap 'rm -f "$tis_status_file"' EXIT
+  gureum_app="/Library/Input Methods/Gureum.app"
+  if [ ! -d "$gureum_app" ]; then gureum_app="$HOME/Library/Input Methods/Gureum.app"; fi
+  GUREUM_APP_PATH="$gureum_app" TIS_STATUS_FILE="$tis_status_file" swift - <<'SWIFT'
 import Carbon
 import Foundation
 
@@ -41,7 +46,7 @@ func stringProp(_ source: TISInputSource, _ key: CFString) -> String {
     return Unmanaged<CFString>.fromOpaque(raw).takeUnretainedValue() as String
 }
 
-let appURL = URL(fileURLWithPath: "/Library/Input Methods/Gureum.app") as CFURL
+let appURL = URL(fileURLWithPath: ProcessInfo.processInfo.environment["GUREUM_APP_PATH"]!) as CFURL
 _ = TISRegisterInputSource(appURL)
 
 let sources = TISCreateInputSourceList(nil, true)?.takeRetainedValue() as? [TISInputSource] ?? []
@@ -85,7 +90,7 @@ import plistlib
 import shutil
 import subprocess
 
-backup_dir = os.path.expanduser("~/.local/share/mac-bootstrap/backups")
+backup_dir = os.environ["LAZYEST_SETUP_BACKUP_DIR"]
 hitoolbox_plist = os.path.expanduser("~/Library/Preferences/com.apple.HIToolbox.plist")
 
 def backup(path, label):
@@ -194,7 +199,7 @@ func stringProp(_ source: TISInputSource, _ key: CFString) -> String {
 }
 
 let sources = TISCreateInputSourceList(nil, true)?.takeRetainedValue() as? [TISInputSource] ?? []
-let appURL = URL(fileURLWithPath: "/Library/Input Methods/Gureum.app") as CFURL
+let appURL = URL(fileURLWithPath: ProcessInfo.processInfo.environment["GUREUM_APP_PATH"]!) as CFURL
 _ = TISRegisterInputSource(appURL)
 for id in ["org.youknowone.inputmethod.Korean", "org.youknowone.inputmethod.Gureum.system", "org.youknowone.inputmethod.Gureum.han2"] {
     if let source = sources.first(where: { stringProp($0, kTISPropertyInputSourceID) == id }) {

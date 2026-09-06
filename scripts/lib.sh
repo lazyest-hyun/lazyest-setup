@@ -7,6 +7,13 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 # shellcheck source=/dev/null
 source "$ROOT_DIR/config/bootstrap.conf"
 
+# Existing backups remain available for reset; all new installations use the brand path.
+LAZYEST_SETUP_BACKUP_DIR="$HOME/Library/Application Support/Lazyest Setup/Backups"
+if [ ! -d "$LAZYEST_SETUP_BACKUP_DIR" ] && [ -d "$HOME/.local/share/mac-bootstrap/backups" ]; then
+  LAZYEST_SETUP_BACKUP_DIR="$HOME/.local/share/mac-bootstrap/backups"
+fi
+export LAZYEST_SETUP_BACKUP_DIR
+
 DRY_RUN=0
 RESTART_UI=0
 
@@ -85,7 +92,7 @@ flow_app_path() {
 }
 
 setup_app_path() {
-  echo "${MAC_BOOTSTRAP_SETUP_APP_PATH:-/Applications/Lazyest Setup.app}"
+  echo "${LAZYEST_SETUP_APP_PATH:-/Applications/Lazyest Setup.app}"
 }
 
 launch_agent_plist() {
@@ -94,4 +101,11 @@ launch_agent_plist() {
 
 flow_release_page_url() {
   printf '%s\n' "$FLOW_RELEASE_PAGE_URL"
+}
+
+require_python() {
+  if ! /usr/bin/xcrun --find python3 >/dev/null 2>&1; then
+    echo "  blocked: Command Line Tools required; run xcode-select --install, then retry" >&2
+    exit 1
+  fi
 }

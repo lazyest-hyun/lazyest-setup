@@ -5,6 +5,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib.sh
 source "$SCRIPT_DIR/lib.sh"
 
+require_python
+
 echo "Desired Dock keep labels:"
 printf '  %s\n' "${DOCK_KEEP_LABELS[@]}"
 echo

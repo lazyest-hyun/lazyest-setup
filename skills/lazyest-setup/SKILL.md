@@ -1,4 +1,4 @@
-# mac-bootstrap Skill
+# Lazyest Setup Skill
 
 Use this skill for the one-time Lazyest Setup project. Runtime Flow work belongs in the separate `lazyest-flow` repository.
 
@@ -17,7 +17,7 @@ Use this skill for the one-time Lazyest Setup project. Runtime Flow work belongs
 3. Preview the requested action with its `--dry-run` option.
 4. Build Setup with `./bootstrap.sh build-setup` when source changed.
 5. Install Setup only when requested with `./bootstrap.sh install-setup`.
-6. Treat `./bootstrap.sh install-flow` as a bridge to the separate Agent repository.
+6. Treat `./bootstrap.sh install-flow` as a link to the separate Flow release page.
 
 ## Boundaries
 

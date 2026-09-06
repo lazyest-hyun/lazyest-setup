@@ -5,6 +5,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib.sh
 source "$SCRIPT_DIR/lib.sh"
 
+require_python
+
 restart_ui=1
 while (($#)); do
   case "$1" in
@@ -26,9 +28,9 @@ while (($#)); do
 done
 
 remove_labels="$(printf '%s\n' "${DOCK_REMOVE_LABELS[@]}")"
-export MAC_BOOTSTRAP_DOCK_REMOVE_LABELS="$remove_labels"
-export MAC_BOOTSTRAP_DOCK_DRY_RUN="$DRY_RUN"
-export MAC_BOOTSTRAP_BACKUP_DIR="$HOME/.local/share/mac-bootstrap/backups"
+export LAZYEST_SETUP_DOCK_REMOVE_LABELS="$remove_labels"
+export LAZYEST_SETUP_DOCK_DRY_RUN="$DRY_RUN"
+export LAZYEST_SETUP_BACKUP_DIR
 
 echo "DOCK_CLEANUP"
 echo "  dry-run: $(bool_label "$DRY_RUN")"
@@ -42,14 +44,14 @@ import shutil
 import sys
 
 plist_path = os.path.expanduser("~/Library/Preferences/com.apple.dock.plist")
-backup_dir = os.environ["MAC_BOOTSTRAP_BACKUP_DIR"]
-dry_run = os.environ.get("MAC_BOOTSTRAP_DOCK_DRY_RUN") == "1"
+backup_dir = os.environ["LAZYEST_SETUP_BACKUP_DIR"]
+dry_run = os.environ.get("LAZYEST_SETUP_DOCK_DRY_RUN") == "1"
 def normalized(value):
     return " ".join(str(value).replace("\u00a0", " ").split()).strip()
 
 remove_labels = {
     normalized(line)
-    for line in os.environ.get("MAC_BOOTSTRAP_DOCK_REMOVE_LABELS", "").splitlines()
+    for line in os.environ.get("LAZYEST_SETUP_DOCK_REMOVE_LABELS", "").splitlines()
     if normalized(line)
 }
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.0 - 2026-09-06
+
+- Rebuilt the compact tab and row layout with aligned actions and concise tooltip guidance.
+- Made source installation build the current release first, verify a staged app, and restore the previous app if replacement fails.
+- Moved to the Lazyest app identity while retaining existing language preferences and recovery backups.
+- Added Command Line Tools preflight for Python-based settings, user-local Gureum registration, and earlier-macOS Launchpad support.
+- Added private-data-free documentation renders and removed checkout paths from release binaries.
+
 ## 1.1.0 - 2026-07-28
 
 - Added Quick Setup as a focused, step-by-step flow for Homebrew, desktop, Dock, and text/keyboard settings while leaving optional app installs separate.
@@ -17,7 +25,7 @@
 - Clarified that only selected settings are changed and added inset spacing to the launch guidance.
 - Added Developer ID signing, notarization, Gatekeeper verification, and SHA-256 release packaging.
 
-This project uses the Setup app version in [`VERSION`](VERSION). Public GitHub Releases contain the signed and notarized ZIP and DMG downloads.
+This project uses the Setup app version in [`VERSION`](VERSION). Published GitHub Releases provide signed and notarized PKG installers.
 
 ## 0.4.0 - 2026-07-17
 
@@ -30,7 +38,7 @@ This project uses the Setup app version in [`VERSION`](VERSION). Public GitHub R
 
 - Moved the right Command to F18 setup fully to a named Karabiner Complex Modification.
 - Made Setup and audit verify the selected profile's exact Complex rule instead of matching unrelated text.
-- Limited reset cleanup to the MacBootstrap-owned Complex rule and the legacy right Command to F18 Simple mapping.
+- Limited reset cleanup to the Setup-owned Complex rule and the legacy right Command to F18 Simple mapping.
 
 ## 0.3.1 - 2026-07-10
 
@@ -39,7 +47,7 @@ This project uses the Setup app version in [`VERSION`](VERSION). Public GitHub R
 
 ## 0.3.0 - 2026-07-10
 
-- Split the always-running MacBootstrapAgent into its own repository and Swift package.
+- Split the always-running always-running agent into its own repository and Swift package.
 - Kept LazyestSetup focused on one-time macOS and app setup.
 - Changed the Setup Agent row to download and install the separate Agent project directly.
 - Gave Setup its own language settings and independent build command.

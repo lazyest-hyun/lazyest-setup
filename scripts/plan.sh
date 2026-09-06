@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib.sh
 source "$SCRIPT_DIR/lib.sh"
 
-echo "MAC_BOOTSTRAP_PLAN"
+echo "LAZYEST_SETUP_PLAN"
 echo
 echo "Native defaults planned by apply-defaults:"
 if [ "$APPLY_TEXT_AUTOMATION_DEFAULTS" = "1" ]; then

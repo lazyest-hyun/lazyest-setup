@@ -5,9 +5,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib.sh
 source "$SCRIPT_DIR/lib.sh"
 
+require_python
+
 parse_common_flags "$@"
 
-backup_dir="$HOME/.local/share/mac-bootstrap/backups"
+backup_dir="$LAZYEST_SETUP_BACKUP_DIR"
 hitoolbox_plist="$HOME/Library/Preferences/com.apple.HIToolbox.plist"
 
 echo "RESET_INPUT_SOURCES"
@@ -66,7 +68,7 @@ import plistlib
 import shutil
 import subprocess
 
-backup_dir = os.path.expanduser("~/.local/share/mac-bootstrap/backups")
+backup_dir = os.environ["LAZYEST_SETUP_BACKUP_DIR"]
 hitoolbox_plist = os.path.expanduser("~/Library/Preferences/com.apple.HIToolbox.plist")
 
 def backup(path, label):

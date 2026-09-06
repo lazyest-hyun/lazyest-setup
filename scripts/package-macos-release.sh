@@ -78,9 +78,8 @@ PKG_NAME="Lazyest-Setup-$VERSION-macOS.pkg"
 PKG_PATH="$DIST_DIR/$PKG_NAME"
 
 rm -rf "$APP_PATH" "$ZIP_PATH" "$ZIP_PATH.sha256" "$PKG_PATH" "$PKG_PATH.sha256"
-"$ROOT_DIR/bootstrap.sh" build-setup
-MAC_BOOTSTRAP_SETUP_APP_PATH="$APP_PATH" \
-  MAC_BOOTSTRAP_CODESIGN_IDENTITY="$SIGNING_IDENTITY" \
+LAZYEST_SETUP_APP_PATH="$APP_PATH" \
+  LAZYEST_CODESIGN_IDENTITY="$SIGNING_IDENTITY" \
   "$SCRIPT_DIR/install-setup.sh"
 
 codesign --verify --deep --strict --verbose=2 "$APP_PATH"

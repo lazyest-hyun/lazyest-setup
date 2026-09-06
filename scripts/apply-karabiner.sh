@@ -5,12 +5,14 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib.sh
 source "$SCRIPT_DIR/lib.sh"
 
+require_python
+
 parse_common_flags "$@"
 
 config_dir="$HOME/.config/karabiner"
 config_path="$config_dir/karabiner.json"
 asset_path="$config_dir/assets/complex_modifications/right_command_to_f18.json"
-backup_dir="$HOME/.local/share/mac-bootstrap/backups"
+backup_dir="$LAZYEST_SETUP_BACKUP_DIR"
 
 echo "APPLY_KARABINER"
 echo "  dry-run: $(bool_label "$DRY_RUN")"
@@ -37,7 +39,7 @@ import shutil
 
 config_path = os.path.expanduser("~/.config/karabiner/karabiner.json")
 asset_path = os.path.expanduser("~/.config/karabiner/assets/complex_modifications/right_command_to_f18.json")
-backup_dir = os.path.expanduser("~/.local/share/mac-bootstrap/backups")
+backup_dir = os.environ["LAZYEST_SETUP_BACKUP_DIR"]
 
 rule = {
     "description": "Lazyest Setup: right_command to F18",

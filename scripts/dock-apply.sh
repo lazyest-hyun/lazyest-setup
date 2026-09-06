@@ -5,6 +5,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib.sh
 source "$SCRIPT_DIR/lib.sh"
 
+require_python
+
 restart_ui=1
 while (($#)); do
   case "$1" in
@@ -25,12 +27,17 @@ while (($#)); do
   shift
 done
 
-export MAC_BOOTSTRAP_DOCK_DRY_RUN="$DRY_RUN"
-export MAC_BOOTSTRAP_BACKUP_DIR="$HOME/.local/share/mac-bootstrap/backups"
+export LAZYEST_SETUP_DOCK_DRY_RUN="$DRY_RUN"
+export LAZYEST_SETUP_BACKUP_DIR
 
 echo "DOCK_APPLY"
 echo "  dry-run: $(bool_label "$DRY_RUN")"
 echo "  restart-ui: $(bool_label "$restart_ui")"
+
+if [ -z "${LAZYEST_SETUP_DOCK_KEEP_LABELS:-}" ]; then
+  echo "  blocked: select at least one Dock item before applying" >&2
+  exit 2
+fi
 
 dock_booted_out=0
 dock_uid="$(id -u)"
@@ -64,11 +71,11 @@ import sys
 from urllib.parse import quote
 
 plist_path = os.path.expanduser("~/Library/Preferences/com.apple.dock.plist")
-backup_dir = os.environ["MAC_BOOTSTRAP_BACKUP_DIR"]
-dry_run = os.environ.get("MAC_BOOTSTRAP_DOCK_DRY_RUN") == "1"
+backup_dir = os.environ["LAZYEST_SETUP_BACKUP_DIR"]
+dry_run = os.environ.get("LAZYEST_SETUP_DOCK_DRY_RUN") == "1"
 
 catalog = [
-    ("Apps", ["Apps", "앱", "Launchpad"], "/System/Applications/Apps.app"),
+    ("Apps", ["Apps", "앱", "Launchpad"], "/System/Applications/Apps.app" if os.path.isdir("/System/Applications/Apps.app") else "/System/Applications/Launchpad.app"),
     ("Safari", ["Safari"], "/Applications/Safari.app"),
     ("Notes", ["Notes", "메모"], "/System/Applications/Notes.app"),
     ("System Settings", ["System Settings", "시스템 설정"], "/System/Applications/System Settings.app"),
@@ -93,11 +100,11 @@ def normalized(value):
 
 keep_labels = {
     normalized(line)
-    for line in os.environ.get("MAC_BOOTSTRAP_DOCK_KEEP_LABELS", "").splitlines()
+    for line in os.environ.get("LAZYEST_SETUP_DOCK_KEEP_LABELS", "").splitlines()
     if normalized(line)
 }
 if not keep_labels:
-    print("  blocked: MAC_BOOTSTRAP_DOCK_KEEP_LABELS is empty")
+    print("  blocked: LAZYEST_SETUP_DOCK_KEEP_LABELS is empty")
     sys.exit(2)
 
 managed_aliases = {

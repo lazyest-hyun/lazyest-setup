@@ -10,8 +10,7 @@ parse_common_flags "$@"
 setup_binary="$(setup_binary_path)"
 setup_app="$(setup_app_path)"
 version="$(app_version)"
-default_codesign_identity="MacBootstrap Local Code Signing"
-codesign_identity="${MAC_BOOTSTRAP_CODESIGN_IDENTITY:-$default_codesign_identity}"
+codesign_identity="${LAZYEST_CODESIGN_IDENTITY:--}"
 
 validate_setup_app_path() {
   case "$setup_app" in
@@ -29,6 +28,7 @@ codesign_identity_available() {
 }
 
 sign_setup_app() {
+  "$ROOT_DIR/scripts/prepare-release-binary.sh" "$setup_app/Contents/MacOS/LazyestSetup"
   if codesign_identity_available; then
     echo "  codesign: $codesign_identity"
     if [[ "$codesign_identity" == Developer\ ID\ Application:* ]]; then
@@ -38,9 +38,13 @@ sign_setup_app() {
     elif codesign --force --deep --options runtime --timestamp=none --sign "$codesign_identity" "$setup_app"; then
       return
     fi
-    echo "  warning: stable codesign failed; falling back to ad-hoc signature"
+    echo "  blocked: requested code signing failed" >&2
+    return 1
+  elif [ "$codesign_identity" != "-" ]; then
+    echo "  blocked: requested signing identity is not available" >&2
+    return 1
   else
-    echo "  codesign: ad-hoc (stable local identity not found; set MAC_BOOTSTRAP_CODESIGN_IDENTITY to override)"
+    echo "  codesign: ad-hoc (local build; use LAZYEST_CODESIGN_IDENTITY for distribution)"
   fi
   codesign --force --deep --options runtime --timestamp=none --sign - "$setup_app"
 }
@@ -61,31 +65,28 @@ echo "  setup app: $setup_app"
 echo "  version: $version"
 validate_setup_app_path
 
-if [ ! -x "$setup_binary" ]; then
-  echo "  blocked: setup binary not found; run ./bootstrap.sh build-setup first"
-  exit 0
+# Every install builds current source, including a fresh clone and UI edits.
+# Build and sign away from the installed copy so a failure leaves it usable.
+"$SCRIPT_DIR/build-setup.sh" "$@"
+if ((!DRY_RUN)) && [ ! -x "$setup_binary" ]; then
+  echo "  blocked: setup build did not produce an executable" >&2
+  exit 1
 fi
 
-if [ "$setup_app" = "/Applications/Lazyest Setup.app" ]; then
-  for process_name in LazyestSetup MacBootstrapSetup; do
-    if pgrep -x "$process_name" >/dev/null 2>&1; then
-      if ((DRY_RUN)); then
-        echo "[dry-run] stop the existing $process_name process"
-      else
-        pkill -x "$process_name" || true
-        sleep 0.3
-      fi
-    fi
-  done
+target_app="$setup_app"
+staging_root=""
+cleanup_staging() {
+  if [ -n "$staging_root" ] && [ -d "$staging_root" ]; then
+    rm -rf "$staging_root"
+  fi
+}
+trap cleanup_staging EXIT
+if ((!DRY_RUN)); then
+  mkdir -p "$(dirname "$target_app")"
+  staging_root="$(mktemp -d "$(dirname "$target_app")/.lazyest-setup-install.XXXXXX")"
+  setup_app="$staging_root/Lazyest Setup.app"
 fi
 
-if [ -d "$setup_app" ]; then
-  run_cmd rm -rf "$setup_app"
-fi
-legacy_setup_app="/Applications/MacBootstrapSetup.app"
-if [ "$setup_app" = "/Applications/Lazyest Setup.app" ] && [ -d "$legacy_setup_app" ]; then
-  run_cmd rm -rf "$legacy_setup_app"
-fi
 run_cmd mkdir -p "$setup_app/Contents/MacOS" "$setup_app/Contents/Resources"
 if ((DRY_RUN)); then
   echo "[dry-run] copy setup binary into $setup_app"
@@ -112,7 +113,7 @@ else
   <key>CFBundleExecutable</key>
   <string>LazyestSetup</string>
   <key>CFBundleIdentifier</key>
-  <string>com.estaid.mac-bootstrap-setup</string>
+  <string>com.lazyest.setup</string>
   <key>CFBundleName</key>
   <string>Lazyest Setup</string>
   <key>CFBundleDisplayName</key>
@@ -125,6 +126,8 @@ else
   <string>$version</string>
   <key>CFBundleVersion</key>
   <string>$version</string>
+  <key>NSAppleEventsUsageDescription</key>
+  <string>선택한 데스크톱 설정을 적용하고 앱 설치를 Terminal에서 시작합니다.</string>
   <key>LSMinimumSystemVersion</key>
   <string>13.0</string>
   <key>LSMultipleInstancesProhibited</key>
@@ -134,6 +137,24 @@ else
 PLIST
   printf 'APPL????' >"$setup_app/Contents/PkgInfo"
   sign_setup_app
+  codesign --verify --deep --strict "$setup_app"
+
+  if [ "$target_app" = "/Applications/Lazyest Setup.app" ]; then
+    # The source build is complete before replacing only this application.
+    pkill -x LazyestSetup >/dev/null 2>&1 || true
+  fi
+  previous_app="$staging_root/previous.app"
+  if [ -d "$target_app" ]; then
+    mv "$target_app" "$previous_app"
+  fi
+  if ! mv "$setup_app" "$target_app"; then
+    if [ -d "$previous_app" ]; then mv "$previous_app" "$target_app"; fi
+    echo "  blocked: could not install app; previous version restored" >&2
+    exit 1
+  fi
+  if [ "$target_app" = "/Applications/Lazyest Setup.app" ]; then
+    "$SCRIPT_DIR/migrate-legacy-install.sh"
+  fi
 fi
 
 echo "  note: installed one-time setup app only; this does not launch it or apply settings"

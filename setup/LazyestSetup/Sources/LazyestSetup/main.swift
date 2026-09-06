@@ -22,14 +22,16 @@ func savedLanguageCode() -> String {
        !value.isEmpty {
         return value
     }
-    return UserDefaults.standard.string(forKey: "MacBootstrapLanguage") ?? SetupLanguage.automatic.rawValue
+    return UserDefaults.standard.string(forKey: "LazyestSetupLanguage")
+        ?? UserDefaults.standard.persistentDomain(forName: "com.estaid.mac-bootstrap-setup")?["MacBootstrapLanguage"] as? String
+        ?? SetupLanguage.automatic.rawValue
 }
 
 func saveLanguageCode(_ code: String) {
     let path = sharedLanguageConfigPath()
     try? FileManager.default.createDirectory(at: path.deletingLastPathComponent(), withIntermediateDirectories: true)
     try? code.write(to: path, atomically: true, encoding: .utf8)
-    UserDefaults.standard.set(code, forKey: "MacBootstrapLanguage")
+    UserDefaults.standard.set(code, forKey: "LazyestSetupLanguage")
 }
 
 func effectiveLanguage() -> SetupLanguage {
@@ -44,7 +46,7 @@ func effectiveLanguage() -> SetupLanguage {
 func localized(_ key: String) -> String {
     let korean: [String: String] = [
         "app.title": "Lazyest Setup",
-        "app.subtitle": "새 Mac에서 필요한 항목만 골라 한 번씩 설정합니다. 선택하지 않은 항목은 바꾸지 않습니다.",
+        "app.subtitle": "필요한 앱과 설정을 한곳에서.",
         "app.impact": "일부 입력기·키보드 변경은 로그아웃이 필요합니다. 적용 전 현재 상태와 영향을 확인하세요. 매일 쓰는 기능은 별도 앱 Flow에서 관리합니다.",
         "tab.install": "설치",
         "tab.sequence": "순차 설정",
@@ -250,7 +252,7 @@ func localized(_ key: String) -> String {
     }
     let english: [String: String] = [
         "app.title": "Lazyest Setup",
-        "app.subtitle": "Choose only what this Mac needs. Setup leaves every unselected item unchanged.",
+        "app.subtitle": "Your apps and Mac settings, in one place.",
         "app.impact": "Some input and keyboard changes require logout. Review each current state and impact before applying. Everyday controls live in the separate Flow app.",
         "tab.install": "Install",
         "tab.sequence": "Guided Setup",
@@ -461,7 +463,7 @@ struct DockChoice {
 }
 
 let dockChoices: [DockChoice] = [
-    DockChoice(title: "앱 / Apps", aliases: ["앱", "Apps", "Launchpad"], path: "/System/Applications/Apps.app"),
+    DockChoice(title: "앱 / Apps", aliases: ["앱", "Apps", "Launchpad"], path: FileManager.default.fileExists(atPath: "/System/Applications/Apps.app") ? "/System/Applications/Apps.app" : "/System/Applications/Launchpad.app"),
     DockChoice(title: "Safari", aliases: ["Safari"], path: "/Applications/Safari.app"),
     DockChoice(title: "메모 / Notes", aliases: ["메모", "Notes"], path: "/System/Applications/Notes.app"),
     DockChoice(title: "시스템 설정 / System Settings", aliases: ["시스템 설정", "System Settings"], path: "/System/Applications/System Settings.app"),
@@ -499,6 +501,9 @@ private enum BooleanPreferenceState: Equatable {
 }
 
 final class SetupWindowController: NSWindowController {
+    private let previewMode: Bool
+    private var mainTabs: NSTabView?
+    private var mainTabButtons: [NSButton] = []
     private var statusPills: [NSTextField] = []
     private var statusRows: [(status: NSTextField, box: NSBox)] = []
     private var dockCheckboxes: [String: NSButton] = [:]
@@ -605,7 +610,8 @@ final class SetupWindowController: NSWindowController {
     private lazy var flowPrimaryButton = button("Install", #selector(primaryFlow))
     private lazy var flowRemoveButton = button("Remove", #selector(removeFlow))
 
-    init() {
+    init(previewMode: Bool = false) {
+        self.previewMode = previewMode
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 900, height: 660),
             styleMask: [.titled, .closable, .miniaturizable, .resizable],
@@ -614,8 +620,10 @@ final class SetupWindowController: NSWindowController {
         )
         window.title = localized("app.title")
         window.isReleasedWhenClosed = false
+        window.contentMinSize = NSSize(width: 820, height: 660)
         super.init(window: window)
         buildUI()
+        if previewMode { return }
         refresh(forceDock: true)
         activationObserver = NotificationCenter.default.addObserver(
             forName: NSApplication.didBecomeActiveNotification,
@@ -644,7 +652,8 @@ final class SetupWindowController: NSWindowController {
         window?.title = localized("app.title")
         let root = NSStackView()
         root.orientation = .vertical
-        root.spacing = 14
+        root.spacing = 16
+        root.alignment = .leading
         root.edgeInsets = NSEdgeInsets(top: 18, left: 18, bottom: 18, right: 18)
         root.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(root)
@@ -662,6 +671,11 @@ final class SetupWindowController: NSWindowController {
         title.font = NSFont.boldSystemFont(ofSize: 22)
         title.alignment = .left
         header.addArrangedSubview(title)
+        let help = NSImageView(image: NSImage(systemSymbolName: "info.circle", accessibilityDescription: localized("app.impact")) ?? NSImage())
+        help.contentTintColor = .secondaryLabelColor
+        help.toolTip = localized("app.impact")
+        help.widthAnchor.constraint(equalToConstant: 16).isActive = true
+        header.addArrangedSubview(help)
         header.addArrangedSubview(NSView())
         configureLanguagePopup()
         let guidedSetupButton = button(localized("button.guidedSetup"), #selector(openGuidedSetupWindow))
@@ -672,9 +686,9 @@ final class SetupWindowController: NSWindowController {
 
         let description = NSStackView()
         description.orientation = .vertical
-        description.alignment = .width
+        description.alignment = .leading
         description.spacing = 4
-        description.edgeInsets = NSEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+        description.edgeInsets = NSEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
 
         let subtitle = NSTextField(wrappingLabelWithString: localized("app.subtitle"))
         subtitle.font = NSFont.systemFont(ofSize: 13, weight: .medium)
@@ -682,36 +696,63 @@ final class SetupWindowController: NSWindowController {
         subtitle.alignment = .left
         subtitle.maximumNumberOfLines = 2
         description.addArrangedSubview(subtitle)
+        subtitle.widthAnchor.constraint(equalTo: description.widthAnchor).isActive = true
 
         let impact = NSTextField(wrappingLabelWithString: localized("app.impact"))
         impact.font = NSFont.systemFont(ofSize: 11)
         impact.textColor = .secondaryLabelColor
         impact.alignment = .left
         impact.maximumNumberOfLines = 2
-        description.addArrangedSubview(impact)
+        subtitle.toolTip = impact.stringValue
         root.addArrangedSubview(description)
-        description.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
+
 
         let tabs = NSTabView()
         tabs.translatesAutoresizingMaskIntoConstraints = false
+        tabs.tabViewType = .noTabsNoBorder
         tabs.addTabViewItem(appsTab())
         tabs.addTabViewItem(textKeyboardTab())
         tabs.addTabViewItem(desktopTab())
         tabs.addTabViewItem(dockTab())
         tabs.addTabViewItem(runtimeTab())
+        mainTabs = tabs
+        mainTabButtons.removeAll()
+        let tabBar = NSStackView()
+        tabBar.orientation = .horizontal
+        tabBar.spacing = 8
+        tabBar.distribution = .fillEqually
+        for (index, item) in tabs.tabViewItems.enumerated() {
+            let tabButton = button(item.label, #selector(selectMainTab(_:)))
+            tabButton.tag = index
+            tabButton.setButtonType(.pushOnPushOff)
+            tabButton.state = index == 0 ? .on : .off
+            tabButton.font = NSFont.systemFont(ofSize: 13, weight: .medium)
+            tabBar.addArrangedSubview(tabButton)
+            mainTabButtons.append(tabButton)
+        }
+        root.addArrangedSubview(tabBar)
         root.addArrangedSubview(tabs)
-        tabs.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
-        tabs.heightAnchor.constraint(greaterThanOrEqualToConstant: 470).isActive = true
+        tabs.heightAnchor.constraint(greaterThanOrEqualToConstant: 430).isActive = true
 
         let footer = NSStackView()
         footer.orientation = .horizontal
         footer.spacing = 10
         statusLabel.textColor = .secondaryLabelColor
+        statusLabel.lineBreakMode = .byTruncatingTail
+        statusLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         footer.addArrangedSubview(statusLabel)
         footer.addArrangedSubview(NSView())
         footer.addArrangedSubview(NSButton(title: localized("button.refresh"), target: self, action: #selector(refreshPressed)))
         footer.addArrangedSubview(NSButton(title: localized("button.removeSetup"), target: self, action: #selector(removeSetupApp)))
         root.addArrangedSubview(footer)
+        for section in root.arrangedSubviews {
+            section.widthAnchor.constraint(equalTo: root.widthAnchor, constant: -36).isActive = true
+        }
+    }
+
+    @objc private func selectMainTab(_ sender: NSButton) {
+        mainTabs?.selectTabViewItem(at: sender.tag)
+        for item in mainTabButtons { item.state = item === sender ? .on : .off }
     }
 
     private func configureLanguagePopup() {
@@ -1146,10 +1187,8 @@ final class SetupWindowController: NSWindowController {
         header.addArrangedSubview(dockStatus)
         root.addArrangedSubview(header)
 
-        let hint = NSTextField(wrappingLabelWithString: localized("dock.hint"))
-        hint.textColor = .secondaryLabelColor
-        hint.font = NSFont.systemFont(ofSize: 12)
-        root.addArrangedSubview(hint)
+        detail.toolTip = localized("dock.hint")
+        dockPrimaryButton.toolTip = localized("dock.hint")
 
         let scrollView = NSScrollView()
         scrollView.hasVerticalScroller = true
@@ -1354,7 +1393,7 @@ final class SetupWindowController: NSWindowController {
         box.fillColor = NSColor.clear
         box.contentViewMargins = NSSize(width: 12, height: 6)
         box.translatesAutoresizingMaskIntoConstraints = false
-        box.heightAnchor.constraint(equalToConstant: 52).isActive = true
+        box.heightAnchor.constraint(equalToConstant: 46).isActive = true
 
         let root = NSStackView()
         root.orientation = .horizontal
@@ -1367,7 +1406,9 @@ final class SetupWindowController: NSWindowController {
         text.spacing = 2
         text.alignment = .leading
         let titleLabel = NSTextField(labelWithString: title)
-        titleLabel.font = NSFont.boldSystemFont(ofSize: 13)
+        titleLabel.font = NSFont.systemFont(ofSize: 13, weight: .medium)
+        titleLabel.lineBreakMode = .byTruncatingTail
+        titleLabel.toolTip = detail
         titleLabel.alignment = .left
         let detailLabel = NSTextField(labelWithString: detail)
         detailLabel.textColor = .secondaryLabelColor
@@ -1382,15 +1423,16 @@ final class SetupWindowController: NSWindowController {
         status.layer?.cornerRadius = 7
         status.layer?.masksToBounds = true
         status.textColor = .secondaryLabelColor
-        status.lineBreakMode = .byWordWrapping
+        status.lineBreakMode = .byTruncatingTail
         status.maximumNumberOfLines = 1
         status.alignment = .center
         status.font = NSFont.systemFont(ofSize: 11, weight: .medium)
         status.setContentHuggingPriority(.required, for: .horizontal)
         status.setContentCompressionResistancePriority(.required, for: .horizontal)
-        status.widthAnchor.constraint(greaterThanOrEqualToConstant: 72).isActive = true
+        status.widthAnchor.constraint(equalToConstant: 142).isActive = true
         text.addArrangedSubview(titleLabel)
-        text.addArrangedSubview(detailLabel)
+        text.toolTip = detail
+        box.toolTip = detail
 
         let actions = NSStackView()
         actions.orientation = .horizontal
@@ -1398,9 +1440,10 @@ final class SetupWindowController: NSWindowController {
         actions.alignment = .centerY
         actions.distribution = .fillEqually
         for button in buttons {
+            button.toolTip = detail
             actions.addArrangedSubview(button)
         }
-        actions.widthAnchor.constraint(equalToConstant: 228).isActive = true
+        actions.widthAnchor.constraint(equalToConstant: buttons.count > 1 ? 228 : 112).isActive = true
 
         root.addArrangedSubview(text)
         let flexibleGap = NSView()
@@ -1408,6 +1451,8 @@ final class SetupWindowController: NSWindowController {
         root.addArrangedSubview(status)
         root.addArrangedSubview(actions)
         text.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        text.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        titleLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         flexibleGap.setContentHuggingPriority(.defaultLow, for: .horizontal)
         actions.setContentHuggingPriority(.required, for: .horizontal)
         actions.setContentCompressionResistancePriority(.required, for: .horizontal)
@@ -1418,6 +1463,10 @@ final class SetupWindowController: NSWindowController {
             root.topAnchor.constraint(equalTo: box.contentView!.topAnchor),
             root.bottomAnchor.constraint(equalTo: box.contentView!.bottomAnchor)
         ])
+        if previewMode {
+            status.stringValue = localized("status.missing")
+            for action in buttons { action.title = localized("button.install") }
+        }
         statusPills.append(status)
         statusRows.append((status, box))
         return box
@@ -1431,13 +1480,13 @@ final class SetupWindowController: NSWindowController {
         status.layer?.cornerRadius = 7
         status.layer?.masksToBounds = true
         status.textColor = .secondaryLabelColor
-        status.lineBreakMode = .byWordWrapping
+        status.lineBreakMode = .byTruncatingTail
         status.maximumNumberOfLines = 1
         status.alignment = .center
         status.font = NSFont.systemFont(ofSize: 11, weight: .medium)
         status.setContentHuggingPriority(.required, for: .horizontal)
         status.setContentCompressionResistancePriority(.required, for: .horizontal)
-        status.widthAnchor.constraint(greaterThanOrEqualToConstant: 72).isActive = true
+        status.widthAnchor.constraint(equalToConstant: 142).isActive = true
     }
 
     private func button(_ title: String, _ action: Selector) -> NSButton {
@@ -1608,7 +1657,7 @@ final class SetupWindowController: NSWindowController {
     }
 
     @objc private func applyDockSelection() {
-        let output = runScript(["dock-apply"], extraEnv: ["MAC_BOOTSTRAP_DOCK_KEEP_LABELS": selectedDockAliases().joined(separator: "\n")])
+        let output = runScript(["dock-apply"], extraEnv: ["LAZYEST_SETUP_DOCK_KEEP_LABELS": selectedDockAliases().joined(separator: "\n")])
         statusLabel.stringValue = output.contains("DOCK_APPLY_OK") && !output.contains("blocked:")
             ? localized("status.dockApplied")
             : localized("status.dockBlocked")
@@ -1820,7 +1869,7 @@ final class SetupWindowController: NSWindowController {
             _ = runProcess("/usr/bin/killall", ["Dock"])
         }
         let labels = sequenceDockAliases().joined(separator: "\n")
-        let output = runScript(["dock-apply"], extraEnv: ["MAC_BOOTSTRAP_DOCK_KEEP_LABELS": labels])
+        let output = runScript(["dock-apply"], extraEnv: ["LAZYEST_SETUP_DOCK_KEEP_LABELS": labels])
         guard output.contains("DOCK_APPLY_OK") && !output.contains("blocked:") else {
             sequenceStatus.stringValue = localized("status.dockBlocked")
             return false
@@ -2022,7 +2071,7 @@ final class SetupWindowController: NSWindowController {
         installBrewCask(
             "gureumkim",
             afterInstallCommand: """
-            /usr/bin/osascript -e 'display dialog "\(terminalLogoutPrompt())" buttons {"\(localized("alert.logout.later"))", "\(localized("alert.logout.now"))"} default button "\(localized("alert.logout.now"))" cancel button "\(localized("alert.logout.later"))"' >/tmp/mac-bootstrap-gureum-logout-choice 2>/dev/null && /usr/bin/osascript -e 'tell application "System Events" to log out'
+            /usr/bin/osascript -e 'display dialog "\(terminalLogoutPrompt())" buttons {"\(localized("alert.logout.later"))", "\(localized("alert.logout.now"))"} default button "\(localized("alert.logout.now"))" cancel button "\(localized("alert.logout.later"))"' >/dev/null 2>&1 && /usr/bin/osascript -e 'tell application "System Events" to log out'
             """
         )
     }
@@ -2054,17 +2103,17 @@ final class SetupWindowController: NSWindowController {
             return
         }
         let output = runScript(["apply-input-sources"])
+        refresh()
         if output.contains("blocked:") {
-            statusLabel.stringValue = output.components(separatedBy: .newlines).last ?? localized("status.dockBlocked")
+            statusLabel.stringValue = output.components(separatedBy: .newlines).first(where: { $0.contains("blocked:") }) ?? localized("status.failed")
         } else {
             statusLabel.stringValue = localized("status.settingsApplied")
         }
-        refresh()
     }
     private func resetInputSourceSettings() {
         let output = runScript(["reset-input-sources"])
         refresh()
-        statusLabel.stringValue = output.contains("blocked:") ? output.components(separatedBy: .newlines).last ?? localized("status.dockBlocked") : localized("status.settingsApplied")
+        statusLabel.stringValue = output.contains("blocked:") ? output.components(separatedBy: .newlines).first(where: { $0.contains("blocked:") }) ?? localized("status.failed") : localized("status.settingsApplied")
         window?.displayIfNeeded()
     }
     @objc private func applyGureumOptionSettings() {
@@ -2096,23 +2145,23 @@ final class SetupWindowController: NSWindowController {
     }
     private func applyFunctionKeys() {
         let output = runScript(["apply-function-keys"])
-        statusLabel.stringValue = output.contains("blocked:") ? output.components(separatedBy: .newlines).last ?? localized("status.dockBlocked") : localized("status.settingsApplied")
         refresh()
+        statusLabel.stringValue = output.contains("blocked:") ? output.components(separatedBy: .newlines).first(where: { $0.contains("blocked:") }) ?? localized("status.failed") : localized("status.settingsApplied")
     }
     private func applyInputShortcut() {
         let output = runScript(["apply-input-shortcuts"])
-        statusLabel.stringValue = output.contains("blocked:") ? output.components(separatedBy: .newlines).last ?? localized("status.dockBlocked") : localized("status.settingsApplied")
         refresh()
+        statusLabel.stringValue = output.contains("blocked:") ? output.components(separatedBy: .newlines).first(where: { $0.contains("blocked:") }) ?? localized("status.failed") : localized("status.settingsApplied")
     }
     private func resetInputShortcutSettings() {
         let output = runScript(["reset-input-shortcuts"])
-        statusLabel.stringValue = output.contains("blocked:") ? output.components(separatedBy: .newlines).last ?? localized("status.dockBlocked") : localized("status.settingsApplied")
         refresh()
+        statusLabel.stringValue = output.contains("blocked:") ? output.components(separatedBy: .newlines).first(where: { $0.contains("blocked:") }) ?? localized("status.failed") : localized("status.settingsApplied")
     }
     private func applyKeyRepeat() {
         let output = runScript(["apply-key-repeat"])
         refresh()
-        statusLabel.stringValue = output.contains("blocked:") ? output.components(separatedBy: .newlines).last ?? localized("status.dockBlocked") : localized("status.settingsApplied")
+        statusLabel.stringValue = output.contains("blocked:") ? output.components(separatedBy: .newlines).first(where: { $0.contains("blocked:") }) ?? localized("status.failed") : localized("status.settingsApplied")
         window?.displayIfNeeded()
     }
     private func resetKeyRepeatSettings() {
@@ -2123,7 +2172,7 @@ final class SetupWindowController: NSWindowController {
     private func disablePressAndHold() {
         let output = runScript(["apply-press-and-hold"])
         refresh()
-        statusLabel.stringValue = output.contains("blocked:") ? output.components(separatedBy: .newlines).last ?? localized("status.dockBlocked") : localized("status.settingsApplied")
+        statusLabel.stringValue = output.contains("blocked:") ? output.components(separatedBy: .newlines).first(where: { $0.contains("blocked:") }) ?? localized("status.failed") : localized("status.settingsApplied")
         window?.displayIfNeeded()
     }
     private func resetPressAndHoldSettings() {
@@ -2136,8 +2185,8 @@ final class SetupWindowController: NSWindowController {
     }
     private func applyGlobeKey() {
         let output = runScript(["apply-globe-key"])
-        statusLabel.stringValue = output.contains("blocked:") ? output.components(separatedBy: .newlines).last ?? localized("status.dockBlocked") : localized("status.settingsApplied")
         refresh()
+        statusLabel.stringValue = output.contains("blocked:") ? output.components(separatedBy: .newlines).first(where: { $0.contains("blocked:") }) ?? localized("status.failed") : localized("status.settingsApplied")
     }
     private func resetGlobeKeySettings() {
         runDefaults(["delete", "com.apple.HIToolbox", "AppleFnUsageType"])
@@ -2146,13 +2195,13 @@ final class SetupWindowController: NSWindowController {
     @objc private func applyGureumSettings() { confirmLogoutForGureum() }
     @objc private func applyKarabinerSettings() {
         let output = runScript(["apply-karabiner"])
-        statusLabel.stringValue = output.contains("blocked:") ? output.components(separatedBy: .newlines).last ?? localized("status.dockBlocked") : localized("status.settingsApplied")
         refresh()
+        statusLabel.stringValue = output.contains("blocked:") ? output.components(separatedBy: .newlines).first(where: { $0.contains("blocked:") }) ?? localized("status.failed") : localized("status.settingsApplied")
     }
     private func resetKarabinerSettings() {
         let output = runScript(["reset-karabiner"])
-        statusLabel.stringValue = output.contains("blocked:") ? output.components(separatedBy: .newlines).last ?? localized("status.dockBlocked") : localized("status.settingsApplied")
         refresh()
+        statusLabel.stringValue = output.contains("blocked:") ? output.components(separatedBy: .newlines).first(where: { $0.contains("blocked:") }) ?? localized("status.failed") : localized("status.settingsApplied")
     }
     @objc private func openDockSettings() {
         NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.Desktop-Settings.extension")!)
@@ -2547,8 +2596,7 @@ final class SetupWindowController: NSWindowController {
             pill.textColor = palette.text
         }
         for row in statusRows {
-            let palette = rowPalette(for: rowVisualState(for: row.status))
-            row.box.borderColor = palette.border
+            row.box.borderColor = NSColor.separatorColor
         }
     }
 
@@ -2973,11 +3021,12 @@ final class SetupWindowController: NSWindowController {
         process.executableURL = URL(fileURLWithPath: executable)
         process.arguments = arguments
         process.standardOutput = stdout
-        process.standardError = Pipe()
+        process.standardError = FileHandle.nullDevice
         do {
             try process.run()
+            let data = stdout.fileHandleForReading.readDataToEndOfFile()
             process.waitUntilExit()
-            return stdout.fileHandleForReading.readDataToEndOfFile()
+            return process.terminationStatus == 0 ? data : nil
         } catch {
             return nil
         }
@@ -3054,23 +3103,26 @@ final class SetupWindowController: NSWindowController {
 
     private func runScript(_ args: [String], extraEnv: [String: String] = [:]) -> String {
         let process = Process()
-        let stdout = Pipe()
-        let stderr = Pipe()
+        let output = Pipe()
         process.executableURL = URL(fileURLWithPath: projectRoot() + "/bootstrap.sh")
         process.arguments = args
         var env = ProcessInfo.processInfo.environment
         for (key, value) in extraEnv { env[key] = value }
         process.environment = env
-        process.standardOutput = stdout
-        process.standardError = stderr
+        process.standardOutput = output
+        process.standardError = output
         do {
             try process.run()
+            // Drain while the child runs: large compiler or script output must not fill a pipe.
+            let data = output.fileHandleForReading.readDataToEndOfFile()
             process.waitUntilExit()
-            let out = String(data: stdout.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
-            let err = String(data: stderr.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
-            return out + (err.isEmpty ? "" : "\n" + err)
+            let text = String(data: data, encoding: .utf8) ?? ""
+            guard process.terminationStatus == 0 else {
+                return "blocked: " + text.trimmingCharacters(in: .whitespacesAndNewlines)
+            }
+            return text
         } catch {
-            return error.localizedDescription
+            return "blocked: " + error.localizedDescription
         }
     }
 }
@@ -3087,7 +3139,34 @@ func projectRoot() -> String {
     return FileManager.default.currentDirectoryPath
 }
 
-let bundleIdentifier = Bundle.main.bundleIdentifier ?? "com.estaid.mac-bootstrap-setup"
+if let exportIndex = CommandLine.arguments.firstIndex(of: "--export-preview"),
+   CommandLine.arguments.indices.contains(exportIndex + 1) {
+    let app = NSApplication.shared
+    app.setActivationPolicy(.prohibited)
+    app.appearance = NSAppearance(named: .aqua)
+    let controller = SetupWindowController(previewMode: true)
+    guard let view = controller.window?.contentView else { exit(1) }
+    controller.window?.appearance = NSAppearance(named: .aqua)
+    controller.window?.styleMask = .borderless
+    view.wantsLayer = true
+    view.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
+    RunLoop.current.run(until: Date().addingTimeInterval(0.3))
+    view.layoutSubtreeIfNeeded()
+    view.displayIfNeeded()
+    guard let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { exit(1) }
+    view.effectiveAppearance.performAsCurrentDrawingAppearance {
+        view.cacheDisplay(in: view.bounds, to: bitmap)
+    }
+    guard let data = bitmap.representation(using: .png, properties: [:]) else { exit(1) }
+    do {
+        let output = URL(fileURLWithPath: CommandLine.arguments[exportIndex + 1])
+        try FileManager.default.createDirectory(at: output.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try data.write(to: output, options: .atomic)
+        exit(0)
+    } catch { fputs("Preview export failed: \(error)\n", stderr); exit(1) }
+}
+
+let bundleIdentifier = Bundle.main.bundleIdentifier ?? "com.lazyest.setup"
 let currentProcessID = ProcessInfo.processInfo.processIdentifier
 if let existing = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier)
     .first(where: { $0.processIdentifier != currentProcessID }) {
