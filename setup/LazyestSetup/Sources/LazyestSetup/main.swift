@@ -104,13 +104,13 @@ func localized(_ key: String) -> String {
         "row.amphetamine.title": "Amphetamine",
         "row.amphetamine.detail": "선택 App Store 대안.",
         "row.gureum.title": "구름 입력기",
-        "row.gureum.detail": "설정 적용을 누르면 구름 두벌식을 등록하고 Apple 두벌식을 제거합니다.",
+        "row.gureum.detail": "설정 적용을 누르면 구름 두벌식만 등록하고 Apple 두벌식과 구름 로마자를 제거합니다.",
         "row.gureumOption.title": "구름 Option 키",
         "row.gureumOption.detail": "한글 입력 중에도 Option 조합 특수문자를 사용합니다.",
         "row.karabiner.title": "Karabiner-Elements",
         "row.karabiner.detail": "오른쪽 Command를 F18로.",
         "row.inputSource.title": "입력 소스 설정",
-        "row.inputSource.detail": "구름 두벌식을 활성화한 뒤 Apple 두벌식을 제거합니다. 개발 도구 없이 설정됩니다.",
+        "row.inputSource.detail": "구름 두벌식만 남기고 Apple 두벌식과 구름 로마자를 제거합니다. 개발 도구 없이 설정됩니다.",
         "row.inputShortcut.title": "입력 소스 단축키",
         "row.inputShortcut.detail": "이전 입력 소스는 끄고 다음 입력 소스는 F18로 설정합니다.",
         "row.keyRepeat.title": "키 반복 속도",
@@ -2330,8 +2330,8 @@ final class SetupWindowController: NSWindowController {
             let prepared = self.processOutput(executable, ["--prepare-gureum-input-sources"])
             var output = prepared
             if prepared.contains("INPUT_SOURCES_OK") {
-                if !self.gureumInputSourceRegistered() {
-                    DispatchQueue.main.async { self.openKeyboardSettings() }
+                DispatchQueue.main.async {
+                    if !self.gureumInputSourceRegistered() { self.openKeyboardSettings() }
                 }
                 for _ in 0..<120 {
                     Thread.sleep(forTimeInterval: 0.5)
@@ -2919,7 +2919,7 @@ final class SetupWindowController: NSWindowController {
     }
 
     private func enabledInputSources() -> [EnabledInputSource]? {
-        SystemInputSourceBackend().sources(includeDisabled: false)
+        SystemInputSourceBackend().persistedEnabledSources()
     }
 
     private func gureumInputSourceRegistered() -> Bool {
@@ -2960,7 +2960,7 @@ final class SetupWindowController: NSWindowController {
     }
 
     private func inputSourcesApplied() -> Bool {
-        gureumInputApplied() && appleKoreanInputRemoved()
+        enabledInputSources().map(InputSourceState.configured) ?? false
     }
 
     private func inputSourceShortcutApplied() -> Bool {
@@ -3198,6 +3198,9 @@ if CommandLine.arguments.contains("--prepare-gureum-input-sources") ||
     let backend = SystemInputSourceBackend()
     let outcome = CommandLine.arguments.contains("--prepare-gureum-input-sources")
         ? InputSourceSetup.prepare(using: backend) : InputSourceSetup.finish(using: backend)
+    if outcome == .applied && CommandLine.arguments.contains("--finish-gureum-input-sources") {
+        guard backend.persistConfiguredSources() else { print("persist input sources failed"); exit(1) }
+    }
     print(outcome == .applied ? "INPUT_SOURCES_OK" : "\(outcome): \(backend.lastError)")
     exit(outcome == .applied ? 0 : 1)
 }

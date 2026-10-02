@@ -37,6 +37,13 @@ final class InputSourceStateTests: XCTestCase {
         ]))
     }
 
+    func testRomanModePreventsCompletedState() {
+        let roman = EnabledInputSource(id: "org.youknowone.inputmethod.Gureum.system", bundleID: gureum.bundleID)
+        XCTAssertFalse(InputSourceState.configured([gureum, roman]))
+        XCTAssertTrue(InputSourceState.configured([gureum]))
+        XCTAssertFalse(InputSourceState.configured([gureum, apple]))
+    }
+
     func testNoEnabledSourcesDoesNotInventGureumRegistration() {
         XCTAssertFalse(InputSourceState.gureumEnabled([]))
     }

@@ -56,6 +56,43 @@ final class SystemInputSourceBackend: InputSourceBackend {
         }
     }
 
+    // TIS retains default mode flags after a mode is removed. Check the saved
+    // enabled list as well so Roman/default modes do not falsely count as active.
+    func persistedEnabledSources() -> [EnabledInputSource]? {
+        guard let sources = sources(includeDisabled: false) else { return nil }
+        let domain = "com.apple.HIToolbox" as CFString
+        CFPreferencesSynchronize(domain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost)
+        guard let items = CFPreferencesCopyAppValue("AppleEnabledInputSources" as CFString, domain) as? [[String: Any]] else { return nil }
+        return sources.filter { source in
+            if source.bundleID != "org.youknowone.inputmethod.Gureum" && source.bundleID != "com.apple.inputmethod.Korean" { return true }
+            return items.contains { item in
+                guard item["Bundle ID"] as? String == source.bundleID else { return false }
+                if source.id == "org.youknowone.inputmethod.Korean" || source.id == "com.apple.inputmethod.Korean" {
+                    return item["InputSourceKind"] as? String == "Keyboard Input Method"
+                }
+                return item["Input Mode"] as? String == source.id
+            }
+        }
+    }
+
+    func persistConfiguredSources() -> Bool {
+        let domain = "com.apple.HIToolbox" as CFString
+        let key = "AppleEnabledInputSources" as CFString
+        CFPreferencesSynchronize(domain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost)
+        guard var items = CFPreferencesCopyAppValue(key, domain) as? [[String: Any]] else { return false }
+        // Preserve layouts and palettes while replacing only Korean/Gureum entries.
+        items.removeAll { item in
+            let bundle = item["Bundle ID"] as? String
+            return bundle == "com.apple.inputmethod.Korean" || bundle == "org.youknowone.inputmethod.Gureum"
+        }
+        items += [
+            ["InputSourceKind": "Keyboard Input Method", "Bundle ID": "org.youknowone.inputmethod.Gureum"],
+            ["InputSourceKind": "Input Mode", "Bundle ID": "org.youknowone.inputmethod.Gureum", "Input Mode": "org.youknowone.inputmethod.Gureum.han2"]
+        ]
+        CFPreferencesSetAppValue(key, items as CFArray, domain)
+        return CFPreferencesAppSynchronize(domain)
+    }
+
     private func isEnabled(_ source: TISInputSource) -> Bool {
         guard let raw = TISGetInputSourceProperty(source, kTISPropertyInputSourceIsEnabled) else { return false }
         return CFBooleanGetValue(Unmanaged<CFBoolean>.fromOpaque(raw).takeUnretainedValue())

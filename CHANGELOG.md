@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Keep only Gureum Han 2set among Gureum modes, remove Apple Korean and Gureum Roman modes, and verify cleanup before showing Applied.
+- Keep input-source status reads on the main thread to prevent Apply Settings from crashing.
+
 - Replaced repeated Gureum logout prompts with native automatic registration, activation, and Apple Korean removal through Apply Settings and guided setup; reset also uses native macOS APIs.
 - Handle macOS activation consent without logout and preserve the Korean fallback until Gureum selection succeeds.
 - Read enabled macOS input sources to recognize manual Apple Korean removal without stale selection/history entries or a runtime Swift requirement for input-source setup.

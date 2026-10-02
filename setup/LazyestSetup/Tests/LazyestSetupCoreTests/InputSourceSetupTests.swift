@@ -44,6 +44,31 @@ final class InputSourceSetupTests: XCTestCase {
         XCTAssertFalse(InputSourceState.appleKoreanEnabled(backend.enabled))
     }
 
+    func testSettingRemovesGureumRomanModesAndAppleKorean() {
+        let backend = Backend()
+        let roman = EnabledInputSource(id: "org.youknowone.inputmethod.Gureum.system", bundleID: backend.gureum.bundleID)
+        let qwerty = EnabledInputSource(id: "org.youknowone.inputmethod.Gureum.qwerty", bundleID: backend.gureum.bundleID)
+        backend.enabled += [roman, qwerty]
+        XCTAssertEqual(InputSourceSetup.apply(using: backend), .applied)
+        XCTAssertTrue(InputSourceState.configured(backend.enabled))
+        XCTAssertEqual(backend.enabled.map { $0.id }.sorted(), [backend.abc.id, backend.gureum.id].sorted())
+    }
+
+    func testRomanModeCleanupFailureIsNotReportedAsApplied() {
+        let backend = Backend()
+        backend.enabled = [backend.abc, backend.gureum,
+            EnabledInputSource(id: "org.youknowone.inputmethod.Gureum.system", bundleID: backend.gureum.bundleID)]
+        backend.cleanupWorks = false
+        XCTAssertEqual(InputSourceSetup.apply(using: backend), .cleanupFailed)
+        XCTAssertFalse(InputSourceState.configured(backend.enabled))
+    }
+
+    func testAlreadyEnabledGureumDoesNotRequestActivationAgain() {
+        let backend = Backend(); backend.enabled = [backend.abc, backend.gureum]
+        XCTAssertEqual(InputSourceSetup.apply(using: backend), .applied)
+        XCTAssertFalse(backend.events.contains { $0.hasPrefix("enable:") })
+    }
+
     func testRegistrationFailurePreservesFallback() {
         let backend = Backend(); backend.registered = false
         XCTAssertEqual(InputSourceSetup.apply(using: backend), .registrationFailed)

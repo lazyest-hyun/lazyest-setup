@@ -26,8 +26,10 @@ public enum InputSourceSetup {
         let han2 = bundle + ".han2"
         guard let installed = backend.sources(includeDisabled: true),
               InputSourceState.gureumEnabled(installed) else { return .registrationFailed }
-        for id in ["org.youknowone.inputmethod.Korean", bundle + ".system", han2] {
+        let alreadyEnabled = backend.sources(includeDisabled: false) ?? []
+        for id in ["org.youknowone.inputmethod.Korean", han2] {
             if installed.contains(where: { $0.id == id && $0.bundleID == bundle }),
+               !alreadyEnabled.contains(where: { $0.id == id && $0.bundleID == bundle }),
                !backend.enable(id) { return .activationFailed }
         }
         return .applied
@@ -41,12 +43,12 @@ public enum InputSourceSetup {
               InputSourceState.gureumEnabled(enabled) else { return .activationFailed }
         // Select the working replacement before removing the existing Korean fallback.
         guard backend.select(han2) else { return .activationFailed }
-        for source in enabled.filter({ InputSourceState.appleKoreanEnabled([$0]) })
+        for source in enabled.filter({ InputSourceState.appleKoreanEnabled([$0]) || InputSourceState.unwantedGureumMode($0) })
             .sorted(by: { $0.id.count > $1.id.count }) {
             guard backend.disable(source.id) else { return .cleanupFailed }
         }
         guard let final = backend.sources(includeDisabled: false),
-              InputSourceState.gureumEnabled(final), !InputSourceState.appleKoreanEnabled(final) else {
+              InputSourceState.configured(final) else {
             return .cleanupFailed
         }
         return .applied
