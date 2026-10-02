@@ -53,7 +53,7 @@ func localized(_ key: String) -> String {
     let korean: [String: String] = [
         "app.title": "Lazyest Setup",
         "app.subtitle": "필요한 앱과 설정을 한곳에서.",
-        "app.impact": "일부 입력기·키보드 변경은 로그아웃이 필요합니다. 적용 전 현재 상태와 영향을 확인하세요. 매일 쓰는 기능은 별도 앱 Flow에서 관리합니다.",
+        "app.impact": "선택한 항목만 적용합니다. 구름 입력 소스는 설정 버튼으로 자동 구성됩니다. 매일 쓰는 기능은 별도 앱 Flow에서 관리합니다.",
         "tab.install": "설치",
         "tab.sequence": "순차 설정",
         "tab.text": "텍스트/키보드",
@@ -104,13 +104,13 @@ func localized(_ key: String) -> String {
         "row.amphetamine.title": "Amphetamine",
         "row.amphetamine.detail": "선택 App Store 대안.",
         "row.gureum.title": "구름 입력기",
-        "row.gureum.detail": "설치 후 로그아웃해야 입력 소스에 나타납니다. 등록에는 Command Line Tools의 Swift가 필요합니다.",
+        "row.gureum.detail": "설정 적용을 누르면 구름 두벌식을 등록하고 Apple 두벌식을 제거합니다.",
         "row.gureumOption.title": "구름 Option 키",
         "row.gureumOption.detail": "한글 입력 중에도 Option 조합 특수문자를 사용합니다.",
         "row.karabiner.title": "Karabiner-Elements",
         "row.karabiner.detail": "오른쪽 Command를 F18로.",
         "row.inputSource.title": "입력 소스 설정",
-        "row.inputSource.detail": "Gureum / Han 2set 등록 후 Apple 두벌식을 제거합니다. 전체 Xcode는 필요하지 않습니다.",
+        "row.inputSource.detail": "구름 두벌식을 활성화한 뒤 Apple 두벌식을 제거합니다. 개발 도구 없이 설정됩니다.",
         "row.inputShortcut.title": "입력 소스 단축키",
         "row.inputShortcut.detail": "이전 입력 소스는 끄고 다음 입력 소스는 F18로 설정합니다.",
         "row.keyRepeat.title": "키 반복 속도",
@@ -160,7 +160,7 @@ func localized(_ key: String) -> String {
         "button.refresh": "새로고침",
         "button.removeSetup": "Setup 제거",
         "button.remove": "제거",
-        "button.logout": "로그아웃",
+        "button.inputSources": "입력 소스 설정",
         "status.ready": "준비됨",
         "status.refreshed": "상태만 확인됨",
         "status.done": "완료",
@@ -182,7 +182,7 @@ func localized(_ key: String) -> String {
         "status.needsOpen": "열기 필요",
         "status.needsPermission": "권한 필요",
         "status.needsRelogin": "반영 대기",
-        "status.needsLogout": "로그아웃 필요",
+        "status.inputSourceRequired": "설정 필요",
         "status.manualCheck": "수동 확인",
         "status.flowInstalled": "Flow 설치됨",
         "status.flowFailed": "Flow 설치 실패",
@@ -231,7 +231,7 @@ func localized(_ key: String) -> String {
         "sequence.text.inputRegistrationRequired": "입력 소스 등록 필요",
         "sequence.text.permissionRequired": "Karabiner 권한 허용 필요",
         "sequence.text.installStarted": "Terminal에서 입력기 설치를 시작했습니다. 완료 후 다시 적용하세요.",
-        "sequence.text.gureumLogoutRequired": "구름 설치 후 로그아웃한 다음 다시 적용하세요.",
+        "sequence.text.gureumInputSourceRequired": "구름 입력 소스 자동 설정에 실패했습니다. 다시 적용하세요.",
         "sequence.text.karabinerPermissionRequired": "Karabiner를 열었습니다. 드라이버 권한을 허용한 다음 다시 적용하세요.",
         "sequence.text.switchFailed": "오른쪽 Command와 입력 소스 전환을 함께 적용하지 못했습니다.",
         "sequence.text.typing": "키 반복과 길게 누르기",
@@ -248,10 +248,7 @@ func localized(_ key: String) -> String {
         "sequence.selectionTitle": "진행할 항목",
         "sequence.selectionDetail": "필요하지 않은 단계는 체크를 끄면 건너뜁니다.",
         "sequence.progressDone": "완료",
-        "alert.logout.title": "지금 로그아웃할까요?",
-        "alert.logout.gureum": "구름 입력기는 설치 후 로그아웃해야 입력 소스 목록에 나타납니다. 저장하지 않은 작업을 먼저 정리하세요.",
-        "alert.logout.now": "지금 로그아웃",
-        "alert.logout.later": "나중에"
+        "status.inputSourceFailed": "입력 소스 자동 설정을 완료하지 못했습니다. 시스템 설정의 구름 활성화 승인창을 확인한 뒤 다시 설정 적용을 눌러주세요."
     ]
     if effectiveLanguage() == .korean, let value = korean[key] {
         return value
@@ -259,7 +256,7 @@ func localized(_ key: String) -> String {
     let english: [String: String] = [
         "app.title": "Lazyest Setup",
         "app.subtitle": "Your apps and Mac settings, in one place.",
-        "app.impact": "Some input and keyboard changes require logout. Review each current state and impact before applying. Everyday controls live in the separate Flow app.",
+        "app.impact": "Only selected settings are applied. The settings button configures Gureum input sources automatically. Everyday controls live in the separate Flow app.",
         "tab.install": "Install",
         "tab.sequence": "Guided Setup",
         "tab.text": "Text & Keyboard",
@@ -310,13 +307,13 @@ func localized(_ key: String) -> String {
         "row.amphetamine.title": "Amphetamine",
         "row.amphetamine.detail": "Optional App Store alternative.",
         "row.gureum.title": "Gureum Input Method",
-        "row.gureum.detail": "Log out after install so it appears in Input Sources. Registration uses Swift from Command Line Tools.",
+        "row.gureum.detail": "Apply Settings registers Gureum 2-set and removes Apple 2-set Korean.",
         "row.gureumOption.title": "Gureum Option Key",
         "row.gureumOption.detail": "Use Option-key special characters while typing Korean.",
         "row.karabiner.title": "Karabiner-Elements",
         "row.karabiner.detail": "Right Command to F18.",
         "row.inputSource.title": "Input Source Settings",
-        "row.inputSource.detail": "Register Gureum / Han 2set, then remove Apple 2-set Korean. Full Xcode is not required.",
+        "row.inputSource.detail": "Enable Gureum 2-set, then remove Apple 2-set Korean. No developer tools required.",
         "row.inputShortcut.title": "Input Source Shortcuts",
         "row.inputShortcut.detail": "Disable previous input source and set next input source to F18.",
         "row.keyRepeat.title": "Key Repeat",
@@ -366,7 +363,7 @@ func localized(_ key: String) -> String {
         "button.refresh": "Refresh",
         "button.removeSetup": "Remove Setup App",
         "button.remove": "Remove",
-        "button.logout": "Log Out",
+        "button.inputSources": "Input Sources",
         "status.ready": "Ready",
         "status.refreshed": "Status checked only",
         "status.done": "Done",
@@ -388,7 +385,7 @@ func localized(_ key: String) -> String {
         "status.needsOpen": "Needs open",
         "status.needsPermission": "Needs permission",
         "status.needsRelogin": "Pending refresh",
-        "status.needsLogout": "Needs logout",
+        "status.inputSourceRequired": "Needs setup",
         "status.manualCheck": "Manual check",
         "status.flowInstalled": "Flow installed",
         "status.flowFailed": "Flow install failed",
@@ -437,7 +434,7 @@ func localized(_ key: String) -> String {
         "sequence.text.inputRegistrationRequired": "Input source registration required",
         "sequence.text.permissionRequired": "Allow Karabiner permission",
         "sequence.text.installStarted": "Input-method installation started in Terminal. Apply again when it finishes.",
-        "sequence.text.gureumLogoutRequired": "Log out after installing Gureum, then apply again.",
+        "sequence.text.gureumInputSourceRequired": "Automatic Gureum setup failed. Apply again to retry.",
         "sequence.text.karabinerPermissionRequired": "Karabiner is open. Allow its driver, then apply again.",
         "sequence.text.switchFailed": "Could not apply Right Command and input-source switching together.",
         "sequence.text.typing": "Key repeat and press-and-hold",
@@ -454,10 +451,7 @@ func localized(_ key: String) -> String {
         "sequence.selectionTitle": "Steps to run",
         "sequence.selectionDetail": "Turn off a step to skip it.",
         "sequence.progressDone": "Complete",
-        "alert.logout.title": "Log out now?",
-        "alert.logout.gureum": "Gureum appears in Input Sources only after logging out after install. Save your work first.",
-        "alert.logout.now": "Log Out Now",
-        "alert.logout.later": "Later"
+        "status.inputSourceFailed": "Automatic input-source setup could not be completed. Check the Gureum activation prompt in System Settings, then try Apply Settings again."
     ]
     return english[key] ?? key
 }
@@ -1947,7 +1941,7 @@ final class SetupWindowController: NSWindowController {
         return true
     }
 
-    private func applySequenceText() -> Bool {
+    private func applySequenceText(inputSourcesReady: Bool = false) -> Bool {
         var missingCasks: [String] = []
         if sequenceTextCheckboxes["gureum"]?.state == .on,
            inputMethodStatus("Gureum") != "Installed" {
@@ -1972,17 +1966,20 @@ final class SetupWindowController: NSWindowController {
         }
 
         if sequenceTextCheckboxes["gureum"]?.state == .on {
-            if !swiftToolchainAvailable() && !gureumInputSourceRegistered() {
-                installCommandLineTools()
-                sequenceStatus.stringValue = localized("status.commandLineToolsFirst")
-                sequenceStatus.isHidden = false
-                return false
-            }
-            let sourceOutput = runScript(["apply-input-sources"])
-            if sourceOutput.contains("blocked:") || !gureumInputSourceRegistered() {
-                sequenceStatus.stringValue = localized("sequence.text.gureumLogoutRequired")
-                sequenceStatus.isHidden = false
-                updateSequenceTextDependencyLabels()
+            if !inputSourcesReady {
+                configureGureumInputSources { [weak self] success in
+                    guard let self, self.sequenceStepIndex == 3 else { return }
+                    guard success else {
+                        self.sequenceStatus.stringValue = localized("sequence.text.gureumInputSourceRequired")
+                        self.sequenceStatus.isHidden = false
+                        self.updateSequenceTextDependencyLabels()
+                        return
+                    }
+                    if self.applySequenceText(inputSourcesReady: true) {
+                        self.sequenceStepIndex += 1
+                        self.advanceSequence()
+                    }
+                }
                 return false
             }
             let optionOutput = runScript(["apply-gureum-option-key"])
@@ -2095,12 +2092,8 @@ final class SetupWindowController: NSWindowController {
     @objc private func primaryGureum() {
         if inputMethodStatus("Gureum") != "Installed" {
             installGureum()
-        } else if !gureumInputSourceRegistered() {
-            if swiftToolchainAvailable() {
-                confirmLogoutForGureum()
-            } else {
-                installCommandLineTools()
-            }
+        } else if !inputSourcesApplied() {
+            configureGureumInputSources()
         } else {
             openKeyboardSettings()
         }
@@ -2138,9 +2131,7 @@ final class SetupWindowController: NSWindowController {
     @objc private func installGureum() {
         installBrewCask(
             "gureumkim",
-            afterInstallCommand: """
-            /usr/bin/osascript -e 'display dialog "\(terminalLogoutPrompt())" buttons {"\(localized("alert.logout.later"))", "\(localized("alert.logout.now"))"} default button "\(localized("alert.logout.now"))" cancel button "\(localized("alert.logout.later"))"' >/dev/null 2>&1 && /usr/bin/osascript -e 'tell application "System Events" to log out'
-            """
+            afterInstallCommand: "/usr/bin/open '/Applications/Lazyest Setup.app'"
         )
     }
     @objc private func installKarabiner() { installBrewCask("karabiner-elements") }
@@ -2158,32 +2149,26 @@ final class SetupWindowController: NSWindowController {
     @objc private func installTeams() { installBrewCask("microsoft-teams") }
     @objc private func installSlack() { installBrewCask("slack") }
     @objc private func applyInputSourceSettings() {
+        guard !inputSourceSetupRunning else { return }
         if inputSourcesApplied() {
             resetInputSourceSettings()
-            return
-        }
-        if inputMethodStatus("Gureum") == "Installed" && !gureumInputSourceRegistered() {
-            if swiftToolchainAvailable() {
-                confirmLogoutForGureum()
-            } else {
-                installCommandLineTools()
-            }
-            return
-        }
-        let output = runScript(["apply-input-sources"])
-        refresh()
-        if output.contains("blocked:") {
-            statusLabel.stringValue = output.components(separatedBy: .newlines).first(where: { $0.contains("blocked:") }) ?? localized("status.failed")
         } else {
-            statusLabel.stringValue = localized("status.settingsApplied")
+            configureGureumInputSources()
         }
     }
+
     private func resetInputSourceSettings() {
-        let output = runScript(["reset-input-sources"])
+        let backend = SystemInputSourceBackend()
+        guard backend.backupPreferences() else {
+            statusLabel.stringValue = localized("status.failed")
+            return
+        }
+        let outcome = InputSourceSetup.reset(using: backend)
         refresh()
-        statusLabel.stringValue = output.contains("blocked:") ? output.components(separatedBy: .newlines).first(where: { $0.contains("blocked:") }) ?? localized("status.failed") : localized("status.settingsApplied")
+        statusLabel.stringValue = outcome == .applied ? localized("status.settingsApplied") : localized("status.failed")
         window?.displayIfNeeded()
     }
+
     @objc private func applyGureumOptionSettings() {
         let targetEnabled = !gureumOptionSpecialCharactersApplied()
         setGureumOptionSpecialCharacters(targetEnabled)
@@ -2260,7 +2245,7 @@ final class SetupWindowController: NSWindowController {
         runDefaults(["delete", "com.apple.HIToolbox", "AppleFnUsageType"])
         refresh()
     }
-    @objc private func applyGureumSettings() { confirmLogoutForGureum() }
+    @objc private func applyGureumSettings() { configureGureumInputSources() }
     @objc private func applyKarabinerSettings() {
         let output = runScript(["apply-karabiner"])
         refresh()
@@ -2322,30 +2307,49 @@ final class SetupWindowController: NSWindowController {
         NSApplication.shared.terminate(nil)
     }
 
-    private func terminalLogoutPrompt() -> String {
-        localized("alert.logout.gureum")
-            .replacingOccurrences(of: "\\", with: "\\\\")
-            .replacingOccurrences(of: "\"", with: "\\\"")
-    }
+    private var inputSourceSetupRunning = false
 
-    private func confirmLogoutForGureum() {
-        let alert = NSAlert()
-        alert.messageText = localized("alert.logout.title")
-        alert.informativeText = localized("alert.logout.gureum")
-        alert.addButton(withTitle: localized("alert.logout.now"))
-        alert.addButton(withTitle: localized("alert.logout.later"))
-        guard alert.runModal() == .alertFirstButtonReturn else {
-            openKeyboardSettings()
+    private func configureGureumInputSources(completion: @escaping (Bool) -> Void = { _ in }) {
+        guard !inputSourceSetupRunning else { return }
+        let backend = SystemInputSourceBackend()
+        guard backend.backupPreferences() else {
+            statusLabel.stringValue = localized("status.inputSourceFailed")
+            completion(false)
             return
         }
-        performLogout()
-    }
-
-    private func performLogout() {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
-        process.arguments = ["-e", "tell application \"System Events\" to log out"]
-        try? process.run()
+        inputSourceSetupRunning = true
+        gureumPrimaryButton.isEnabled = false
+        inputSourcePrimaryButton.isEnabled = false
+        sequencePrimaryButton.isEnabled = false
+        statusLabel.stringValue = effectiveLanguage() == .korean
+            ? "입력기를 설정합니다. macOS가 활성화 승인을 요청하면 허용해 주세요."
+            : "Configuring input sources. Allow activation if macOS asks."
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self else { return }
+            let executable = Bundle.main.executableURL?.path ?? CommandLine.arguments[0]
+            let prepared = self.processOutput(executable, ["--prepare-gureum-input-sources"])
+            var output = prepared
+            if prepared.contains("INPUT_SOURCES_OK") {
+                if !self.gureumInputSourceRegistered() {
+                    DispatchQueue.main.async { self.openKeyboardSettings() }
+                }
+                for _ in 0..<120 {
+                    Thread.sleep(forTimeInterval: 0.5)
+                    output = self.processOutput(executable, ["--finish-gureum-input-sources"])
+                    if output.contains("INPUT_SOURCES_OK") { break }
+                }
+            }
+            DispatchQueue.main.async {
+                self.inputSourceSetupRunning = false
+                self.refresh()
+                self.sequencePrimaryButton.isEnabled = true
+                let success = output.contains("INPUT_SOURCES_OK") && self.inputSourcesApplied()
+                self.statusLabel.stringValue = success ? localized("status.settingsApplied") : localized("status.inputSourceFailed")
+                self.statusLabel.toolTip = success ? nil : output.trimmingCharacters(in: .whitespacesAndNewlines)
+                self.window?.displayIfNeeded()
+                completion(success)
+            }
+        }
     }
 
     private func applyBooleanPreference(
@@ -2510,14 +2514,14 @@ final class SetupWindowController: NSWindowController {
     }
 
     private func setGureumState(brewInstalled: Bool) {
-        if inputMethodStatus("Gureum") == "Installed" && gureumInputSourceRegistered() {
+        guard !inputSourceSetupRunning else { return }
+        if inputMethodStatus("Gureum") == "Installed" && inputSourcesApplied() {
             gureumStatus.stringValue = localized("status.registered")
             gureumPrimaryButton.title = localized("button.open")
             gureumPrimaryButton.isEnabled = true
         } else if inputMethodStatus("Gureum") == "Installed" {
-            let swiftAvailable = swiftToolchainAvailable()
-            gureumStatus.stringValue = swiftAvailable ? localized("status.needsLogout") : localized("status.commandLineToolsFirst")
-            gureumPrimaryButton.title = swiftAvailable ? localized("button.logout") : localized("button.install")
+            gureumStatus.stringValue = localized("status.inputSourceRequired")
+            gureumPrimaryButton.title = localized("button.applySettings")
             gureumPrimaryButton.isEnabled = true
         } else if brewInstalled {
             gureumStatus.stringValue = localized("status.missing")
@@ -2547,14 +2551,14 @@ final class SetupWindowController: NSWindowController {
     }
 
     private func setInputSourceSettingsState() {
+        guard !inputSourceSetupRunning else { return }
         if inputMethodStatus("Gureum") != "Installed" {
             inputSourceStatus.stringValue = localized("status.gureumFirst")
             inputSourcePrimaryButton.title = localized("button.applySettings")
             inputSourcePrimaryButton.isEnabled = false
         } else if !gureumInputSourceRegistered() {
-            let swiftAvailable = swiftToolchainAvailable()
-            inputSourceStatus.stringValue = swiftAvailable ? localized("status.needsLogout") : localized("status.commandLineToolsFirst")
-            inputSourcePrimaryButton.title = swiftAvailable ? localized("button.logout") : localized("button.install")
+            inputSourceStatus.stringValue = localized("status.inputSourceRequired")
+            inputSourcePrimaryButton.title = localized("button.applySettings")
             inputSourcePrimaryButton.isEnabled = true
         } else if inputSourcesApplied() {
             inputSourceStatus.stringValue = localized("status.applied")
@@ -2727,7 +2731,7 @@ final class SetupWindowController: NSWindowController {
              localized("status.needsOpen"),
              localized("status.needsPermission"),
              localized("status.needsRelogin"),
-             localized("status.needsLogout"),
+             localized("status.inputSourceRequired"),
              localized("status.notApplied"),
              localized("status.partiallyApplied"):
             return .attention
@@ -2914,14 +2918,12 @@ final class SetupWindowController: NSWindowController {
         return Unmanaged<CFString>.fromOpaque(raw).takeUnretainedValue() as String
     }
 
+    private func enabledInputSources() -> [EnabledInputSource]? {
+        SystemInputSourceBackend().sources(includeDisabled: false)
+    }
+
     private func gureumInputSourceRegistered() -> Bool {
-        guard let rawSources = TISCreateInputSourceList(nil, false)?.takeRetainedValue() as? [TISInputSource] else {
-            return false
-        }
-        return rawSources.contains { source in
-            tisStringProperty(source, kTISPropertyInputSourceID) == "org.youknowone.inputmethod.Gureum.han2" &&
-                tisStringProperty(source, kTISPropertyBundleID) == "org.youknowone.inputmethod.Gureum"
-        }
+        enabledInputSources().map(InputSourceState.gureumEnabled) ?? false
     }
 
     private func gureumOptionSpecialCharactersApplied() -> Bool {
@@ -2938,12 +2940,15 @@ final class SetupWindowController: NSWindowController {
     }
 
     private func gureumOptionKeyBehaviorValue() -> String {
-        let containerValue = processOutput("/usr/bin/defaults", ["read", gureumContainerPreferencesPath(), "OptionKeyBehavior"])
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        if !containerValue.isEmpty {
-            return containerValue
+        // Avoid asking a defaults subprocess to open another app's container on every refresh.
+        let domainValue = defaultValue("org.youknowone.Gureum", "OptionKeyBehavior")
+        if !domainValue.isEmpty { return domainValue }
+        if let data = try? Data(contentsOf: URL(fileURLWithPath: gureumContainerPreferencesPath())),
+           let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
+           let dictionary = plist as? [String: Any], let value = dictionary["OptionKeyBehavior"] as? NSNumber {
+            return value.stringValue
         }
-        return defaultValue("org.youknowone.Gureum", "OptionKeyBehavior")
+        return ""
     }
 
     private func gureumContainerPreferencesPath() -> String {
@@ -3030,27 +3035,8 @@ final class SetupWindowController: NSWindowController {
     }
 
     private func appleKoreanInputRemoved() -> Bool {
-        let xml = processData("/usr/bin/defaults", ["export", "com.apple.HIToolbox", "-"])
-        guard let data = xml,
-              let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
-              let dict = plist as? [String: Any] else {
-            return false
-        }
-        for key in ["AppleEnabledInputSources", "AppleSelectedInputSources", "AppleInputSourceHistory"] {
-            guard let items = dict[key] as? [[String: Any]] else { continue }
-            for item in items {
-                let bundleID = item["Bundle ID"] as? String ?? ""
-                let inputMode = item["Input Mode"] as? String ?? ""
-                let inputSourceID = item["InputSource ID"] as? String ?? ""
-                if bundleID == "com.apple.inputmethod.Korean" ||
-                    inputMode.hasPrefix("com.apple.inputmethod.Korean") ||
-                    inputSourceID.hasPrefix("com.apple.inputmethod.Korean") {
-                    return false
-                }
-            }
-        }
-        let current = dict["AppleCurrentKeyboardLayoutInputSourceID"] as? String ?? ""
-        return !current.contains("2SetHangul") && !current.contains("2SetKorean")
+        guard let sources = enabledInputSources() else { return false }
+        return !InputSourceState.appleKoreanEnabled(sources)
     }
 
     private func karabinerMappingApplied() -> Bool {
@@ -3094,7 +3080,7 @@ final class SetupWindowController: NSWindowController {
             try process.run()
             let data = stdout.fileHandleForReading.readDataToEndOfFile()
             process.waitUntilExit()
-            return process.terminationStatus == 0 ? data : nil
+            return process.terminationStatus == 0 || arguments.contains("--finish-gureum-input-sources") || arguments.contains("--prepare-gureum-input-sources") ? data : nil
         } catch {
             return nil
         }
@@ -3205,6 +3191,15 @@ func projectRoot() -> String {
         return url.deletingLastPathComponent().appendingPathComponent(value, isDirectory: true).path
     }
     return FileManager.default.currentDirectoryPath
+}
+
+if CommandLine.arguments.contains("--prepare-gureum-input-sources") ||
+    CommandLine.arguments.contains("--finish-gureum-input-sources") {
+    let backend = SystemInputSourceBackend()
+    let outcome = CommandLine.arguments.contains("--prepare-gureum-input-sources")
+        ? InputSourceSetup.prepare(using: backend) : InputSourceSetup.finish(using: backend)
+    print(outcome == .applied ? "INPUT_SOURCES_OK" : "\(outcome): \(backend.lastError)")
+    exit(outcome == .applied ? 0 : 1)
 }
 
 if let exportIndex = CommandLine.arguments.firstIndex(of: "--export-preview"),

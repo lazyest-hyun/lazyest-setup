@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Replaced repeated Gureum logout prompts with native automatic registration, activation, and Apple Korean removal through Apply Settings and guided setup; reset also uses native macOS APIs.
+- Handle macOS activation consent without logout and preserve the Korean fallback until Gureum selection succeeds.
+- Read enabled macOS input sources to recognize manual Apple Korean removal without stale selection/history entries or a runtime Swift requirement for input-source setup.
+- Preserved the Gureum app path for the input-source script’s final TIS refresh.
+
 ## 1.2.0 - 2026-09-06
 
 - Rebuilt the compact tab and row layout with aligned actions and concise tooltip guidance.

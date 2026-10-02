@@ -35,7 +35,8 @@ if command -v swift >/dev/null 2>&1; then
   trap 'rm -f "$tis_status_file"' EXIT
   gureum_app="/Library/Input Methods/Gureum.app"
   if [ ! -d "$gureum_app" ]; then gureum_app="$HOME/Library/Input Methods/Gureum.app"; fi
-  GUREUM_APP_PATH="$gureum_app" TIS_STATUS_FILE="$tis_status_file" swift - <<'SWIFT'
+  export GUREUM_APP_PATH="$gureum_app"
+  TIS_STATUS_FILE="$tis_status_file" swift - <<'SWIFT'
 import Carbon
 import Foundation
 

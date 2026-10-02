@@ -48,7 +48,7 @@ Setup의 `Flow` 탭에서 Flow가 없을 때 버튼을 누르면 [최신 GitHub 
 ### 텍스트와 키보드
 
 - Gureum 두벌식 입력 소스 등록
-- Gureum 입력 소스 등록에는 Apple Command Line Tools의 Swift가 필요하며, 전체 Xcode는 필요하지 않습니다.
+- 앱의 설정 버튼은 macOS API로 구름 입력 소스를 자동 구성합니다. 사용 중 Swift나 Command Line Tools가 필요하지 않습니다.
 - Karabiner Complex Modification으로 오른쪽 Command를 `F18`로 변경
 - 이전 입력 소스 단축키 비활성화 및 다음 입력 소스를 `F18`로 설정
 - 키 반복, 길게 눌러 악센트, 기능 키, Globe/Fn 키 설정
@@ -140,7 +140,7 @@ macOS 설정 명령 전체는 `./bootstrap.sh help`에서 확인할 수 있습�
 
 Flow 저장소와 최신 릴리즈 페이지는 [`config/bootstrap.conf`](config/bootstrap.conf)의 `FLOW_REPOSITORY`, `FLOW_RELEASE_PAGE_URL`에서 확인할 수 있습니다. Setup은 릴리즈 파일을 자동 설치하거나 빌드하지 않고, GitHub의 최신 릴리즈 페이지를 엽니다. 새 DMG가 게시되면 해당 버전의 앱을 `/Applications`로 옮겨 실행합니다. 공개 페이지의 기존 PKG는 이전 버전입니다.
 
-Flow 릴리즈를 내려받아 사용하는 데는 사용자 Mac에 Swift나 전체 Xcode를 설치할 필요가 없습니다. Setup 소스 빌드와 Dock, 입력 소스, 입력 단축키, Karabiner 설정에는 Apple Command Line Tools가 필요합니다. 도구가 없으면 설정을 바꾸기 전에 안내하며 설치를 강제로 시작하지 않습니다.
+Flow 릴리즈를 내려받아 사용하는 데는 사용자 Mac에 Swift나 전체 Xcode를 설치할 필요가 없습니다. Setup 소스 빌드와 Dock, 입력 단축키, Karabiner 설정에는 Apple Command Line Tools가 필요합니다. 도구가 없으면 설정을 바꾸기 전에 안내하며 설치를 강제로 시작하지 않습니다.
 
 ## 검증
 
@@ -159,7 +159,7 @@ swift build --package-path setup/LazyestSetup -c release --product LazyestSetup
 1. 소스 설치는 `./bootstrap.sh install-setup` 한 번이면 현재 소스를 빌드하고 설치합니다. 소스 경로에 공백이 있어도 동작합니다.
 2. 앱을 열고 `간편 설정 시작`에서 필요한 설정을 선택합니다. 앱 설치는 `설치` 탭에서 별도로 선택합니다.
 3. 항목과 버튼 위에 마우스를 올리면 변경 범위와 선행 조건을 확인할 수 있습니다.
-4. 입력기 등록 후 macOS가 로그아웃을 요구하면 작업을 저장한 뒤 진행합니다.
+4. 구름 설치 후 `설정 적용`을 누르면 앱이 구름 두벌식을 등록·활성화하고 선택한 뒤 Apple 두벌식을 제거합니다. 수동 입력 소스 추가나 개발 도구 설치는 필요하지 않습니다. macOS가 최초 활성화 승인을 요청하면 시스템 설정 창이 열리며, `허용` 후 자동으로 이어서 적용됩니다. 구름 활성화가 확인되지 않으면 기존 한글 입력 소스를 유지하고 실패를 표시합니다.
 
 새 앱 식별자는 `com.lazyest.setup`입니다. 예전 식별자와 설정 이름은 기존 언어 설정, 복구용 백업, 이전 앱 제거에만 사용합니다. 새 백업은 `~/Library/Application Support/Lazyest Setup/Backups`에 보관하며 기존 복구 백업이 있으면 계속 사용합니다. 자세한 내용은 [개인정보 처리](PRIVACY.md)를 참고하세요.
 
